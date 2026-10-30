@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Universal Mint의 Issuer Onboarding과 Add Token 프로토타입을 살펴보세요.">
+  <meta name="description" content="Universal Mint의 온보딩, 토큰 등록, 입고 확인 및 시리얼 번호 검토 프로토타입을 살펴보세요.">
   <title>Universal Mint · Prototypes</title>
   <style>
     :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #14213d; background: #f6f7f9; }
@@ -20,7 +20,7 @@
     .card { display: flex; flex-direction: column; min-height: 290px; padding: 30px; border: 1px solid #e3e6eb; border-radius: 16px; background: #fff; text-decoration: none; color: inherit; transition: border-color .15s, transform .15s, box-shadow .15s; }
     .card:hover { border-color: #a9bedb; transform: translateY(-3px); box-shadow: 0 10px 30px #14213d0a; }
     .card:focus-visible { outline: 3px solid #2457c5; outline-offset: 4px; }
-    .number { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: #eaf0fa; color: #0b3f86; font-size: 13px; font-weight: 700; }
+    .number { display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-width: 44px; height: 44px; padding: 0 12px; border-radius: 12px; background: #eaf0fa; color: #0b3f86; font-size: 13px; font-weight: 700; white-space: nowrap; }
     h2 { margin: 26px 0 12px; font-size: 24px; letter-spacing: -.6px; }
     .card p { margin: 0 0 30px; color: #626c7a; font-size: 14px; line-height: 1.8; word-break: keep-all; }
     .open { display: flex; justify-content: space-between; align-items: center; margin-top: auto; color: #0b3f86; font-size: 14px; font-weight: 650; }
@@ -47,6 +47,18 @@
         <span class="number" aria-hidden="true">02</span>
         <h2>Add Token</h2>
         <p>토큰 정보와 운영 설정을 입력하고,<br>등록 요청을 제출하는 흐름을 확인합니다.</p>
+        <span class="open">프로토타입 열기 <span class="arrow" aria-hidden="true">↗</span></span>
+      </a>
+      <a class="card" href="ds2/">
+        <span class="number" aria-hidden="true">03 · DS2</span>
+        <h2>Deposit Confirmation</h2>
+        <p>입고 확인서의 원본과 추출된 정보를 대조하며,<br>입고 확인 흐름을 살펴봅니다.</p>
+        <span class="open">프로토타입 열기 <span class="arrow" aria-hidden="true">↗</span></span>
+      </a>
+      <a class="card" href="ds4g/">
+        <span class="number" aria-hidden="true">04 · DS4g</span>
+        <h2>Bar Serial Numbers</h2>
+        <p>보유 명세서와 바 시리얼 번호를 대조하고,<br>목록을 검토·수정하는 흐름을 살펴봅니다.</p>
         <span class="open">프로토타입 열기 <span class="arrow" aria-hidden="true">↗</span></span>
       </a>
     </nav>
