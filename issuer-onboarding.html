@@ -1,0 +1,451 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Issuer Onboarding MVP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: two shells from the Issuer Portal Figma. Account setup = centered card on a quiet canvas; Portal = top bar + sidebar + Overview with one next-step card. A slim Korean prototype navigator sits above. Single light look, matching the product. */
+:root{
+  --canvas:#EDEFF2; --page:#F6F7F9; --surface:#FFFFFF; --subtle:#F6F7F9; --muted-bg:#EEF0F3;
+  --border:#E3E6EB; --border-strong:#C9CED6;
+  --strong:#0B1524; --text:#2A3443; --muted:#626C7A; --faint:#A3AAB5;
+  --brand:#0B3F86; --brand-soft:#EAF0FA; --brand-track:#D3DCE9;
+  --ok:#1F7A55; --ok-soft:#E4F3EC; --warn:#A8650C; --warn-soft:#FBF1E2;
+  --info:#2457C5; --info-soft:#E6EEFC; --danger:#BE2340; --scrim:rgba(11,21,36,.42);
+  --nav:#14213D; --nav-fg:#E8ECF4; --nav-muted:#9DB0D3;
+  --f-ui:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-kr:'IBM Plex Sans KR','DM Sans',system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--page);color:var(--text);font:14px/1.45 var(--f-ui);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.proto{background:var(--nav);color:var(--nav-fg);font-family:var(--f-kr);padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.proto b{font-weight:600;font-size:13px;white-space:nowrap}
+.proto .chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.proto button{border:1px solid #2E3D60;background:transparent;color:var(--nav-muted);border-radius:999px;padding:4px 11px;font-size:12px}
+.proto button[aria-current="true"]{background:var(--nav-fg);color:var(--nav);border-color:var(--nav-fg)}
+.proto .sim{border-color:#5A6E99;color:var(--nav-fg)}
+.proto .reset{border-style:dashed}
+
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* account setup shell */
+.setup{display:flex;flex-direction:column;align-items:center;padding-block:56px 48px;gap:20px}
+.brandmark{display:flex;gap:10px;align-items:center}
+.brandmark i{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--brand) 55%,var(--danger) 55%)}
+.brandmark b{display:block;color:var(--strong);font-weight:700;line-height:1.2}
+.brandmark span{font-size:12.5px;color:var(--muted)}
+.scard{background:var(--surface);border-radius:14px;padding:24px 24px 28px;width:100%;box-shadow:0 1px 2px rgba(11,21,36,.04)}
+.scard.w-l{max-width:672px}.scard.w-m{max-width:480px}
+.bar{display:grid;gap:4px;margin-bottom:18px}
+.bar i{height:3px;border-radius:2px;background:var(--border)}
+.bar i.on{background:var(--brand)}
+.stepno{font-size:10.5px;letter-spacing:.1em;font-weight:600;color:var(--faint);text-transform:uppercase}
+h1{font-size:22px;line-height:1.25;color:var(--strong);margin:4px 0 2px;font-weight:600;text-wrap:balance}
+.sub{color:var(--muted);font-size:12.5px;margin:0}
+.below{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;text-align:center}
+.below button{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;text-underline-offset:2px;font-size:12px}
+
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+@media (max-width:640px){.plans{grid-template-columns:1fr}}
+.plan{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:72px 16px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+@media (max-width:640px){.plan{padding:20px 16px}}
+.plan svg{color:var(--muted);margin-bottom:56px}
+@media (max-width:640px){.plan svg{margin-bottom:8px}}
+.plan b{font-size:16px;font-weight:600;color:var(--strong)}
+.plan span{font-size:12px;color:var(--faint)}
+.plan[aria-checked="true"]{border:2px solid var(--brand);background:var(--brand-soft);padding:71px 15px 27px}
+@media (max-width:640px){.plan[aria-checked="true"]{padding:19px 15px}}
+.plan[aria-checked="true"] b,.plan[aria-checked="true"] svg{color:var(--brand)}
+.plan[aria-checked="true"] span{color:var(--brand)}
+
+/* form */
+.form{display:flex;flex-direction:column;gap:16px;margin-top:18px}
+label.lb,.lb{display:block;font-size:12.5px;font-weight:500;color:var(--strong);margin-bottom:6px}
+.help{font-size:12px;color:var(--muted);margin-top:6px}
+.err{font-size:12px;color:var(--danger);margin-top:6px}
+input.in,select.in{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:10px 12px;font-size:13.5px;color:var(--strong)}
+input.in.bad{border-color:var(--danger)}
+select.in{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23626C7A' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+.panel{background:var(--subtle);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:12.5px;color:var(--text);display:inline-flex;gap:5px;align-items:center}
+.chip[aria-pressed="true"]{border:1.5px solid var(--brand);background:var(--brand-soft);color:var(--brand);padding:5.5px 11.5px}
+.link{background:none;border:0;padding:0;color:var(--brand);font-weight:500;font-size:12.5px;align-self:flex-start}
+.contact{display:flex;justify-content:space-between;gap:12px;background:var(--subtle);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text)}
+.combo{position:relative}
+.menu{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(11,21,36,.14);padding:4px;z-index:6;max-height:240px;overflow:auto}
+.menu button{display:flex;justify-content:space-between;width:100%;padding:8px 10px;border:0;background:none;border-radius:6px;text-align:left;font-size:13px;color:var(--strong)}
+.menu button:hover,.menu button.on{background:var(--subtle)}
+.menu button span{color:var(--faint);font-size:11.5px}
+.menu .mf{border-top:1px solid var(--border);margin-top:4px;padding:6px 10px;font-size:11.5px;color:var(--faint)}
+.btn{border:1px solid var(--border-strong);background:var(--surface);border-radius:8px;padding:9px 16px;font-weight:500;color:var(--strong);font-size:13px}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:disabled{background:var(--brand-track);border-color:var(--brand-track);cursor:not-allowed}
+.btn.lg{padding:12px 18px}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.actions{display:flex;gap:10px;margin-top:8px}
+.actions .grow{flex:1}
+
+/* portal shell */
+.portal{padding-block:0 16px;background:var(--canvas);min-height:100%}
+.top{display:flex;align-items:center;gap:12px;height:60px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--strong);font-size:15px}
+.logo i{width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,var(--brand) 55%,var(--danger) 55%)}
+.logo small{font-size:10px;letter-spacing:.12em;color:var(--faint);font-weight:600;border-left:1px solid var(--border-strong);padding-left:10px;margin-left:2px}
+.top .grow{flex:1}
+.me{display:flex;gap:10px;align-items:center}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--muted)}
+.me b{display:block;color:var(--strong);font-weight:600;line-height:1.2}
+.me span{font-size:12px;color:var(--muted)}
+.shell{display:flex;background:var(--page);border:1px solid var(--border);border-radius:16px;min-height:calc(100vh - 140px);overflow:hidden}
+.side{width:240px;flex:none;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px}
+.side a{display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:8px;color:var(--text);text-decoration:none}
+.side a svg{color:var(--faint)}
+.side a.on{background:var(--muted-bg);color:var(--strong);font-weight:600;box-shadow:inset 3px 0 0 var(--brand)}
+.side a.on svg{color:var(--brand)}
+.side h6{margin:18px 12px 6px;font-size:10.5px;letter-spacing:.08em;color:var(--faint);font-weight:600}
+.side .org{margin-top:auto;border-top:1px solid var(--border);padding:14px 6px 2px;display:flex;gap:10px;align-items:center}
+.side .org i{width:30px;height:30px;border-radius:8px;background:var(--brand);flex:none}
+.side .org b{display:block;color:var(--strong);font-weight:500;font-size:12.5px}
+.side .org span{font-size:12px;color:var(--muted)}
+.side .org span.ok{color:var(--ok)}
+.main{flex:1;min-width:0;padding:40px 32px 64px}
+@media (max-width:900px){.side{display:none}.me div{display:none}.main{padding:24px 16px 40px}}
+.ov{font-size:34px;font-weight:700;color:var(--strong);margin:0;letter-spacing:-.01em}
+.ov-sub{color:var(--text);margin:6px 0 28px}
+.next{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:840px;display:flex;flex-direction:column;gap:14px}
+.next .head{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.next h2{margin:0;font-size:20px;font-weight:600;color:var(--strong)}
+.next p{margin:0;color:var(--text);max-width:440px}
+.dots{display:flex;gap:4px;align-items:center}
+.dots i{width:6px;height:6px;border-radius:3px;background:var(--border-strong)}
+.dots i.on{width:18px;background:var(--brand)}
+.dots i.done{background:#8FA6CF}
+.eyebrow{display:flex;gap:10px;align-items:center;font-size:10.5px;letter-spacing:.1em;font-weight:600;color:var(--faint);text-transform:uppercase}
+.cta{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.cta .skip{background:none;border:0;color:var(--muted);font-size:12px}
+.wait{border:1px solid var(--border);border-radius:10px;padding:16px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.wait .grow{flex:1;min-width:220px}
+.wait b{display:block;color:var(--strong);font-weight:600}
+.wait span{font-size:12.5px;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;padding:2px 9px;border-radius:999px;background:var(--muted-bg);color:var(--muted);white-space:nowrap}
+.badge.info{background:var(--info-soft);color:var(--info)}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.aside-line{max-width:840px;display:flex;justify-content:space-between;gap:12px;padding:16px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.aside-line button{background:none;border:0;color:var(--brand);font-weight:500;font-size:12.5px;padding:0}
+.all{margin-top:18px;max-width:840px}
+.all>button{background:none;border:0;color:var(--brand);font-weight:500;font-size:12.5px;padding:0}
+.steps-list{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.steps-list>div{display:flex;gap:14px;align-items:center;padding:14px 18px;border-top:1px solid var(--border)}
+.steps-list>div:first-child{border-top:0}
+.steps-list .t{flex:1;min-width:0}
+.steps-list b{display:block;color:var(--strong);font-weight:500}
+.steps-list span.m{font-size:12.5px;color:var(--muted)}
+.dot{width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center}
+.dot.done{background:var(--ok-soft);color:var(--ok)}
+.dot.now{border:2px solid var(--brand)}
+.dot.todo{border:1.5px dashed var(--border-strong)}
+.empty{margin-top:28px;color:var(--faint);font-size:12.5px}
+.joined{background:var(--ok-soft);color:var(--ok);border-radius:10px;padding:12px 16px;max-width:840px;margin-bottom:16px;font-weight:500}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:var(--scrim);display:grid;place-items:center;z-index:20;padding:16px}
+.modal{background:var(--surface);border-radius:16px;width:100%;max-width:400px;padding:24px;box-shadow:0 20px 60px rgba(11,21,36,.3);max-height:calc(100% - 16px);overflow:auto;display:flex;flex-direction:column;gap:14px}
+.modal.wide{max-width:580px}
+.modal h2{margin:0;font-size:18px;color:var(--strong);font-weight:600}
+.modal p{margin:0;color:var(--text)}
+.ent{background:var(--subtle);border-radius:8px;padding:12px}
+.ent b{display:block;color:var(--strong);font-weight:600}
+.ent span{font-size:12px;color:var(--muted)}
+.ready{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.ready li{display:flex;gap:8px;align-items:center;font-size:13px}
+.ready svg{color:var(--muted);flex:none}
+.signs{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted)}
+.embed{border:1.5px dashed var(--border);border-radius:10px;background:var(--subtle);min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center}
+.embed .stages{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.embed .stages span{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+.embed .stages span.on{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.embed .stages span.done{color:var(--ok);border-color:var(--ok-soft);background:var(--ok-soft)}
+.mfoot{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.mfoot .grow{flex:1;font-size:12px;color:var(--muted);min-width:180px}
+.big-ok{width:48px;height:48px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+
+/* invite */
+.orgcard{border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px;align-items:flex-start;margin:16px 0}
+.orgcard .ic{width:32px;height:32px;border-radius:8px;background:var(--muted-bg);display:grid;place-items:center;color:var(--muted);flex:none}
+.orgcard .grow{flex:1;min-width:0}
+.orgcard b{display:block;color:var(--strong);font-weight:600}
+.orgcard span{display:block;font-size:12.5px;color:var(--muted)}
+.orgcard em{display:block;font-style:normal;font-size:12px;color:var(--faint)}
+.or{display:flex;align-items:center;gap:12px;color:var(--faint);font-size:12px;margin:16px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--border)}
+.alt{border:1px solid var(--border);border-radius:10px}
+.alt>button{display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 14px;background:none;border:0;text-align:left;gap:12px}
+.alt b{display:block;color:var(--strong);font-weight:500}
+.alt span{font-size:12px;color:var(--muted)}
+.alt .body{padding:0 14px 14px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--strong);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;z-index:30;font-family:var(--f-kr);max-width:calc(100% - 32px)}
+</style>
+
+<div class="proto" role="navigation" aria-label="프로토타입 화면 이동">
+  <b>Onboarding MVP</b>
+  <div class="chips" id="protoNav"></div>
+  <span id="protoSim"></span>
+  <button class="reset" data-a="reset">처음부터</button>
+</div>
+<div id="root"></div>
+<div id="layer"></div>
+
+<script>
+const NAV = [['plan','플랜 선택'],['apply','조직 신청'],['ov-kyc','승인 후 KYC'],['ov-kyb','KYB 시작'],['ov-review','KYB 심사 중'],['ov-verified','KYB 완료'],['invite','초대 합류']];
+const COUNTRIES = [['Singapore','SG'],['South Korea','KR'],['United Arab Emirates','AE'],['United Kingdom','GB'],['United States','US'],['Tunisia','TN'],['Switzerland','CH'],['Japan','JP'],['Hong Kong','HK'],['Luxembourg','LU']];
+const TOKENIZE = ['Precious metals','Other commodities','Real estate','Funds or securities','Private credit','Other…'];
+const HOLDERS = ['Institutional investors','Professional investors','Retail investors','Not decided yet'];
+const ROLES = ['Founder / CEO','Director','Head of Operations','Compliance / Legal','Finance','Other — type your role'];
+const ADD_TOKEN_MVP = 'https://claude.ai/artifact/GA2QyKKg7Q2H9DxegTx4XK';
+
+const fresh = () => ({
+  screen:'plan', plan:'issuer',
+  legal:'Ault Global Commodities Pte. Ltd.', org:'Ault Global Commodities', country:'Singapore', cq:null, reg:'202312345K',
+  web:null, tok:['Precious metals'], hold:['Institutional investors'], details:null, role:'Head of Operations', roleOther:'', tried:false,
+  kyc:'todo', kyb:'todo', modal:null, persona:0, showAll:false, joined:false, inviteAlt:false, declined:false, declineAsk:false
+});
+let S = fresh();
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ck = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg>';
+const chev = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>';
+const shield = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>';
+const brandmark = `<div class="brandmark"><i></i><div><b>Universal Mint</b><span>Account setup</span></div></div>`;
+const bar = (n,of) => `<div class="bar" style="grid-template-columns:repeat(${of},1fr)">${Array.from({length:of},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`;
+const planName = () => ({personal:'Personal',standard:'Standard organization',issuer:'Issuer organization'})[S.plan];
+
+/* ---------- account setup ---------- */
+function plan(){
+  const ic = {
+    personal:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.6 3 5.2"/></svg>',
+    standard:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V6l8-3 8 3v15M9 21v-4h6v4M8 9h2M14 9h2M8 13h2M14 13h2"/></svg>',
+    issuer:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="15" r="5"/><circle cx="15" cy="9" r="5"/><path d="M15 7v4"/></svg>'
+  };
+  const card = (k,t,s) => `<button class="plan" role="radio" aria-checked="${S.plan===k}" data-a="plan" data-v="${k}">${ic[k]}<b>${t}</b><span>${s}</span></button>`;
+  const note = {personal:'Personal is ready right away. No company documents needed.',standard:'Standard organization needs basic company details and a platform review.',issuer:'Issuer organization needs company documents and a platform review.'}[S.plan];
+  return `<div class="setup wrap">${brandmark}
+    <div class="scard w-l">${bar(2,3)}<div class="stepno">Step 2 of 3</div><h1>Choose your workspace</h1><p class="sub">You can add another workspace later.</p>
+      <div class="plans" role="radiogroup" aria-label="Workspace">${card('personal','Personal','Hold tokens in your own name')}${card('standard','Standard organization','Hold tokens for your company')}${card('issuer','Issuer organization','Issue and list your own tokens')}</div>
+      <p class="sub" style="text-align:center">${note}</p>
+      <div style="display:flex;justify-content:center;margin-top:14px"><button class="btn pri lg" style="min-width:184px" data-a="planNext">Continue</button></div>
+    </div>
+    <div class="below">${shield}<button data-a="go" data-s="invite">Invited? Open your invite link to join instead.</button><span>·</span><button data-a="toast" data-m="로그아웃은 MVP 범위 밖입니다">Not you? Sign out</button></div>
+  </div>`;
+}
+
+function applyValid(){
+  const e = {};
+  if (S.legal.trim().length<2) e.legal='Enter the legal entity name.';
+  if (S.org.trim().length<2) e.org='Enter an organization name.';
+  if (!COUNTRIES.some(c=>c[0]===S.country)) e.country='Pick a country from the list.';
+  if (S.reg.trim().length<3) e.reg='Enter the registration number.';
+  if (S.plan==='issuer' && !S.tok.length) e.tok='Pick at least one.';
+  if (S.plan==='issuer' && !S.hold.length) e.hold='Pick at least one.';
+  if (S.role.startsWith('Other') && !S.roleOther.trim()) e.role='Type your role.';
+  return e;
+}
+function apply(){
+  const err = S.tried ? applyValid() : {};
+  const E = k => err[k] ? `<div class="err">${err[k]}</div>` : '';
+  const open = S.cq !== null;
+  const list = open ? COUNTRIES.filter(([n,c])=> (n+' '+c).toLowerCase().includes(S.cq.toLowerCase())) : [];
+  const chips = (arr,key) => `<div class="chips">${arr.map(v=>{const on=S[key].includes(v);return `<button class="chip" aria-pressed="${on}" data-a="chip" data-k="${key}" data-v="${esc(v)}">${on?ck:''}${v}</button>`}).join('')}</div>`;
+  return `<div class="setup wrap">${brandmark}
+    <div class="scard w-m">${bar(3,3)}<div class="stepno">Step 3 of 3</div><h1>Tell us about your organization</h1><p class="sub">About 3 minutes. The platform reviews this before business verification (KYB).</p>
+    <div class="form">
+      <div class="sub" style="color:var(--text)">Applying as <b style="font-weight:500;color:var(--strong)">${planName()}</b> &nbsp;<button class="link" data-a="go" data-s="plan">Change</button></div>
+      <div><label class="lb" for="legal">Legal entity name</label><input class="in ${err.legal?'bad':''}" id="legal" data-in="legal" value="${esc(S.legal)}"><div class="help">Must match the registration certificate.</div>${E('legal')}</div>
+      <div><label class="lb" for="org">Organization name</label><input class="in ${err.org?'bad':''}" id="org" data-in="org" value="${esc(S.org)}">${E('org')}</div>
+      <div class="two">
+        <div class="combo"><label class="lb" for="country">Jurisdiction of incorporation</label><input class="in ${err.country?'bad':''}" id="country" role="combobox" aria-expanded="${open}" autocomplete="off" data-in="cq" data-a="openCountry" value="${esc(open?S.cq:S.country)}" placeholder="Search country">
+          ${open?`<div class="menu" role="listbox">${list.map(([n,c])=>`<button role="option" class="${n===S.country?'on':''}" data-a="country" data-v="${esc(n)}">${n}<span>${c}</span></button>`).join('')||'<div class="mf">No country matches.</div>'}<div class="mf">Name or code · 249 countries</div></div>`:''}${E('country')}</div>
+        <div><label class="lb" for="reg">Registration number</label><input class="in ${err.reg?'bad':''}" id="reg" data-in="reg" value="${esc(S.reg)}">${E('reg')}</div>
+      </div>
+      ${S.web===null?'<button class="link" data-a="addWeb">+ Add website (optional)</button>':`<div><label class="lb" for="web">Website <span class="sub">(optional)</span></label><input class="in" id="web" data-in="web" value="${esc(S.web)}" placeholder="https://"></div>`}
+      ${S.plan==='issuer'?`<div class="panel">
+        <div><div class="lb" style="margin-bottom:2px">What will you tokenize?</div><div class="help" style="margin:0 0 8px">Select all that apply</div>${chips(TOKENIZE,'tok')}${E('tok')}</div>
+        <div><div class="lb">Who will hold the tokens?</div>${chips(HOLDERS,'hold')}${E('hold')}</div>
+        ${S.details===null?'<button class="link" data-a="addDetails">+ Add details (optional)</button>':`<div><label class="lb" for="details">Anything else reviewers should know <span class="sub">(optional)</span></label><input class="in" id="details" data-in="details" value="${esc(S.details)}" placeholder="e.g. first token planned for Q1"></div>`}
+      </div>`:''}
+      <div><div class="lb" style="margin-bottom:2px">Authorized contact for this application</div><div class="help" style="margin:0 0 8px">The platform contacts you about this application.</div><div class="contact"><span>Juya Kim · juya.k@bharvest.io</span><button class="link" data-a="toast" data-m="연락처 수정은 MVP 범위 밖입니다">Edit</button></div></div>
+      <div><label class="lb" for="role">Your role</label><select class="in" id="role" data-in="role">${ROLES.map(r=>`<option ${S.role===r?'selected':''}>${r}</option>`).join('')}</select>
+        ${S.role.startsWith('Other')?`<input class="in ${err.role?'bad':''}" style="margin-top:8px" data-in="roleOther" value="${esc(S.roleOther)}" placeholder="Your role" aria-label="Your role">`:''}${E('role')}</div>
+      <p class="sub">By submitting, you confirm you’re authorized to apply for this organization.</p>
+      <div class="actions"><button class="btn lg" data-a="go" data-s="plan">Back</button><button class="btn pri lg grow" data-a="submitApp">Submit application</button></div>
+      ${Object.keys(err).length?'<div class="err" style="text-align:center;margin-top:-6px">Check the highlighted fields.</div>':'<p class="sub" style="text-align:center;margin-top:-6px">Review usually takes 1–2 business days.</p>'}
+    </div></div>
+    <div class="below">${shield}<button data-a="go" data-s="invite">Invited to a workspace? Open the invite link to skip this step.</button></div>
+  </div>`;
+}
+
+function invite(){
+  if (S.declined) return `<div class="setup wrap">${brandmark}<div class="scard w-m"><h1>Invitation declined</h1><p class="sub" style="margin-top:6px">Juya Kim will see that you declined. You can still create your own workspace.</p><div class="actions"><button class="btn pri lg grow" data-a="go" data-s="plan">Create a workspace</button></div></div></div>`;
+  return `<div class="setup wrap">${brandmark}
+    <div class="scard w-m">${bar(2,2)}<div class="stepno">Step 2 of 2, invitation</div><h1>Join Ault Global Commodities</h1><p class="sub">Juya Kim invited minho.park@aultglobal.com to this organization. Join your team’s workspace to get started.</p>
+      <div class="orgcard"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V6l8-3 8 3v15M9 21v-4h6v4"/></svg></span><div class="grow"><b>Ault Global Commodities</b><span>Issuer organization, Singapore</span><em>Invited by Juya Kim (Head of Operations), expires Oct 28, 2026</em></div><span class="badge ok">KYB verified</span></div>
+      <button class="btn pri lg" style="width:100%" data-a="join">Join Ault Global Commodities</button>
+      <div class="or">or</div>
+      <div class="alt"><button data-a="toggleAlt" aria-expanded="${S.inviteAlt}"><span><b>Create your own workspace instead</b><span>Personal, Standard or Issuer organization. The invitation stays open until Oct 28.</span></span>${chev}</button>
+        ${S.inviteAlt?'<div class="body"><button class="btn sm" data-a="go" data-s="plan">Choose a workspace</button></div>':''}</div>
+      ${S.declineAsk?`<div class="contact" style="margin-top:14px;align-items:center;flex-wrap:wrap"><span>Decline this invitation? Juya Kim will be notified.</span><span style="display:flex;gap:8px"><button class="btn sm" data-a="declineNo">Keep</button><button class="btn sm" style="color:var(--danger)" data-a="declineYes">Decline</button></span></div>`
+        :'<div style="text-align:center;margin-top:12px"><button class="link" style="align-self:center" data-a="declineAsk">Decline invitation</button></div>'}
+    </div>
+    <div class="below">${shield}<button data-a="toast" data-m="로그아웃은 MVP 범위 밖입니다">Not you? Sign out</button></div>
+  </div>`;
+}
+
+/* ---------- portal ---------- */
+const orgStatus = () => S.kyb==='verified' ? ['Verified','ok'] : S.kyb==='review' ? ['KYB in review',''] : ['Unverified',''];
+function portal(inner){
+  const [st,cls] = orgStatus();
+  const nav = [['Overview','M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',1],['My tasks','M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2'],['Requests','M12 4v12m0 0-5-5m5 5 5-5M5 20h14'],['Tokens','M9 20a5 5 0 1 1 0-10 5 5 0 0 1 0 10zM15 14a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'],['Disclosures','M4 10v4l11 5V5L4 10z']];
+  const adm = [['Organization','M4 21V5l8-2 8 2v16M9 21v-5h6v5'],['Token Operations','M12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM12 2v4M12 18v4M2 12h4M18 12h4'],['Audit log','M6 3h9l4 4v14H6zM9 12h7M9 16h7']];
+  const a = ([n,d,on]) => `<a href="#" class="${on?'on':''}" data-a="${on?'noop0':'noop'}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="${d}"/></svg>${n}</a>`;
+  return `<div class="portal wrap"><header class="top"><div class="logo"><i></i>Universal Mint <small>ISSUER PORTAL</small></div><div class="grow"></div><div class="me"><span class="avatar">${S.joined?'MP':'JU'}</span><div><b>${S.joined?'Minho Park':'Juya Kim'}</b><span>${S.joined?'minho.park@aultglobal.com':'juya.k@bharvest.io'}</span></div></div></header>
+    <div class="shell"><nav class="side" aria-label="Portal">${nav.map(a).join('')}<h6>ADMINISTRATION</h6>${adm.map(a).join('')}<div class="org"><i></i><div><b>Ault Global Commodities</b><span class="${cls}">${st}</span></div></div></nav>
+    <main class="main">${inner}</main></div></div>`;
+}
+function stepState(){
+  const kyc = S.kyc==='done' ? 'done' : S.kyc==='skipped' ? 'skipped' : 'now';
+  const kyb = S.kyb==='verified' ? 'done' : S.kyb==='review' ? 'review' : S.kyc==='todo' ? 'todo' : 'now';
+  return {kyc,kyb,tok: S.kyb==='verified' ? 'now' : 'todo'};
+}
+function overview(){
+  const s = stepState();
+  let card, eyebrowN, dots;
+  if (S.kyc==='todo'){
+    eyebrowN='Step 1 of 3 · Identity'; dots=[ 'on','','' ];
+    card = `<div class="head"><h2>Verify your identity</h2><div class="cta"><button class="btn pri" data-a="kycStart">Verify identity</button><button class="skip" data-a="kycSkip">Skip for now</button></div></div><p>Your photo ID with Persona · a few minutes. You can skip this and do it later from Account.</p>`;
+  } else if (S.kyb==='todo'){
+    eyebrowN='Step 2 of 3 · Business'; dots=['done','on',''];
+    card = `<div class="head"><h2>Verify your business</h2><div class="cta"><button class="btn pri" data-a="kybStart">Start KYB</button></div></div><p>Company registration, directors and owners · about 10 minutes. Once it’s approved, the platform grants issuing rights.</p>`;
+  } else if (S.kyb==='review'){
+    eyebrowN='Step 2 of 3 · Business · In review'; dots=['done','on',''];
+    card = `<div class="head"><h2>Your business verification is in review</h2><span class="badge info">In review</span></div><p>Usually 1–2 business days. We’ll notify you when it’s approved.</p>
+      <div class="wait"><div class="grow"><b>While you wait, prepare your first token</b><span>Custodian, signing credential and treasury wallet don’t need KYB. Set them up now. KYB is only checked when you submit the listing.</span></div><button class="btn sm" data-a="toast" data-m="Custodian 등록 화면은 MVP 범위 밖입니다">Start with a custodian</button></div>`;
+  } else {
+    eyebrowN='Step 2 of 3 · Business · Verified'; dots=['done','done','on'];
+    card = `<div class="head"><h2>Your business is verified</h2><div class="cta"><a class="btn pri" style="text-decoration:none" href="${ADD_TOKEN_MVP}" target="_blank" rel="noopener">Prepare your first token</a></div></div><p>Verified ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})} by Universal Mint. Ault Global Commodities can now list tokens. Next, prepare your first one.</p>`;
+  }
+  const sub = S.kyb==='verified' ? 'Business verified. You’re ready to set up your first token.' : 'Ault Global Commodities is approved.';
+  const kycLine = S.kyc==='skipped' ? `<div class="aside-line"><span>${S.kyb==='verified'?'Before you submit a token listing, verify your identity (KYC). You skipped it earlier.':'You skipped identity verification. You can do it anytime.'}</span><button data-a="kycStart">Verify identity →</button></div>` : '';
+  const row = (st,t,m) => `<div><span class="dot ${st==='done'?'done':st==='now'||st==='review'?'now':'todo'}">${st==='done'?ck:''}</span><div class="t"><b>${t}</b><span class="m">${m}</span></div>${st==='review'?'<span class="badge info">In review</span>':st==='skipped'?'<span class="badge">Skipped</span>':''}</div>`;
+  const all = `<div class="all"><button data-a="toggleAll" aria-expanded="${S.showAll}">${S.showAll?'Hide setup steps':'See all setup steps'}</button>${S.showAll?`<div class="steps-list">
+      ${row(s.kyc==='skipped'?'skipped':s.kyc,'1  Verify your identity (KYC)','Needed by whoever submits a token listing.')}
+      ${row(s.kyb,'2  Verify your business (KYB)','Company registration, directors and owners.')}
+      ${row(s.tok,'3  Prepare your first token','Custodian, Fireblocks and treasury wallet, then Add token.')}</div>`:''}</div>`;
+  return portal(`${S.joined?'<div class="joined">You joined Ault Global Commodities. Your admin manages verification.</div>':''}
+    <h1 class="ov">Overview</h1><p class="ov-sub">${sub}</p>
+    ${S.joined?'':`<section class="next" aria-label="Next step"><div class="eyebrow"><span class="dots">${dots.map(d=>`<i class="${d}"></i>`).join('')}</span>${eyebrowN}</div>${card}</section>${kycLine}${all}`}
+    <p class="empty">Tokens, requests and wallets will appear here once you start issuing.</p>`);
+}
+
+/* ---------- modals ---------- */
+const PSTAGES = ['Company details','Documents','Directors and owners','Review'];
+function modal(){
+  if (!S.modal) return '';
+  let body = '';
+  if (S.modal==='kyc') body = `<div class="modal wide" role="dialog" aria-modal="true" aria-label="Identity verification"><h2 style="font-size:15px">Identity verification · Persona</h2>
+    <div class="embed"><b style="color:var(--strong);font-weight:500">Persona verification (embedded)</b><span class="sub">Photo ID → selfie → done</span><button class="btn sm" data-a="kycDone">Finish (prototype)</button></div>
+    <div class="mfoot"><span class="grow">Your progress is saved in Persona. Close anytime and continue from Overview.</span><button class="btn" data-a="close">Save and close</button></div></div>`;
+  if (S.modal==='k1') body = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="k1t"><h2 id="k1t">Verify your business</h2><p class="sub" style="font-size:13px">About 10 minutes with Persona, our verification partner. You can save and finish later.</p>
+    <div class="ent"><b>${esc(S.legal)}</b><span>${esc(S.country)} · ${esc(S.reg)} · from your application</span></div>
+    <div><div class="lb">Have these ready</div><ul class="ready">${['Certificate of incorporation','Names of directors','Beneficial owners (25% or more) and their photo ID','Proof of business address, dated in the last 3 months'].map(t=>`<li>${ck.replace('3"','2"')}${t}</li>`).join('')}</ul></div>
+    <div class="signs">Signs for ${esc(S.org)}: Governance · 1 of 1 (you). You’ll confirm with your passkey.</div>
+    <div class="mfoot"><button class="btn" data-a="close">Not now</button><button class="btn pri" data-a="k2">Continue to Persona</button></div></div>`;
+  if (S.modal==='k2') body = `<div class="modal wide" role="dialog" aria-modal="true" aria-label="Business verification"><h2 style="font-size:15px">Business verification · Persona</h2>
+    <div class="embed"><b style="color:var(--strong);font-weight:500">Persona verification (embedded)</b>
+      <div class="stages">${PSTAGES.map((p,i)=>`<span class="${i<S.persona?'done':i===S.persona?'on':''}">${i<S.persona?'✓ ':''}${p}</span>`).join('')}</div>
+      <button class="btn sm" data-a="pNext">${S.persona<3?'Next section (prototype)':'Submit to review (prototype)'}</button></div>
+    <div class="mfoot"><span class="grow">Your progress is saved in Persona. Close anytime and continue from Overview.</span><button class="btn" data-a="close">Save and close</button></div></div>`;
+  if (S.modal==='k3') body = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="k3t"><span class="big-ok"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 5 5 9-10"/></svg></span><h2 id="k3t">Submitted for review</h2>
+    <p>Persona and Universal Mint review your business, usually in 1–2 business days. We’ll notify you. Meanwhile, you can start preparing your first token.</p>
+    <div class="mfoot"><button class="btn pri" data-a="k3done">Back to Overview</button></div></div>`;
+  return `<div class="scrim" data-a="scrim">${body}</div>`;
+}
+
+/* ---------- render + actions ---------- */
+function screenKey(){ if (S.screen!=='overview') return S.screen; if (S.kyc==='todo') return 'ov-kyc'; if (S.kyb==='todo') return 'ov-kyb'; if (S.kyb==='review') return 'ov-review'; return 'ov-verified'; }
+function render(keep){
+  const f = keep && document.activeElement && document.activeElement.dataset.in;
+  const pos = f && document.activeElement.selectionStart;
+  $('#root').innerHTML = ({plan,apply,invite,overview})[S.screen]();
+  $('#layer').innerHTML = modal();
+  const k = screenKey();
+  $('#protoNav').innerHTML = NAV.map(([key,l])=>`<button data-a="jump" data-s="${key}" aria-current="${k===key}">${l}</button>`).join('');
+  $('#protoSim').innerHTML = k==='ov-review' ? '<button class="sim" data-a="approveKyb">▶ 플랫폼 KYB 승인 (시뮬레이션)</button>' : '';
+  if (f){ const el=document.querySelector(`[data-in="${f}"]`); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch(e){} } }
+}
+function go(s){ S.screen=s; S.tried=false; S.cq=null; render(); window.scrollTo({top:0}); }
+let tt;
+function toast(m){ clearTimeout(tt); let el=$('.toast'); if(!el){el=document.createElement('div');el.className='toast';el.setAttribute('role','status');document.body.appendChild(el);} el.textContent=m; tt=setTimeout(()=>el.remove(),2400); }
+
+document.addEventListener('click', e => {
+  if (S.cq!==null && !e.target.closest('.combo')) { S.cq=null; render(); }
+  const b = e.target.closest('[data-a]'); if(!b) return;
+  const a = b.dataset.a;
+  if (a==='scrim' && e.target!==b) return;
+  if (b.tagName==='A' && !b.target) e.preventDefault();
+  switch(a){
+    case 'noop': toast('MVP는 온보딩 흐름만 다룹니다'); break;
+    case 'noop0': break;
+    case 'reset': S=fresh(); render(); toast('처음 상태로 돌렸습니다'); break;
+    case 'jump': {
+      const k=b.dataset.s; S.modal=null; S.joined=false;
+      if (k==='plan'||k==='apply'||k==='invite'){ S.declined=false; S.declineAsk=false; go(k); break; }
+      S.kyc = k==='ov-kyc' ? 'todo' : (S.kyc==='todo' ? 'skipped' : S.kyc);
+      S.kyb = {'ov-kyc':'todo','ov-kyb':'todo','ov-review':'review','ov-verified':'verified'}[k];
+      go('overview'); break; }
+    case 'go': go(b.dataset.s); break;
+    case 'toast': toast(b.dataset.m); break;
+    case 'plan': S.plan=b.dataset.v; render(); break;
+    case 'planNext': if (S.plan==='personal'){ toast('Personal 워크스페이스는 바로 생성됩니다 (MVP 범위 밖)'); } else go('apply'); break;
+    case 'openCountry': if (S.cq===null){ S.cq=''; render(true); } break;
+    case 'country': S.country=b.dataset.v; S.cq=null; render(); break;
+    case 'chip': { const k=b.dataset.k, v=b.dataset.v; S[k]=S[k].includes(v)?S[k].filter(x=>x!==v):[...S[k],v]; render(); break; }
+    case 'addWeb': S.web=''; render(); setTimeout(()=>$('#web')?.focus()); break;
+    case 'addDetails': S.details=''; render(); setTimeout(()=>$('#details')?.focus()); break;
+    case 'submitApp': if (Object.keys(applyValid()).length){ S.tried=true; render(); } else { S.kyc='todo'; S.kyb='todo'; go('overview'); toast('플랫폼 승인 시뮬레이션: 조직이 승인되었습니다'); } break;
+    case 'kycStart': S.modal='kyc'; render(); break;
+    case 'kycDone': S.kyc='done'; S.modal=null; render(); toast('Identity verified'); break;
+    case 'kycSkip': S.kyc='skipped'; render(); break;
+    case 'kybStart': S.modal='k1'; S.persona=0; render(); break;
+    case 'k2': S.modal='k2'; render(); break;
+    case 'pNext': if (S.persona<3){ S.persona++; render(); } else { S.modal='k3'; render(); } break;
+    case 'k3done': S.kyb='review'; S.modal=null; render(); break;
+    case 'close': case 'scrim': S.modal=null; render(); break;
+    case 'approveKyb': S.kyb='verified'; render(); toast('플랫폼 KYB 승인 시뮬레이션 완료'); break;
+    case 'toggleAll': S.showAll=!S.showAll; render(); break;
+    case 'join': S.joined=true; S.kyc='done'; S.kyb='verified'; go('overview'); break;
+    case 'toggleAlt': S.inviteAlt=!S.inviteAlt; render(); break;
+    case 'declineAsk': S.declineAsk=true; render(); break;
+    case 'declineNo': S.declineAsk=false; render(); break;
+    case 'declineYes': S.declined=true; render(); break;
+  }
+});
+document.addEventListener('keydown', e => { if (e.key==='Escape'){ if (S.modal){S.modal=null;render();} else if (S.cq!==null){S.cq=null;render();} } });
+document.addEventListener('input', e => {
+  const k=e.target.dataset.in; if(!k) return;
+  if (e.target.tagName==='SELECT') return;
+  S[k]=e.target.value;
+  if (k==='cq' || S.tried) render(true);
+});
+document.addEventListener('change', e => { const k=e.target.dataset.in; if (k && e.target.tagName==='SELECT'){ S[k]=e.target.value; render(); } });
+render();
+</script>
+
+</body></html>

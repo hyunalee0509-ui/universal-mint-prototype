@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Universal Mint의 Issuer Onboarding과 Add Token 프로토타입을 살펴보세요.">
+  <title>Universal Mint · Prototypes</title>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #14213d; background: #f6f7f9; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #14213d; color: #fff; padding: 22px max(24px, calc((100vw - 1040px) / 2)); }
+    .brand { font-size: 17px; font-weight: 650; letter-spacing: -.3px; }
+    header span { display: inline-block; margin-left: 14px; color: #b8c9e4; font-size: 12px; font-weight: 500; }
+    main { max-width: 1040px; margin: 0 auto; padding: 76px 24px 40px; }
+    .eyebrow { margin: 0 0 16px; color: #0b3f86; font-size: 12px; font-weight: 700; letter-spacing: 2px; }
+    h1 { margin: 0 0 18px; font-size: clamp(32px, 5vw, 48px); letter-spacing: -1.8px; line-height: 1.2; }
+    .intro { margin: 0; color: #626c7a; font-size: 16px; line-height: 1.8; word-break: keep-all; }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; margin-top: 44px; }
+    .card { display: flex; flex-direction: column; min-height: 290px; padding: 30px; border: 1px solid #e3e6eb; border-radius: 16px; background: #fff; text-decoration: none; color: inherit; transition: border-color .15s, transform .15s, box-shadow .15s; }
+    .card:hover { border-color: #a9bedb; transform: translateY(-3px); box-shadow: 0 10px 30px #14213d0a; }
+    .card:focus-visible { outline: 3px solid #2457c5; outline-offset: 4px; }
+    .number { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: #eaf0fa; color: #0b3f86; font-size: 13px; font-weight: 700; }
+    h2 { margin: 26px 0 12px; font-size: 24px; letter-spacing: -.6px; }
+    .card p { margin: 0 0 30px; color: #626c7a; font-size: 14px; line-height: 1.8; word-break: keep-all; }
+    .open { display: flex; justify-content: space-between; align-items: center; margin-top: auto; color: #0b3f86; font-size: 14px; font-weight: 650; }
+    .arrow { font-size: 22px; }
+    footer { margin-top: 36px; padding-top: 22px; border-top: 1px solid #e3e6eb; color: #626c7a; font-size: 12px; line-height: 1.8; }
+    @media (max-width: 640px) { main { padding-top: 48px; } .cards { grid-template-columns: 1fr; gap: 16px; margin-top: 30px; } .card { min-height: 260px; padding: 26px; } header span { margin-left: 10px; } }
+    @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+  </style>
+</head>
+<body>
+  <header><div class="brand">Universal Mint <span>PROTOTYPES</span></div></header>
+  <main>
+    <p class="eyebrow">ISSUER PORTAL</p>
+    <h1>프로토타입 둘러보기</h1>
+    <p class="intro">확인할 흐름을 선택해 주세요.<br>화면을 직접 눌러보며 사용 흐름과 주요 상태를 살펴볼 수 있습니다.</p>
+    <nav class="cards" aria-label="프로토타입 선택">
+      <a class="card" href="issuer-onboarding.html">
+        <span class="number" aria-hidden="true">01</span>
+        <h2>Issuer Onboarding</h2>
+        <p>워크스페이스 신청부터 본인·기업 인증까지,<br>발행사 온보딩 흐름을 확인합니다.</p>
+        <span class="open">프로토타입 열기 <span class="arrow" aria-hidden="true">↗</span></span>
+      </a>
+      <a class="card" href="add-token.html">
+        <span class="number" aria-hidden="true">02</span>
+        <h2>Add Token</h2>
+        <p>토큰 정보와 운영 설정을 입력하고,<br>등록 요청을 제출하는 흐름을 확인합니다.</p>
+        <span class="open">프로토타입 열기 <span class="arrow" aria-hidden="true">↗</span></span>
+      </a>
+    </nav>
+    <footer>팀 검토용 인터랙티브 프로토타입 · 화면 내 인증 및 제출은 시뮬레이션입니다.</footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Add Token MVP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: app chrome (top bar + sidebar + centered 620px work column) mirroring the Issuer Portal Figma, with a slim Korean prototype navigator above it. Single light look, matching the product. */
+:root{
+  --canvas:#EDEFF2; --surface:#FFFFFF; --subtle:#F6F7F9; --muted-bg:#EEF0F3;
+  --border:#E3E6EB; --border-strong:#C9CED6;
+  --strong:#0B1524; --text:#2A3443; --muted:#626C7A; --faint:#A3AAB5;
+  --brand:#0B3F86; --brand-soft:#EAF0FA; --brand-track:#D3DCE9;
+  --ok:#1F7A55; --ok-soft:#E4F3EC; --warn:#A8650C; --warn-soft:#FBF1E2;
+  --info:#2457C5; --info-soft:#E6EEFC; --danger:#BE2340; --scrim:rgba(11,21,36,.42);
+  --nav:#14213D; --nav-fg:#E8ECF4; --nav-muted:#9DB0D3;
+  --f-ui:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --f-kr:'IBM Plex Sans KR','DM Sans',system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--canvas);color:var(--text);font:14px/1.45 var(--f-ui);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* prototype navigator */
+.proto{background:var(--nav);color:var(--nav-fg);font-family:var(--f-kr);padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.proto b{font-weight:600;font-size:13px;white-space:nowrap}
+.proto .chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.proto button{border:1px solid #2E3D60;background:transparent;color:var(--nav-muted);border-radius:999px;padding:4px 11px;font-size:12px}
+.proto button[aria-current="true"]{background:var(--nav-fg);color:var(--nav);border-color:var(--nav-fg)}
+.proto .reset{border-style:dashed}
+
+/* app chrome */
+.app{padding-block:0 16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;gap:12px;height:60px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--strong);font-size:16px}
+.logo i{width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,var(--brand) 55%,var(--danger) 55%);display:inline-block}
+.logo small{font-size:10px;letter-spacing:.12em;color:var(--faint);font-weight:600;border-left:1px solid var(--border-strong);padding-left:10px;margin-left:2px}
+.top .sp{flex:1}
+.top .me{display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--muted)}
+.me .n{font-weight:600;color:var(--strong);line-height:1.2}
+.me .e{font-size:12px;color:var(--muted)}
+.shell{display:flex;background:var(--subtle);border:1px solid var(--border);border-radius:16px;min-height:calc(100vh - 140px);overflow:hidden}
+.side{width:248px;flex:none;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px}
+.side a{display:flex;gap:10px;align-items:center;padding:9px 14px;border-radius:8px;color:var(--text);text-decoration:none}
+.side a svg{color:var(--faint)}
+.side a.on{background:var(--muted-bg);color:var(--strong);font-weight:600;box-shadow:inset 3px 0 0 var(--brand)}
+.side a.on svg{color:var(--brand)}
+.side h6{margin:18px 14px 6px;font-size:11px;letter-spacing:.08em;color:var(--faint);font-weight:600}
+.side .org{margin-top:auto;border-top:1px solid var(--border);padding:14px 8px 2px;display:flex;gap:10px;align-items:center}
+.side .org i{width:30px;height:30px;border-radius:8px;background:var(--brand);flex:none}
+.side .org b{display:block;color:var(--strong);font-weight:500;font-size:13px}
+.side .org span{font-size:12px;color:var(--muted)}
+.main{flex:1;min-width:0;padding:56px 24px 64px;display:flex;justify-content:center}
+.col{width:100%;max-width:620px;display:flex;flex-direction:column;gap:20px}
+@media (max-width:900px){.side{display:none}.top .me div{display:none}.main{padding:28px 0 40px}.shell{border-radius:12px}}
+
+/* type */
+h1{font-size:26px;line-height:1.25;color:var(--strong);margin:0;font-weight:600;text-wrap:balance;letter-spacing:-.01em}
+.lede{margin:-12px 0 0;color:var(--muted);font-size:15px}
+.back{color:var(--brand);text-decoration:none;font-size:13px;font-weight:500;display:inline-flex;gap:4px;align-items:center;background:none;border:0;padding:0;align-self:flex-start}
+.eyebrow{font-size:11px;letter-spacing:.08em;font-weight:600;color:var(--muted);text-transform:uppercase}
+.meta{font-size:12.5px;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:12.5px}
+
+/* stepper */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.steps div{border-bottom:3px solid var(--brand-track);padding-bottom:8px;font-size:12.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.steps div.done,.steps div.cur{border-color:var(--brand);color:var(--strong)}
+.steps div.cur{font-weight:600}
+
+/* atoms */
+.btn{border:1px solid var(--border-strong);background:var(--surface);border-radius:8px;padding:9px 16px;font-weight:500;color:var(--strong);font-size:13.5px}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:disabled{background:var(--brand-track);border-color:var(--brand-track);color:#fff;cursor:not-allowed}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.btn.danger{color:var(--danger)}
+.btn.block{width:100%;padding:13px}
+.link{background:none;border:0;padding:0;color:var(--brand);font-weight:500;font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:6px;background:var(--muted-bg);color:var(--muted);white-space:nowrap}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.info{background:var(--info-soft);color:var(--info)}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.brand{background:var(--brand-soft);color:var(--brand)}
+.tip{position:relative;display:inline-grid;place-items:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--faint);color:var(--faint);font-size:9px;font-weight:700;vertical-align:middle;cursor:help;margin-left:4px}
+.tip span{display:none;position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:280px;background:var(--strong);color:#fff;font-weight:400;font-size:12.5px;line-height:1.45;padding:10px 12px;border-radius:8px;z-index:5;text-align:left}
+.tip:hover span,.tip:focus span{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.pad{padding:16px 18px}
+.row{display:flex;align-items:center;gap:12px}
+.row .grow{flex:1;min-width:0}
+.sec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:-10px}
+.hr{height:1px;background:var(--border);margin:12px 0}
+.foot{display:flex;align-items:center;gap:12px;margin-top:12px}
+.foot .sp{flex:1}
+.foot .hint{font-size:12.5px;color:var(--muted)}
+.foot .hint.ok{color:var(--ok)}
+.foot .hint.err{color:var(--danger)}
+input.in,select.in{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--strong)}
+select.in{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23626C7A' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+select.in:disabled,input.in:disabled{background-color:var(--subtle);color:var(--faint)}
+label.lb{display:block;font-size:13px;font-weight:500;color:var(--strong);margin-bottom:6px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:10px 16px;align-items:center}
+@media (max-width:560px){.kv{grid-template-columns:1fr;gap:4px}.kv>.lbl{margin-top:8px}}
+.kv .lbl{font-size:13px;color:var(--text)}
+
+/* check icons */
+.dot{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center}
+.dot.done{background:var(--ok-soft);color:var(--ok)}
+.dot.wait{border:1.5px dashed var(--border-strong)}
+.dot.todo{border:2px solid var(--warn)}
+.list>div{display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid var(--border)}
+.list>div:first-child{border-top:0}
+.list .t{flex:1;min-width:0}
+.list .t b{display:block;font-weight:500;color:var(--strong);font-size:14.5px}
+.list .t span{font-size:12.5px;color:var(--muted)}
+.list .is-done .t b{color:var(--muted);font-weight:400}
+.progress{display:flex;align-items:center;gap:12px}
+.progress b{white-space:nowrap;color:var(--strong);font-weight:600}
+.progress .bars{flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.progress .bars i{height:4px;border-radius:2px;background:var(--brand-track)}
+.progress .bars i.on{background:var(--ok)}
+
+/* choice cards */
+.opt{display:flex;gap:14px;align-items:center;padding:16px 18px;border:1px solid var(--border);border-radius:12px;background:var(--surface);text-align:left;width:100%}
+.opt[aria-checked="true"]{border:2px solid var(--brand);padding:15px 17px}
+.opt:disabled{background:var(--subtle);cursor:not-allowed}
+.opt:disabled .t b,.opt:disabled .t span{color:var(--faint)}
+.radio{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border-strong);flex:none;display:grid;place-items:center}
+.opt[aria-checked="true"] .radio{border:5px solid var(--brand)}
+.opt .t{flex:1;min-width:0}
+.opt .t b{display:block;font-weight:500;color:var(--strong);font-size:14.5px}
+.opt .t span{font-size:12.5px;color:var(--muted)}
+.cb{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border-strong);background:var(--surface);flex:none;display:grid;place-items:center;color:#fff}
+.cb.on{background:var(--brand);border-color:var(--brand)}
+.ini{width:32px;height:32px;border-radius:8px;background:var(--muted-bg);display:grid;place-items:center;font-size:11.5px;font-weight:600;color:var(--muted);flex:none}
+.coin{width:44px;height:44px;border-radius:50%;background:#C8784A;color:#fff;display:grid;place-items:center;font-weight:600;flex:none;box-shadow:inset 0 0 0 2px #E39B6F}
+.cust{border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+.cust.on{border:2px solid var(--brand)}
+.cust .head{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;width:100%;background:none;border:0;text-align:left}
+.cust .head .t b{display:block;font-weight:600;color:var(--strong);font-size:14.5px}
+.cust .head .t span{display:block;font-size:12.5px;color:var(--muted)}
+.cust .head .t em{display:block;font-style:normal;font-size:12px;color:var(--faint)}
+.cust .evi{margin:0 18px 18px 64px;background:var(--subtle);border-radius:10px;padding:12px}
+@media (max-width:560px){.cust .evi{margin-left:18px}}
+.file{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px}
+.file .ft{width:32px;height:32px;border-radius:6px;background:#FDECEE;color:var(--danger);font-size:10.5px;font-weight:600;display:grid;place-items:center;flex:none}
+.file .ft.api{background:var(--info-soft);color:var(--info)}
+.file .t{flex:1;min-width:0}
+.file .t b{display:block;font-weight:500;color:var(--strong);font-size:13px;overflow-wrap:anywhere}
+.file .t span{font-size:12px;color:var(--muted)}
+.drop{border:1.5px dashed var(--border-strong);border-radius:10px;padding:22px;text-align:center;background:var(--subtle)}
+.drop.small{padding:8px 12px;display:inline-flex;gap:6px;align-items:center;color:var(--brand);font-weight:500;font-size:13px;background:var(--surface)}
+.drop .up{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;margin:0 auto 8px;color:var(--brand)}
+.err-line{font-size:12.5px;color:var(--danger);margin-top:6px}
+
+/* segmented + chips */
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--subtle);border-radius:10px;padding:4px;gap:4px}
+.seg button{border:0;background:transparent;border-radius:7px;padding:9px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--strong);font-weight:500;box-shadow:0 0 0 1px var(--border)}
+.step-in{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.unit{display:flex;align-items:center;border:1px solid var(--border);border-radius:8px;background:var(--surface);padding-right:12px;flex:1;min-width:160px}
+.unit input{border:0;padding:10px 12px;width:100%;background:transparent;font-variant-numeric:tabular-nums}
+.unit input:focus{outline:none}
+.unit:focus-within{outline:2px solid var(--brand);outline-offset:1px}
+.unit span{color:var(--muted);font-size:13px}
+.chip{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:9px 13px;font-size:13px;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{border:1.5px solid var(--brand);background:var(--brand-soft);color:var(--brand)}
+.pillchip{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:12.5px}
+.tg{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--subtle);border-radius:8px;padding:10px 12px}
+.sw{width:34px;height:20px;border-radius:999px;background:var(--border-strong);border:0;position:relative;flex:none;padding:0}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.sw[aria-checked="true"]{background:var(--brand)}
+.sw[aria-checked="true"]::after{left:16px}
+.sw:disabled{opacity:.5;cursor:not-allowed}
+
+/* picker */
+.pick{position:relative}
+.pick>button{width:100%;text-align:left;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:10px 34px 10px 12px;color:var(--strong);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23626C7A' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.pick>button[aria-expanded="true"]{border-color:var(--brand)}
+.menu{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(11,21,36,.14);padding:6px;z-index:6}
+.menu .s{margin:4px;width:calc(100% - 8px)}
+.menu h6{margin:10px 10px 4px;font-size:12px;font-weight:500;color:var(--muted)}
+.menu .it{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;width:100%;background:none;border:0;text-align:left}
+.menu .it.on{background:var(--brand-soft)}
+.menu .it b{display:block;font-weight:500;color:var(--strong)}
+.menu .it span{font-size:12px;color:var(--muted)}
+.menu .mf{border-top:1px solid var(--border);margin-top:4px;padding:10px 10px 6px;font-size:12px;color:var(--muted)}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:var(--scrim);display:grid;place-items:center;z-index:20;padding:16px}
+.modal{background:var(--surface);border-radius:16px;width:100%;max-width:420px;padding:24px;box-shadow:0 20px 60px rgba(11,21,36,.3);max-height:calc(100% - 16px);overflow:auto}
+.modal h2{margin:0;font-size:19px;color:var(--strong);font-weight:600}
+.modal .x{float:right;border:0;background:none;font-size:18px;color:var(--muted);line-height:1}
+.sum{display:grid;grid-template-columns:1fr auto;gap:9px;font-size:13px;margin:16px 0}
+.sum dt{color:var(--muted)}
+.sum dd{margin:0;color:var(--strong);text-align:right}
+.signer{display:flex;gap:12px;align-items:center;border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px}
+.signer .av{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--brand);color:var(--brand);display:grid;place-items:center;font-size:12px;font-weight:600}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp 0.9s linear infinite;display:inline-block;vertical-align:-4px;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.waiting{background:var(--brand-soft);color:var(--brand);border-radius:10px;padding:14px;text-align:center;font-weight:500}
+.waiting .spin{border-color:var(--brand-track);border-top-color:var(--brand)}
+
+/* timeline */
+.tl{display:flex;flex-direction:column;gap:16px}
+.tl>div{display:flex;gap:14px}
+.tl .d{width:20px;height:20px;border-radius:50%;flex:none;margin-top:1px;display:grid;place-items:center}
+.tl .d.done{background:var(--ok);color:#fff}
+.tl .d.now{background:var(--brand)}
+.tl .d.next{background:var(--muted-bg)}
+.tl b{display:block;font-weight:500;color:var(--strong)}
+.tl .next+div b{color:var(--muted);font-weight:400}
+.big-ok{width:56px;height:56px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.table>div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:14px 0;border-top:1px solid var(--border)}
+.table>div:last-child{border-bottom:1px solid var(--border)}
+.table b{font-weight:500;color:var(--strong)}
+@media (max-width:560px){.table>div{grid-template-columns:1fr;gap:2px}}
+.confirm{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--strong);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;z-index:30;font-family:var(--f-kr);max-width:calc(100% - 32px)}
+</style>
+
+<div class="proto" role="navigation" aria-label="프로토타입 화면 이동">
+  <b>Add token MVP</b>
+  <div class="chips" id="protoNav"></div>
+  <button class="reset" data-a="reset">처음부터</button>
+</div>
+
+<div class="app">
+  <header class="top">
+    <div class="logo"><i></i>Universal Mint <small>ISSUER PORTAL</small></div>
+    <div class="sp"></div>
+    <div class="me"><span class="avatar">JU</span><div><div class="n">Juya Kim</div><div class="e">juya.k@bharvest.io</div></div></div>
+  </header>
+  <div class="shell">
+    <nav class="side" aria-label="Portal">
+      <a href="#" data-a="noop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</a>
+      <a href="#" data-a="noop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2"/></svg>My tasks</a>
+      <a href="#" data-a="noop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14"/></svg>Requests</a>
+      <a href="#" class="on" data-a="noop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="15" r="5"/><circle cx="15" cy="9" r="5"/></svg>Tokens</a>
+      <a href="#" data-a="noop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10v4l11 5V5L4 10zM15 9h3a3 3 0 0 1 0 6h-3"/></svg>Disclosures</a>
+      <h6>ADMINISTRATION</h6>
+      <a href="#" data-a="noop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V5l8-2 8 2v16M9 21v-5h6v5"/></svg>Organization</a>
+      <a href="#" data-a="noop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Token Operations</a>
+      <a href="#" data-a="noop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6zM9 12h7M9 16h7"/></svg>Audit log</a>
+      <div class="org"><i></i><div><b>Ault Global Commodities</b><span>Issuer Organization</span></div></div>
+    </nav>
+    <main class="main"><div class="col" id="view"></div></main>
+  </div>
+</div>
+<div id="layer"></div>
+
+<script>
+const SCREENS = [
+  ['bys','0 시작 전 준비'],['token','1 Token'],['details','2 Details'],['terms','3 Investor terms'],
+  ['ops','4 Operations'],['sign','제출 · 서명'],['done','제출 완료'],['detail','요청 상세']
+];
+const TOKENS = {
+  TDS:{name:'Test Decimals Six',sym:'TDS',net:'Ault Mainnet',vault:0},
+  AGLD:{name:'Ault Gold',sym:'AGLD',net:'Ault Testnet',vault:2}
+};
+const INVESTORS = [['Hanbit Capital','Organization'],['Seoul Asset Partners','Organization'],['Minji Park','Individual'],['Daehan Securities','Organization']];
+const GROUPS = {gov:'Issuer organization governance',tre:'Treasury approvals',board:'Board'};
+const QUORUM = {gov:'1 of 1',tre:'2 of 3',board:'3 of 5'};
+
+const fresh = () => ({
+  screen:'bys', treasury:false, porBys:false,
+  token:'TDS', name:'Ault Copper', desc:'Allocated copper cathode in segregated storage. 1 token = 1 lb.', wp:null,
+  cust:{TV:true,SB:true}, por:{n:'TestVault_custody_agreement_signed.pdf',s:'1.2 MB'}, tried:false,
+  who:'any', step:100, issM:'Manual settlement', redM:'FedEx delivery', people:[], picker:false, q:'',
+  issFee:5, redFee:0, terms:{a:true,b:true,c:false},
+  wallet:'TW', roles:{am:'gov',mint:'gov',burn:'gov',op:'gov'}, feeWallet:'', files:[{n:'TestVault_reserve_statement_Oct.pdf',s:'1.4 MB'}],
+  modal:null, submittedAt:null, withdrawConfirm:false, withdrawn:false
+});
+let S = fresh();
+const $ = s => document.querySelector(s);
+const esc = v => String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ico = {
+  check:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg>',
+  back:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m6-6-6 6 6 6"/></svg>',
+  up:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>'
+};
+const tip = t => `<span class="tip" tabindex="0" aria-label="${esc(t)}">i<span>${esc(t)}</span></span>`;
+const tok = () => TOKENS[S.token];
+const stepper = n => `<div class="steps">${['Token','Details','Investor terms','Operations'].map((l,i)=>`<div class="${i+1<n?'done':i+1===n?'cur':''}">${i+1}&nbsp;&nbsp;${l}</div>`).join('')}</div>`;
+const backLink = `<button class="back" data-a="go" data-s="bys">${ico.back} Your tokens</button>`;
+
+/* ---------- screens ---------- */
+function bys(){
+  const org = [
+    ['done','Verify your identity (KYC)','Done on Oct 18'],
+    ['done','Register a passkey','Used to sign for your organization'],
+    ['wait','Verify your business (KYB)','The platform is reviewing it. Usually 1 to 2 business days.','<span class="badge info">In review</span>'],
+    ['wait','Issuer permission','The platform grants it after your business is verified.','<span class="badge">Waiting</span>'],
+    [S.treasury?'done':'todo','Treasury wallet','Where redeemed tokens come back to. You register it and sign once.', S.treasury?'':'<button class="btn sm" data-a="bysDo" data-k="treasury">Register wallet</button>']
+  ];
+  const tkn = [
+    ['done','Connect Fireblocks','Local test – Hyuna'],
+    ['done','Custodian','Test Vault holds silver for this token'],
+    ['wait','Deployed token contract','Your Fireblocks admin deploys it with the ERC-20F template.','<button class="link" data-a="copy" data-k="contract">Copy request for admin</button>'],
+    ['wait','A vault that holds the token','Your Fireblocks admin adds the token to a vault you sign from.','<button class="link" data-a="copy" data-k="vault">Copy request for admin</button>'],
+    [S.porBys?'done':'todo','Proof of reserve','Test Vault checks reserves manually, so a statement from them is required.', S.porBys?'':'<button class="btn sm" data-a="bysDo" data-k="porBys">Upload</button>']
+  ];
+  const cnt = a => a.filter(r=>r[0]==='done').length;
+  const done = cnt(org)+cnt(tkn);
+  const list = a => `<div class="card list">${a.map(([st,t,s,act])=>`<div class="${st==='done'?'is-done':''}"><span class="dot ${st}">${st==='done'?ico.check:''}</span><div class="t"><b>${t}</b><span>${s}</span></div>${act||''}</div>`).join('')}</div>`;
+  return `${backLink}
+  <h1>Before you add a token</h1>
+  <p class="lede">You can start a draft now. Everything below must be done before you submit.</p>
+  <div class="progress"><b>${done} of 10 done</b><div class="bars">${Array.from({length:10},(_,i)=>`<i class="${i<done?'on':''}"></i>`).join('')}</div></div>
+  <div><div class="row" style="margin-top:12px"><div class="grow"><b style="font-size:16px;color:var(--strong)">Organization</b><div class="meta">Done once. Applies to every token you add.</div></div><span class="meta">${cnt(org)} of 5 done</span></div></div>
+  ${list(org)}
+  <div><div class="row" style="margin-top:12px"><div class="grow"><b style="font-size:16px;color:var(--strong)">This token</b><div class="meta">Needed for each token.</div></div><span class="meta">${cnt(tkn)} of 5 done</span></div></div>
+  ${list(tkn)}
+  <div class="foot"><button class="btn" data-a="go" data-s="bys">Cancel</button><div class="sp"></div><span class="hint">${10-done} left before you can submit</span><button class="btn pri" data-a="go" data-s="token">Start token draft</button></div>`;
+}
+
+function token(){
+  const opt = (k,t,s,dis) => `<button class="opt" role="radio" aria-checked="${S.token===k&&!dis}" ${dis?'disabled':''} data-a="set" data-k="token" data-v="${k}"><span class="radio"></span><span class="t"><b>${t}</b><span>${s}</span></span>${dis?'<span class="badge">Listed</span>':''}</button>`;
+  return `${backLink}${stepper(1)}
+  <h1>Which token are you listing?</h1>
+  <div class="row"><span class="meta grow">Tokens in your Fireblocks account (Local test – Hyuna)</span><button class="link" data-a="toast" data-m="Fireblocks 계정 변경은 MVP 범위 밖입니다">Change</button></div>
+  <div role="radiogroup" aria-label="Token" style="display:flex;flex-direction:column;gap:10px;margin-top:-8px">
+    ${opt('TDS','Test Decimals Six (TDS)','On Ault Mainnet, signed from vault 0')}
+    ${opt('AGLD','Ault Gold (AGLD)','On Ault Testnet, signed from vault 2')}
+    ${opt('TDS2','Test Decimals Six, local QA (TDS2)','Already listed on Ault Mainnet',true)}
+  </div>
+  <div class="row meta" style="color:var(--text)"><span style="color:var(--ok)">${ico.check}</span>Contract, network, template and signing vault come with this token.</div>
+  <div class="foot"><button class="btn" data-a="go" data-s="bys">Cancel</button><div class="sp"></div><button class="btn pri" data-a="go" data-s="details">Continue</button></div>`;
+}
+
+function detailsValid(){
+  const any = S.cust.TV || S.cust.SB;
+  const por = !S.cust.TV || !!S.por;
+  return {ok: S.name.trim().length>=2 && any && por, any, por};
+}
+function details(){
+  const v = detailsValid();
+  const show = S.tried && !v.ok;
+  const tv = `<div class="cust ${S.cust.TV?'on':''}">
+    <button class="head" data-a="cust" data-k="TV" role="checkbox" aria-checked="${S.cust.TV}"><span class="cb ${S.cust.TV?'on':''}">${S.cust.TV?ico.check:''}</span><span class="ini">TV</span><span class="t"><b>Test Vault</b><span>Silver held in Korea</span><em>Reserves checked manually, account TV-000123</em></span></button>
+    ${S.cust.TV?`<div class="evi"><div class="row"><span class="grow" style="font-weight:500;color:var(--strong);font-size:13px">Proof of reserve <span class="badge warn">Required</span></span>${tip('Required for custodians that check reserves manually. Upload your custodian’s latest statement showing the asset is held, such as a holding certificate or the signed custody agreement. Reviewers check it before approval. Investors can read it after listing.')}</div>
+      ${S.por?`<div class="file"><span class="ft">PDF</span><div class="t"><b>${esc(S.por.n)}</b><span>${S.por.s}, uploaded today. Investors can read it after listing.</span></div><button class="link" data-a="pick" data-k="por">Replace</button><button class="link" data-a="rmPor">Remove</button></div>`
+      :`<label class="drop" style="display:block;margin-top:8px;cursor:pointer"><span class="up">${ico.up}</span>Drop the statement here or <span style="color:var(--brand);font-weight:500">browse</span><div class="meta">PDF, up to 20 MB</div><input type="file" accept=".pdf" hidden data-f="por"></label>${show&&!v.por?'<div class="err-line">Add a proof of reserve for Test Vault to continue.</div>':''}`}
+    </div>`:''}
+  </div>`;
+  const sb = `<div class="cust ${S.cust.SB?'on':''}">
+    <button class="head" data-a="cust" data-k="SB" role="checkbox" aria-checked="${S.cust.SB}"><span class="cb ${S.cust.SB?'on':''}">${S.cust.SB?ico.check:''}</span><span class="ini">SB</span><span class="t"><b>Seoul Bullion Vault</b><span>Silver held in Korea</span><em>Reserves checked automatically by API, account SB-2201</em></span></button>
+    ${S.cust.SB?`<div class="evi"><div class="row"><span class="grow" style="font-weight:500;color:var(--strong);font-size:13px">Verified by API</span>${tip('Seoul Bullion Vault reports reserves to the platform automatically, so no document is needed.')}</div>
+      <div class="file"><span class="ft api">API</span><div class="t"><b>Reserve report from Seoul Bullion Vault</b><span>Synced automatically. Last update today at 13:40.</span></div><button class="link" data-a="toast" data-m="리포트 보기는 MVP 범위 밖입니다">View</button></div></div>`:''}
+  </div>`;
+  return `${backLink}${stepper(2)}
+  <h1>How should investors see it?</h1>
+  <div class="row" style="align-items:flex-end"><span class="coin">${esc(S.name.slice(0,2)||'?')}</span><div class="grow"><label class="lb" for="f-name">Public name ${tip('The name investors see in listings and requests.')}</label><input class="in" id="f-name" data-in="name" value="${esc(S.name)}"></div></div>
+  ${show&&S.name.trim().length<2?'<div class="err-line" style="margin-top:-14px">Enter a public name.</div>':''}
+  <div><label class="lb" for="f-desc">One-line description ${tip('Shown under the name on the token page.')}</label><input class="in" id="f-desc" data-in="desc" value="${esc(S.desc)}"></div>
+  <div class="card pad row"><div class="grow"><div style="font-weight:500;color:var(--strong);font-size:13px">Whitepaper or token summary <span class="badge">Optional</span></div><div class="meta">${S.wp?esc(S.wp)+' attached. ':''}Investors can read it after listing.</div></div>
+    ${S.wp?'<button class="link" data-a="rmWp">Remove</button>':`<label class="drop small" style="cursor:pointer">${ico.up} Drop PDF or browse<input type="file" accept=".pdf" hidden data-f="wp"></label>`}</div>
+  <div style="margin-top:8px"><div style="font-weight:600;color:var(--strong);font-size:16px">Backed by ${tip('Custodians registered for your organization that hold this asset.')}</div><div class="meta">Select one or more. All must hold the same asset.</div>${show&&!v.any?'<div class="err-line">Select at least one custodian.</div>':''}</div>
+  ${tv}${sb}
+  <div class="cust" style="background:var(--subtle)"><div class="head" style="cursor:not-allowed"><span class="cb" style="background:var(--subtle)"></span><span class="ini">BZ</span><span class="t"><b style="color:var(--faint)">Brinks Zurich</b><span style="color:var(--warn)">Holds copper, not silver. Can’t be combined.</span></span></div></div>
+  <div class="foot"><button class="btn" data-a="go" data-s="token">Back</button><div class="sp"></div>${show?'<span class="hint err">Fix the items above</span>':''}<button class="btn pri" data-a="next" data-s="terms">Continue</button></div>`;
+}
+
+function terms(){
+  const s = Math.max(0, Number(S.step)||0);
+  const sym = tok().sym;
+  const edited = S.issFee!=0 || S.redFee!=0;
+  const approve = S.who==='approve';
+  const ppl = S.people;
+  const pickLabel = ppl.length===0 ? (approve?'No one approved yet':'No one excluded') : ppl.length===1 ? ppl[0] : `${ppl.length} investors ${approve?'approved':'excluded'}`;
+  const list = INVESTORS.filter(([n])=>n.toLowerCase().includes(S.q.toLowerCase()));
+  const menu = S.picker ? `<div class="menu" role="listbox" aria-multiselectable="true">
+      <input class="in s" placeholder="Search by name or wallet" data-in="q" value="${esc(S.q)}" aria-label="Search investors">
+      <h6>Investors on your book</h6>
+      ${list.map(([n,k])=>{const on=ppl.includes(n);return `<button class="it ${on?'on':''}" role="option" aria-selected="${on}" data-a="person" data-v="${esc(n)}"><span class="cb ${on?'on':''}">${on?ico.check:''}</span><span><b>${n}</b><span>${k}</span></span></button>`}).join('') || '<div class="meta" style="padding:8px 10px">No investor matches.</div>'}
+      <div class="mf">${approve?'Only these investors can submit issuance or redemption requests.':'Excluded investors can’t submit issuance or redemption requests.'}</div>
+    </div>` : '';
+  const sel = (k,opts) => `<select class="in" data-in="${k}" aria-label="${k}">${opts.map(o=>`<option ${S[k]===o?'selected':''}>${o}</option>`).join('')}</select>`;
+  const sw = (k,label,req) => `<div class="tg"><span>${label}</span><span class="row" style="gap:8px"><button class="sw" role="switch" aria-checked="${S.terms[k]}" aria-label="${label}" data-a="term" data-k="${k}" ${req?'disabled':''}></button><span class="meta" style="width:58px">${req?'Required':S.terms[k]?'Included':'Optional'}</span></span></div>`;
+  return `${backLink}${stepper(3)}
+  <h1>What investors get</h1>
+  <p class="lede">Rules investors see when they request this token.</p>
+  <div class="sec-h"><span class="eyebrow">Needs you</span><span class="badge ok">${ico.check} ${s>0?2:1} of 2 done</span></div>
+  <div class="card pad"><div class="row"><div class="grow"><b style="color:var(--strong);font-weight:600">Who can request this token</b><div class="meta">${S.who==='any'?'Picked: the platform default':'Only investors you add below can request'}</div></div><span class="badge ok">${ico.check} Confirmed</span></div>
+    <div class="seg" style="margin-top:12px"><button aria-pressed="${S.who==='any'}" data-a="who" data-v="any">Any KYC-verified investor</button><button aria-pressed="${approve}" data-a="who" data-v="approve">Only investors I approve</button></div></div>
+  <div class="card pad"><div class="row"><div class="grow"><b style="color:var(--strong);font-weight:600">Request size step</b><div class="meta">Investors request in multiples of this amount.</div></div>${s>0?`<span class="badge ok">${ico.check} Confirmed</span>`:'<span class="badge warn">Needed</span>'}</div>
+    <div class="step-in" style="margin-top:12px"><label class="unit"><input inputmode="decimal" data-in="step" value="${esc(S.step)}" aria-label="Request size step"><span>${sym}</span></label>${[1,10,100].map(n=>`<button class="chip" aria-pressed="${s===n}" data-a="stepq" data-v="${n}">${n}</button>`).join('')}</div>
+    <div class="meta" style="margin-top:8px" id="stepHint">${s>0?`Investors can request ${s}, ${s*2}, ${s*3} ${sym}…`:'Enter a step above 0.'}</div></div>
+  <span class="eyebrow" style="margin-top:12px">Pre-filled defaults</span>
+  <div class="card pad"><div class="row"><b style="color:var(--strong);font-weight:600">Request rules</b><span class="badge">Auto</span></div><div class="meta" style="margin-top:4px">How requests are fulfilled.</div><div class="hr"></div>
+    <div class="kv"><span class="lbl">Issuance method</span>${sel('issM',['Manual settlement','Wire transfer'])}<span class="lbl">Redemption method</span>${sel('redM',['FedEx delivery','Vault pickup'])}<span class="lbl">${approve?'Approved investors':'Excluded investors'}</span><div class="pick"><button aria-haspopup="listbox" aria-expanded="${S.picker}" data-a="picker">${esc(pickLabel)}</button>${menu}</div></div></div>
+  <div class="card pad"><div class="row"><b style="color:var(--strong);font-weight:600">Fees</b><span class="badge ${edited?'brand':''}">${edited?'Edited':'Auto'}</span><span class="grow"></span>${edited?'<button class="link" data-a="resetFees">Reset to default</button>':''}</div><div class="meta" style="margin-top:4px">Charged per request, paid in USDC.e. Leave 0 for no fee.</div><div class="hr"></div>
+    <div class="kv"><span class="lbl">Issuance fee</span><label class="unit"><input inputmode="decimal" data-in="issFee" value="${esc(S.issFee)}" aria-label="Issuance fee"><span>USDC.e</span></label><span class="lbl">Redemption fee</span><label class="unit"><input inputmode="decimal" data-in="redFee" value="${esc(S.redFee)}" aria-label="Redemption fee"><span>USDC.e</span></label></div></div>
+  <div class="card pad"><div class="row"><b style="color:var(--strong);font-weight:600">Terms</b><span class="badge">Auto</span></div><div class="meta" style="margin:4px 0 12px">What investors accept before requesting.</div>
+    <div style="display:flex;flex-direction:column;gap:8px">${sw('a','Backing & custody acknowledgement',true)}${sw('b','Redemption policy',true)}${sw('c','Reserve attestation updates',false)}</div></div>
+  <div class="foot"><button class="btn" data-a="go" data-s="details">Back</button><div class="sp"></div>${s>0?'':'<span class="hint err">Set a request size step</span>'}<button class="btn pri" data-a="go" data-s="ops" ${s>0?'':'disabled'}>Continue</button></div>`;
+}
+
+function opsState(){
+  const needFee = Number(S.redFee)>0;
+  return {needFee, ok: !!S.wallet && (!needFee || !!S.feeWallet)};
+}
+function ops(){
+  const st = opsState();
+  const role = (k,l,q) => `<span class="lbl">${l}</span><select class="in" data-role="${k}" aria-label="${l}">${Object.entries(GROUPS).map(([g,n])=>`<option value="${g}" ${S.roles[k]===g?'selected':''}>${n}${q?` (${QUORUM[g]})`:''}</option>`).join('')}</select>`;
+  return `${backLink}${stepper(4)}
+  <h1>How your team runs it</h1>
+  <p class="lede">Internal settings, then submit. Investors don’t see these.</p>
+  <div class="sec-h"><span class="eyebrow">Needs you</span><span class="badge ok">${ico.check} 1 of 1 done</span></div>
+  <div class="card pad"><div class="row"><div class="grow"><b style="color:var(--strong);font-weight:600">Where redeemed tokens come back</b><div class="meta">Picked: your only wallet that isn’t the mint vault</div></div><span class="badge ok">${ico.check} Confirmed</span></div>
+    <select class="in" style="margin-top:12px" data-in="wallet" aria-label="Return wallet"><option value="TW" selected>Treasury wallet  ·  0x25AB…297C</option><option disabled>Mint vault 0  ·  can’t receive redemptions</option></select></div>
+  <span class="eyebrow" style="margin-top:12px">Pre-filled defaults</span>
+  <div class="card pad"><div class="row"><b style="color:var(--strong);font-weight:600">Approvals</b><span class="badge">Auto</span></div><div class="meta" style="margin-top:4px">Who signs off each step of a request. Groups are managed in Governance.</div><div class="hr"></div>
+    <div class="kv">${role('am','Account manager')}${role('mint','Mint approver',1)}${role('burn','Burn approver',1)}${role('op','Operator')}
+      <span class="lbl">Signed agreements</span><div><span class="row" style="gap:8px"><button class="sw" role="switch" aria-checked="false" aria-label="Signed agreements" disabled></button><span class="meta">Off</span></span><div class="meta" style="color:var(--faint)">Needs DocuSign connected first</div></div></div></div>
+  <div class="card pad"><div class="row"><b style="color:var(--strong);font-weight:600">Fee wallet</b><span class="badge">${st.needFee?'Needed':'Auto'}</span></div><div class="meta" style="margin-top:4px">Where redemption fees are paid.${st.needFee?` Redemption fee is ${esc(S.redFee)} USDC.e.`:''}</div><div class="hr"></div>
+    <div class="kv"><span class="lbl">Fee wallet</span><select class="in" data-in="feeWallet" aria-label="Fee wallet" ${st.needFee?'':'disabled'}>${st.needFee?`<option value="" ${S.feeWallet?'':'selected'}>Select a wallet</option><option value="TW" ${S.feeWallet==='TW'?'selected':''}>Treasury wallet  ·  0x25AB…297C</option>`:'<option>Only needed with a redemption fee</option>'}</select></div></div>
+  <span class="eyebrow" style="margin-top:12px">Before you submit</span>
+  <div class="card pad"><div class="row" style="flex-wrap:wrap;gap:6px"><b style="color:var(--strong);font-weight:600">Files for reviewers</b><span class="badge">Optional</span><span class="badge">Reviewers only</span></div><div class="meta" style="margin:4px 0 12px">Attach anything that helps the platform approve faster. Investors never see these.</div>
+    <label class="drop" style="display:block;cursor:pointer"><span class="up">${ico.up}</span>Drag files here or <span style="color:var(--brand);font-weight:600">browse</span><div class="meta" style="color:var(--faint)">PDF, PNG or JPG, up to 20 MB each</div><input type="file" multiple accept=".pdf,.png,.jpg,.jpeg" hidden data-f="files"></label>
+    <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:10px"><span class="meta">Useful to include:</span>${['Recent reserve statement','KYB pack','Proof of title'].map(t=>`<span class="pillchip">${t}</span>`).join('')}</div>
+    ${S.files.map((f,i)=>`<div class="file"><span class="ft">${f.n.split('.').pop().toUpperCase().slice(0,3)}</span><div class="t"><b>${esc(f.n)}</b><span>${f.s}</span></div><span style="color:var(--ok)">${ico.check}</span><button class="link" data-a="rmFile" data-i="${i}">Remove</button></div>`).join('')}</div>
+  <div class="foot"><button class="btn" data-a="go" data-s="terms">Back</button><div class="sp"></div><span class="hint ${st.ok?'ok':'err'}">${st.ok?'All set':'Pick a fee wallet'}</span><button class="btn pri" data-a="openSign" ${st.ok?'':'disabled'}>Review and submit</button></div>`;
+}
+
+function signModal(){
+  const t = tok(), wait = S.modal==='wait';
+  return `<div class="scrim" data-a="scrim"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <button class="x" data-a="closeSign" aria-label="Close">✕</button>
+    <h2 id="mt">Submit ${esc(S.name)}</h2><div class="meta">The platform reviews it before it goes live.</div>
+    <div class="row" style="margin-top:18px"><span class="coin" style="width:40px;height:40px;font-size:13px">${esc(S.name.slice(0,2))}</span><div><b style="color:var(--strong);font-weight:600">${esc(S.name)}</b><div class="meta">${t.sym} on ${t.net}</div></div></div>
+    <dl class="sum"><dt>Backed by</dt><dd>${[S.cust.TV&&'Test Vault',S.cust.SB&&'Seoul Bullion Vault'].filter(Boolean).join(', ')}</dd>
+      <dt>Investors</dt><dd>${S.who==='any'?'Any KYC-verified':'Only approved ('+S.people.length+')'}${S.who==='any'&&S.people.length?', '+S.people.length+' excluded':''}</dd>
+      <dt>Request step</dt><dd>${esc(S.step)} ${t.sym}</dd><dt>Issuance fee</dt><dd>${esc(S.issFee)} USDC.e</dd></dl>
+    <div class="signer"><span class="av">JK</span><div class="grow" style="flex:1"><b style="color:var(--strong);font-weight:500">Juya Kim</b><div class="meta">Signs for Ault Global Commodities</div></div><span class="meta">1 of 1</span></div>
+    ${wait?`<div class="waiting"><span class="spin"></span>Waiting for your passkey<div class="meta" style="margin-top:4px">Check your browser or device.</div></div>
+      <div class="row" style="justify-content:center;gap:16px;margin-top:12px"><button class="link" data-a="sign">Try again</button><button class="link" style="color:var(--text)" data-a="closeSign">Cancel</button></div>`
+    :`<button class="btn pri block" data-a="sign">Sign with passkey</button><div class="meta" style="text-align:center;margin-top:10px">Sent to the platform right after you sign.</div><div style="text-align:center;margin-top:8px"><button class="link" style="color:var(--strong)" data-a="closeSign">Cancel</button></div>`}
+  </div></div>`;
+}
+
+const when = () => S.submittedAt ? S.submittedAt.toLocaleString('en-US',{month:'short',day:'numeric'})+' at '+S.submittedAt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : 'Oct 22 at 14:20';
+const timeline = () => `<div class="tl"><div><span class="d done">${ico.check}</span><div><b>Submitted</b><span class="meta">${when()} by Juya Kim</span></div></div>
+  <div><span class="d now"></span><div><b>Platform review</b><span class="meta">Usually 1 to 2 business days. We’ll email you.</span></div></div>
+  <div><span class="d next"></span><div><b style="color:var(--muted);font-weight:400">Live</b><span class="meta">Token appears in Listed tokens and can be issued</span></div></div></div>`;
+
+function done(){
+  return `<span class="big-ok" style="margin-top:40px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 5 5 9-10"/></svg></span>
+  <h1>${esc(S.name)} is in review</h1><p class="lede">We sent it to the platform. Nothing else is needed from you right now.</p>
+  ${timeline()}
+  <div class="row"><button class="btn pri" data-a="go" data-s="detail">View request</button><button class="btn" data-a="go" data-s="bys">Back to tokens</button></div>`;
+}
+
+function detail(){
+  const t = tok();
+  const docs = 1 + (S.wp?1:0);
+  const top = `${backLink}<div class="row" style="align-items:flex-start;flex-wrap:wrap"><div class="grow"><div class="row" style="gap:10px"><h1>${esc(S.name)}</h1><span class="badge ${S.withdrawn?'':'info'}">${S.withdrawn?'Withdrawn':'In review'}</span></div><div class="meta" style="margin-top:4px">Listing request, submitted ${when().split(' at')[0]}</div></div>
+    ${S.withdrawn?`<button class="btn" data-a="go" data-s="token">Edit and submit again</button>`:`<button class="btn danger sm" data-a="askWithdraw">Withdraw request</button>`}</div>`;
+  const conf = S.withdrawConfirm && !S.withdrawn ? `<div class="confirm"><span class="grow" style="flex:1;min-width:200px">Withdraw this request? The platform stops reviewing it. You can edit and submit again.</span><button class="btn sm" data-a="keep">Keep in review</button><button class="btn sm danger" data-a="withdraw">Withdraw</button></div>` : '';
+  return `${top}${conf}
+  ${S.withdrawn?'<div class="card pad meta" style="color:var(--text)">You withdrew this request. Nothing was sent to investors.</div>':timeline()}
+  <div><b style="color:var(--strong);font-size:16px;font-weight:600">What you submitted</b></div>
+  <div class="table" style="margin-top:-12px">
+    <div><b>Token</b><span>${t.name} (${t.sym}) on ${t.net}</span></div>
+    <div><b>Backing</b><span>${[S.cust.TV&&'Test Vault, proof of reserve attached',S.cust.SB&&'Seoul Bullion Vault, verified by API'].filter(Boolean).join('; ')}</span></div>
+    <div><b>Investor terms</b><span>${S.who==='any'?'Any KYC-verified investor':'Only approved investors'}, in steps of ${esc(S.step)} ${t.sym}</span></div>
+    <div><b>Signing</b><span>Signed from vault ${t.vault} by Fireblocks</span></div>
+    <div><b>Roles</b><span>${new Set(Object.values(S.roles)).size===1?GROUPS[S.roles.am]+' for all 4 roles':'Mixed: '+[...new Set(Object.values(S.roles))].map(g=>GROUPS[g]).join(', ')}</span></div>
+    <div><b>Documents</b><span>${docs} public document${docs>1?'s':''}, ${S.files.length} file${S.files.length===1?'':'s'} for reviewers</span></div>
+  </div>
+  <div class="meta">${S.withdrawn?'Withdrawn requests stay here for your records.':'Changes aren’t possible while in review. Withdraw it to edit and submit again.'}</div>`;
+}
+
+/* ---------- render + actions ---------- */
+const VIEWS = {bys,token,details,terms,ops,sign:ops,done,detail};
+function render(keepFocus){
+  const f = keepFocus && document.activeElement && document.activeElement.dataset.in;
+  const pos = f && document.activeElement.selectionStart;
+  $('#view').innerHTML = VIEWS[S.screen]();
+  $('#layer').innerHTML = S.modal ? signModal() : '';
+  const navKey = S.modal ? 'sign' : S.screen;
+  $('#protoNav').innerHTML = SCREENS.map(([k,l])=>`<button data-a="jump" data-s="${k}" aria-current="${navKey===k}">${l}</button>`).join('');
+  if (f){ const el = document.querySelector(`[data-in="${f}"]`); if (el){ el.focus(); try{ el.setSelectionRange(pos,pos);}catch(e){} } }
+}
+function go(s){ S.screen=s; S.picker=false; S.tried=false; render(); window.scrollTo({top:0}); }
+let tt;
+function toast(m){ clearTimeout(tt); let el=$('.toast'); if(!el){el=document.createElement('div');el.className='toast';el.setAttribute('role','status');document.body.appendChild(el);} el.textContent=m; tt=setTimeout(()=>el.remove(),2200); }
+const REQ = {
+  contract:'Hi, could you deploy our token contract in Fireblocks with the ERC-20F template for Ault Copper? We need it to list on Universal Mint.',
+  vault:'Hi, could you add the Ault Copper token to a Fireblocks vault I can sign from? We need it to list on Universal Mint.'
+};
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-a]'); if(!b) return;
+  const a = b.dataset.a;
+  if (a==='scrim' && e.target!==b) return;
+  if (b.tagName==='A') e.preventDefault();
+  switch(a){
+    case 'noop': toast('MVP는 Add token 흐름만 다룹니다'); break;
+    case 'reset': S = fresh(); render(); toast('처음 상태로 돌렸습니다'); break;
+    case 'jump': if (b.dataset.s==='sign'){ S.screen='ops'; S.modal='sign'; render(); } else { S.modal=null; if(b.dataset.s==='done'||b.dataset.s==='detail'){ S.submittedAt ||= new Date(); } go(b.dataset.s); } break;
+    case 'go': go(b.dataset.s); break;
+    case 'toast': toast(b.dataset.m); break;
+    case 'bysDo': S[b.dataset.k]=true; render(); toast(b.dataset.k==='treasury'?'Treasury wallet registered (prototype)':'Statement uploaded (prototype)'); break;
+    case 'copy': { const t=REQ[b.dataset.k]; const ok=()=>toast('Request copied. Send it to your Fireblocks admin.'); try{ navigator.clipboard.writeText(t).then(ok,()=>toast(t)); }catch(err){ toast(t); } break; }
+    case 'set': S[b.dataset.k]=b.dataset.v; render(); break;
+    case 'cust': S.cust[b.dataset.k]=!S.cust[b.dataset.k]; render(); break;
+    case 'rmPor': S.por=null; render(); break;
+    case 'rmWp': S.wp=null; render(); break;
+    case 'pick': { const i=document.createElement('input'); i.type='file'; i.accept='.pdf'; i.onchange=()=>{ if(i.files[0]){ S.por={n:i.files[0].name,s:size(i.files[0].size)}; render(); } }; i.click(); break; }
+    case 'next': { if (detailsValid().ok) go(b.dataset.s); else { S.tried=true; render(); } break; }
+    case 'who': S.who=b.dataset.v; S.people=[]; render(); break;
+    case 'stepq': S.step=Number(b.dataset.v); render(); break;
+    case 'picker': S.picker=!S.picker; S.q=''; render(); break;
+    case 'person': { const n=b.dataset.v; S.people = S.people.includes(n)?S.people.filter(x=>x!==n):[...S.people,n]; render(); break; }
+    case 'resetFees': S.issFee=0; S.redFee=0; S.feeWallet=''; render(); break;
+    case 'term': S.terms[b.dataset.k]=!S.terms[b.dataset.k]; render(); break;
+    case 'rmFile': S.files.splice(Number(b.dataset.i),1); render(); break;
+    case 'openSign': S.modal='sign'; render(); break;
+    case 'closeSign': case 'scrim': S.modal=null; clearTimeout(signT); render(); break;
+    case 'sign': S.modal='wait'; render(); clearTimeout(signT); signT=setTimeout(()=>{ S.modal=null; S.submittedAt=new Date(); go('done'); }, 2200); break;
+    case 'askWithdraw': S.withdrawConfirm=true; render(); break;
+    case 'keep': S.withdrawConfirm=false; render(); break;
+    case 'withdraw': S.withdrawn=true; S.withdrawConfirm=false; render(); toast('Request withdrawn'); break;
+  }
+});
+let signT;
+document.addEventListener('click', e => { if (S.picker && !e.target.closest('.pick')) { S.picker=false; render(); } }, true);
+document.addEventListener('keydown', e => { if (e.key==='Escape'){ if(S.modal){S.modal=null;clearTimeout(signT);render();} else if(S.picker){S.picker=false;render();} } });
+document.addEventListener('input', e => {
+  const k = e.target.dataset.in; if(!k) return;
+  S[k] = e.target.value;
+  // text fields re-render live where something else depends on them
+  if (['name','step','issFee','redFee','q'].includes(k)) render(true);
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.role){ S.roles[t.dataset.role]=t.value; return; }
+  if (t.tagName==='SELECT' && t.dataset.in){ S[t.dataset.in]=t.value; render(); return; }
+  const f = t.dataset.f; if(!f || !t.files.length) return;
+  if (f==='por') S.por={n:t.files[0].name,s:size(t.files[0].size)};
+  if (f==='wp') S.wp=t.files[0].name;
+  if (f==='files') for (const x of t.files) S.files.push({n:x.name,s:size(x.size)});
+  render();
+});
+const size = b => b>1e6 ? (b/1e6).toFixed(1)+' MB' : Math.max(1,Math.round(b/1e3))+' KB';
+render();
+</script>
+
+</body></html>
