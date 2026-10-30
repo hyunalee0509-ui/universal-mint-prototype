@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DS2 Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5f7; --surface: #fff; --sunken: #f1f2f4; --border: #e3e5e8; --border-strong: #c9cdd3;
+    --text: #14171c; --muted: #6b717a; --faint: #a3a8b0;
+    --brand: #0d3b7a; --brand-soft: #eaf0f9; --positive: #1a7f4b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "DM Sans", system-ui, sans-serif; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 32px 24px; }
+  .crumb { color: var(--muted); font-size: 13px; }
+  h1 { font-size: 34px; letter-spacing: -0.02em; margin: 8px 0 10px; }
+  .ctx { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .pill { background: var(--brand-soft); color: var(--brand); border-radius: 999px; padding: 2px 10px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 480px) minmax(0, 1fr); gap: 20px; align-items: start; }
+
+  /* document */
+  .doc { background: var(--sunken); border-radius: 12px; padding: 12px 12px 10px; position: sticky; top: 16px; }
+  .docbar { display: flex; justify-content: space-between; font-size: 13px; margin: 0 4px 8px; }
+  .docbar .muted, .file { color: var(--muted); }
+  .file { font-size: 12px; margin: 8px 4px 0; }
+  .sheet { position: relative; background: #fff; }
+  .sheet img { display: block; width: 100%; user-select: none; -webkit-user-drag: none; }
+  /* Every read field sits faintly outlined; the one in focus is filled and the rest step back. */
+  .box { position: absolute; border: 1.5px solid var(--positive); border-radius: 3px; cursor: pointer; transition: background .12s, border-color .12s, opacity .12s; }
+  .box.secondary { border-style: dashed; border-color: rgba(26,127,75,.55); }
+  .sheet.focusing .box { opacity: .25; }
+  .sheet.focusing .box.on { opacity: 1; border: 2px solid var(--brand); background: rgba(13,59,122,.16); }
+  .tag { position: absolute; background: var(--brand); color: #fff; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 5px; white-space: nowrap; pointer-events: none; transform: translateY(-100%); margin-top: -4px; }
+
+  /* checks */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 22px 18px; min-height: 680px; display: flex; flex-direction: column; }
+  .step { color: var(--brand); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+  h2 { font-size: 18px; margin: 12px 0 0; }
+  .lead { color: var(--muted); font-size: 13px; margin: 16px 0 14px; }
+  .hint { color: var(--faint); font-size: 12px; margin: -6px 0 12px; }
+  .sum { background: var(--sunken); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; cursor: default; border: 1.5px solid transparent; }
+  .sum .k { color: var(--muted); font-size: 11px; letter-spacing: .08em; font-weight: 600; }
+  .sum .v { font-size: 22px; font-weight: 600; }
+  .sum .v small { font-size: 14px; font-weight: 400; color: var(--muted); margin-left: 6px; }
+  .rows { border: 1px solid var(--border); border-radius: 12px; padding: 0 14px; }
+  .row { display: grid; grid-template-columns: 20px 120px 1fr; gap: 8px; padding: 14px 4px; border-top: 1px solid var(--border); align-items: center; cursor: default; border-radius: 8px; }
+  .row:first-child { border-top: 0; }
+  .row .ok { color: var(--positive); }
+  .row .k { color: var(--muted); font-size: 13px; }
+  .row .v { font-size: 13px; }
+  .row .v div:last-child { color: var(--muted); }
+  [data-field]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  [data-field].on { background: var(--brand-soft); }
+  .sum.on { border-color: var(--brand); }
+  .row.on { border-top-color: transparent; }
+  .row.on + .row { border-top-color: transparent; }
+  .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 16px; color: var(--muted); font-size: 13px; }
+  .btn { height: 36px; padding: 0 18px; border-radius: 8px; font: 500 13px "DM Sans", sans-serif; background: var(--brand); color: #fff; border: 0; cursor: pointer; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } .doc { position: static; } .card { min-height: 0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb">Requests / ISS-0012</div>
+  <h1>Confirm deposit</h1>
+  <div class="ctx"><span class="pill">Deposit</span>ISS-0012, Ault Silver to your treasury, 5,000 oz expected</div>
+
+  <div class="grid">
+    <section class="doc" aria-label="Document">
+      <div class="docbar"><span>Deposit confirmation</span><span class="muted">Replace</span></div>
+      <div class="sheet" id="sheet">
+        <img id="img" src="deposit.png" alt="The Wyoming Reserve deposit confirmation receipt, VAU079">
+        <span class="tag" id="tag" hidden></span>
+      </div>
+      <div class="file">VAU079 Deposit Confirmation 9-17-26.pdf</div>
+    </section>
+
+    <section class="card">
+      <div class="step">STEP 1 OF 2</div>
+      <h2>Add the deposit confirmation</h2>
+      <p class="lead">The receipt The Wyoming Reserve sends when the silver arrives in VAU079.</p>
+      <p class="hint">Hover a line to see where it was read in the document.</p>
+
+      <div class="sum" data-field="deposited" tabindex="0">
+        <div class="k">DEPOSITED</div>
+        <div class="v">5,000 oz<small>in 50 bars of 100 oz</small></div>
+      </div>
+
+      <div class="rows">
+        <div class="row" data-field="account" tabindex="0"><span class="ok">✓</span><span class="k">Account</span><div class="v"><div>VAU079</div><div>Your pledged account for Ault Silver</div></div></div>
+        <div class="row" data-field="customer" tabindex="0"><span class="ok">✓</span><span class="k">Customer</span><div class="v"><div>Ault Global Commodities, Inc. (Encumbered)</div><div>Matches your organization</div></div></div>
+        <div class="row" data-field="weight" tabindex="0"><span class="ok">✓</span><span class="k">Total weight</span><div class="v"><div>5,000 oz</div><div>Matches the transfer request</div></div></div>
+        <div class="row" data-field="date" tabindex="0"><span class="ok">✓</span><span class="k">Date</span><div class="v"><div>Sep 17, 2026</div><div>Received by CH/RS</div></div></div>
+      </div>
+
+      <div class="foot"><span>Next, add the bar list.</span><button class="btn" id="next">Next</button></div>
+    </section>
+  </div>
+</div>
+
+<script>
+// Boxes in pixels on the 1236×1600 render of the deposit confirmation PDF (from the Figma draft DS2).
+const DOC_W = 1236, DOC_H = 1600;
+const BOX = {
+  date:       [207, 343, 109, 37],
+  customer:   [273, 393, 567, 37],
+  account:    [255, 444, 111, 37],
+  qty:        [619, 569,  53, 39],
+  bar:        [855, 569,  91, 39],
+  total:      [491, 659, 367, 39],
+  receivedBy: [143, 715, 340, 32],
+  receiptDate:[143, 765, 400, 32],
+};
+// Each line on the right, the boxes it was read from (first = main source), and the label shown on the document.
+const FIELDS = {
+  deposited: { boxes: ['total', 'qty', 'bar'], label: 'Deposited' },
+  account:   { boxes: ['account'], label: 'Account' },
+  customer:  { boxes: ['customer'], label: 'Customer' },
+  weight:    { boxes: ['total', 'bar'], label: 'Total weight' },
+  date:      { boxes: ['date', 'receiptDate', 'receivedBy'], label: 'Date' },
+};
+const SECONDARY = new Set(['receivedBy', 'receiptDate']);
+
+const sheet = document.getElementById('sheet'), tag = document.getElementById('tag');
+const boxEls = {};
+for (const [key, [x, y, w, h]] of Object.entries(BOX)) {
+  const el = document.createElement('div');
+  el.className = 'box' + (SECONDARY.has(key) ? ' secondary' : '');
+  el.dataset.box = key;
+  Object.assign(el.style, { left: x / DOC_W * 100 + '%', top: y / DOC_H * 100 + '%', width: w / DOC_W * 100 + '%', height: h / DOC_H * 100 + '%' });
+  sheet.insertBefore(el, tag);
+  boxEls[key] = el;
+}
+const fieldEls = [...document.querySelectorAll('[data-field]')];
+
+let hovered = null, focused = null;
+function show() {
+  const field = hovered ?? focused;
+  sheet.classList.toggle('focusing', !!field);
+  for (const el of fieldEls) el.classList.toggle('on', el.dataset.field === field);
+  const boxes = field ? FIELDS[field].boxes : [];
+  for (const [key, el] of Object.entries(boxEls)) el.classList.toggle('on', boxes.includes(key));
+  if (!field) { tag.hidden = true; return; }
+  const main = boxEls[boxes[0]];
+  tag.textContent = FIELDS[field].label;
+  // Beside the box rather than above it, so the label never covers the line above.
+  tag.style.left = `calc(${main.style.left} + ${main.style.width} + 6px)`;
+  tag.style.top = `calc(${main.style.top} + ${main.style.height})`;
+  tag.hidden = false;
+}
+
+// right → document
+for (const el of fieldEls) {
+  el.addEventListener('mouseenter', () => { hovered = el.dataset.field; show(); });
+  el.addEventListener('mouseleave', () => { hovered = null; show(); });
+  el.addEventListener('focus', () => { focused = el.dataset.field; show(); });
+  el.addEventListener('blur', () => { focused = null; show(); });
+}
+// document → right: a box can feed several lines; the first line that names it wins.
+const fieldOfBox = key => Object.keys(FIELDS).find(f => FIELDS[f].boxes[0] === key) ?? Object.keys(FIELDS).find(f => FIELDS[f].boxes.includes(key));
+for (const [key, el] of Object.entries(boxEls)) {
+  el.addEventListener('mouseenter', () => { hovered = fieldOfBox(key); show(); });
+  el.addEventListener('mouseleave', () => { hovered = null; show(); });
+  el.addEventListener('click', () => fieldEls.find(f => f.dataset.field === fieldOfBox(key))?.focus());
+}
+document.getElementById('next').onclick = () => {};
+
+console.assert(Object.values(FIELDS).every(f => f.boxes.every(b => BOX[b])), 'every field points at known boxes');
+</script>
+</body>
+</html>
