@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Issue Flow Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page: #eceef1; --shell: #f6f7f9; --surface: #fff; --sunken: #f1f2f4; --border: #e3e5e8; --border-strong: #c9cdd3;
+    --text: #14171c; --muted: #6b717a; --faint: #a3a8b0;
+    --brand: #0d3b7a; --brand-soft: #eaf0f9; --brand-disabled: #9db3d3;
+    --positive: #1a7f4b; --positive-soft: #e3f3ea; --attention: #9a5b00; --attention-soft: #fff6e6; --critical: #b3123a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text); font: 14px/1.45 "DM Sans", system-ui, sans-serif; }
+  button { font: inherit; color: inherit; }
+  a, .link { color: var(--brand); text-decoration: none; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
+  .link:hover { text-decoration: underline; }
+  svg.i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+  /* prototype bar (not part of the product) */
+  .proto { background: #1b1f26; color: #c9ced6; font-size: 12px; padding: 8px 20px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .proto .chips { display: flex; gap: 4px; flex-wrap: wrap; }
+  .proto .chip { background: #2a303a; border: 0; color: #c9ced6; border-radius: 6px; padding: 3px 8px; cursor: pointer; font-size: 12px; }
+  .proto .chip.on { background: #fff; color: #14171c; font-weight: 600; }
+  .proto .cap { flex: 1 1 360px; color: #9aa2ad; }
+  .proto .cap b { color: #fff; font-weight: 600; margin-right: 6px; }
+  .proto .q { color: #f3c97a; }
+
+  /* shell */
+  header.top { height: 62px; display: flex; align-items: center; padding: 0 20px; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; }
+  .logo .mk { width: 20px; height: 20px; border-radius: 4px; background: linear-gradient(135deg, #0d3b7a 50%, #b3123a 50%); }
+  .top .sp { flex: 1; }
+  .bell { position: relative; color: var(--muted); padding: 6px; }
+  .bell::after { content: ""; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--critical); }
+  .me { display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 14px; }
+  .av { width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: grid; place-items: center; font-size: 11px; color: var(--muted); }
+  .me .n { font-weight: 600; font-size: 13px; line-height: 1.2; }
+  .me .e { color: var(--muted); font-size: 12px; }
+  .panel { margin: 0 20px 20px; background: var(--shell); border: 1px solid var(--border); border-radius: 16px; display: grid; grid-template-columns: 248px 1fr; min-height: calc(100vh - 62px - 20px - 40px); }
+  aside { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  .org { margin: 12px; padding: 8px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 18px; }
+  .org .mono { width: 28px; height: 28px; border-radius: 7px; background: var(--brand); color: #fff; display: grid; place-items: center; }
+  .org .n { font-weight: 500; font-size: 12.5px; } .org .h { color: var(--muted); font-size: 12px; }
+  nav { padding: 6px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .nav { display: flex; align-items: center; gap: 10px; height: 37px; padding: 0 12px; border-radius: 8px; color: var(--muted); position: relative; }
+  .nav.on { background: #eceef2; color: var(--text); font-weight: 600; }
+  .nav.on::before { content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 3px; border-radius: 2px; background: var(--brand); }
+  .nav .cnt { margin-left: auto; background: var(--critical); color: #fff; font-size: 11px; border-radius: 999px; min-width: 20px; height: 20px; display: grid; place-items: center; }
+  .settings { border-top: 1px solid var(--border); padding: 12px; }
+  main { padding: 32px; min-width: 0; }
+
+  /* page head */
+  .back { display: inline-flex; gap: 4px; align-items: center; font-size: 13px; margin-bottom: 26px; }
+  .phead { display: flex; gap: 16px; align-items: center; margin-bottom: 26px; }
+  .tok { width: 56px; height: 56px; border-radius: 12px; background: var(--sunken); display: grid; place-items: center; flex: none; }
+  .tok::after { content: ""; width: 26px; height: 26px; border-radius: 50%; background: #b7bcc4; }
+  h1 { font-size: 30px; letter-spacing: -0.02em; margin: 0; line-height: 1.15; }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  /* cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  .chead { padding: 22px 24px 16px; }
+  .chead h2 { font-size: 19px; margin: 0; font-weight: 600; }
+  .chead p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  .over { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; padding: 18px 24px 14px; border-bottom: 1px solid var(--border); }
+  .kv { display: grid; grid-template-columns: 112px 1fr auto; gap: 12px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--border); font-size: 14px; }
+  .kv .k { color: var(--muted); font-size: 13px; }
+  .kv .v.empty { color: var(--faint); }
+  .foot { display: flex; align-items: center; gap: 12px; padding: 18px 24px 22px; margin-top: auto; }
+  .foot .sp { flex: 1; }
+  .foot .note { color: var(--muted); font-size: 13px; }
+  .btn { height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface); cursor: pointer; font-weight: 500; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn.primary:disabled { background: var(--brand-disabled); border-color: var(--brand-disabled); cursor: not-allowed; }
+  .btn:focus-visible, .link:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .badge { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: var(--sunken); color: var(--muted); white-space: nowrap; }
+  .badge.pos { background: var(--positive-soft); color: var(--positive); }
+
+  /* stepper */
+  .steps { display: flex; align-items: center; gap: 12px; padding: 18px 24px; margin-bottom: 24px; }
+  .step { display: flex; align-items: center; gap: 10px; color: var(--muted); white-space: nowrap; }
+  .dot { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--border-strong); display: grid; place-items: center; background: #fff; }
+  .step.done { color: var(--text); } .step.done .dot { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .step.done .dot svg { width: 13px; height: 13px; stroke-width: 3; }
+  .step.cur { color: var(--text); font-weight: 600; } .step.cur .dot { border: 2px solid var(--brand); }
+  .step.cur .dot::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); }
+  .bar { flex: 1; height: 2px; background: var(--border); min-width: 24px; } .bar.done { background: var(--brand); }
+  .steps.short .bar { flex: 0 0 120px; }
+
+  .cols { display: grid; gap: 16px; align-items: start; }
+  .cols.side { grid-template-columns: minmax(0, 1fr) 340px; }
+  .cols.doc { grid-template-columns: minmax(0, 494px) minmax(0, 1fr); }
+  .stack { display: flex; flex-direction: column; min-height: 100%; }
+
+  /* terms */
+  .clause { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-top: 1px solid var(--border); }
+  .clause label { flex: 1; display: flex; gap: 12px; align-items: center; cursor: pointer; }
+  input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--brand); margin: 0; cursor: pointer; }
+  input[type=checkbox]:disabled { cursor: not-allowed; }
+
+  /* document */
+  .docbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 500; }
+  .docbar .link { color: var(--muted); font-weight: 400; }
+  .vp { position: relative; height: 420px; overflow: auto; background: #f3f4f6; }
+  .sheet { position: relative; margin: 12px; background: #fff; transition: width .2s; }
+  .sheet img { display: block; width: 100%; user-select: none; -webkit-user-drag: none; }
+  .hl { position: absolute; border: 2px solid #2f6fe4; border-radius: 3px; pointer-events: none; transition: all .2s; }
+  .sheet.pick { cursor: pointer; }
+  .s [data-act="toBar"] { color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .hl.soft { border-style: dashed; border-color: rgba(47,111,228,.6); }
+  .zoom { position: sticky; bottom: 14px; left: 50%; transform: translateX(-50%); width: max-content; display: flex; align-items: center; background: #23272e; color: #fff; border-radius: 999px; padding: 2px 4px; font-size: 13px; z-index: 2; margin-top: -50px; }
+  .zoom button { background: none; border: 0; color: #fff; cursor: pointer; padding: 6px 12px; }
+  .zoom .lv { border-left: 1px solid #4a505a; border-right: 1px solid #4a505a; min-width: 84px; text-align: center; }
+  .file { padding: 12px 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .guide { margin: 16px; padding: 14px 16px; border-radius: 10px; background: var(--sunken); display: flex; gap: 14px; }
+  .thumb { width: 48px; height: 62px; flex: none; background: #fff; border: 1px solid var(--border); border-radius: 3px; padding: 7px 6px; display: flex; flex-direction: column; gap: 4px; }
+  .thumb i { display: block; height: 2px; background: #c9cdd3; } .thumb i:nth-child(1) { width: 70%; background: #8a9099; } .thumb i:nth-child(4) { width: 50%; }
+  .guide .t { font-weight: 500; font-size: 13px; } .guide .d { color: var(--muted); font-size: 13px; margin: 2px 0 2px; }
+  .drop { margin: 0 16px 16px; height: 300px; border: 1.5px dashed #5b7fb5; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; cursor: pointer; transition: background .15s; }
+  .drop:hover, .drop.over { background: var(--brand-soft); }
+  .drop .up { color: var(--muted); margin-bottom: 64px; } .drop .up svg { width: 26px; height: 26px; }
+  .drop .t { font-weight: 600; } .drop .d { color: var(--muted); font-size: 12px; margin-bottom: 14px; } .drop .p { font-size: 13px; color: var(--muted); }
+
+  /* amount */
+  .amount { padding: 6px 24px 22px; }
+  .amount .num { font-size: 36px; letter-spacing: -0.02em; font-weight: 500; }
+  .amount .num small { font-size: 16px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+  .amount .num.empty { color: var(--faint); }
+  .amount .from { color: var(--muted); }
+  .amount .help { margin-top: 18px; font-size: 13px; color: var(--muted); }
+  .amount .help .link { margin-left: 4px; font-weight: 500; }
+  [data-src] { cursor: pointer; } [data-src]:hover, [data-src].on { background: var(--brand-soft); }
+  [data-src]:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+  .notebox { padding: 16px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+  /* recipient */
+  .opt { margin: 0 24px 12px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
+  .opt.on { border-color: var(--brand); background: var(--brand-soft); }
+  .opt .top { display: flex; gap: 12px; padding: 16px; align-items: flex-start; }
+  .opt input[type=radio] { margin: 3px 0 0; width: 16px; height: 16px; accent-color: var(--brand); }
+  .opt .t { font-weight: 600; } .opt .d { color: var(--muted); font-size: 13px; }
+  .wallet { display: flex; gap: 12px; align-items: center; padding: 12px 16px 14px; margin: 0 16px; border-top: 1px solid #d6deea; }
+  .wallet .w { flex: 1; } .wallet .a { color: var(--muted); font-size: 12px; font-family: "DM Mono", monospace; }
+  .wlist { margin: 0 16px 14px; background: #fff; border: 1px solid var(--border); border-radius: 8px; }
+  .wlist button { display: flex; width: 100%; gap: 12px; align-items: center; padding: 10px 12px; background: none; border: 0; cursor: pointer; text-align: left; }
+  .wlist button + button { border-top: 1px solid var(--border); }
+  .wlist button:hover { background: var(--sunken); }
+  .field { margin: 0 16px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+  .field input { height: 36px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 0 10px; font: 13px "DM Mono", monospace; }
+  .field .err { color: var(--critical); font-size: 12px; }
+
+  /* after you submit */
+  .seq { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-top: 1px solid var(--border); }
+  .seq .m { width: 24px; height: 24px; border-radius: 50%; background: var(--sunken); display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .seq .t { flex: 1; font-weight: 500; }
+
+  /* dialog */
+  .scrim { position: fixed; inset: 0; background: rgba(20,23,28,.45); display: grid; place-items: center; z-index: 20; }
+  .dialog { width: 520px; max-width: calc(100vw - 32px); background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+  .dialog .kv { grid-template-columns: 140px 1fr; }
+  .sign { display: flex; gap: 12px; align-items: center; padding: 16px 24px; background: var(--shell); border-top: 1px solid var(--border); }
+  .sign .ic { width: 36px; height: 36px; border-radius: 8px; background: #fff; border: 1px solid var(--border); display: grid; place-items: center; color: var(--brand); }
+  .sign .t { font-weight: 600; } .sign .d { color: var(--muted); font-size: 12px; }
+  .lightbox img { display: block; max-height: 80vh; max-width: 90vw; background: #fff; border-radius: 6px; }
+
+  /* deposit checks */
+  .check { display: grid; grid-template-columns: 16px 110px 1fr; gap: 12px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--border); transition: background .12s; }
+  .check.hot { background: var(--brand-soft); }
+  .check .k { color: var(--muted); }
+  .check .s { color: var(--muted); font-size: 12px; } .check .s.warn { color: var(--attention); }
+  .check.off .v { color: var(--faint); }
+
+  /* bars */
+  .barshead { display: flex; align-items: center; gap: 8px; padding: 18px 24px 10px; border-top: 1px solid var(--border); font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--muted); }
+  .barshead .c { color: var(--attention); letter-spacing: 0; font-size: 12px; } .barshead .c.ok { color: var(--positive); }
+  .barshead .sp { flex: 1; }
+  .table { margin: 0 24px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .tr { display: grid; grid-template-columns: 32px 1fr 84px 56px; gap: 10px; align-items: center; padding: 8px 12px; }
+  .th { background: var(--sunken); color: var(--muted); font-size: 11px; letter-spacing: .06em; height: 32px; padding-top: 0; padding-bottom: 0; }
+  .rows { max-height: 280px; overflow: auto; }
+  .row { border-top: 1px solid var(--border); }
+  .row.flag { background: var(--attention-soft); }
+  .row.hot { box-shadow: inset 3px 0 0 var(--brand); }
+  .row .n { color: var(--faint); font-size: 12px; }
+  .row input { width: 100%; height: 32px; border: 1px solid var(--border-strong); border-radius: 6px; padding: 0 8px; font: 13px "DM Mono", monospace; background: #fff; }
+  .row.flag input.bad { border-color: var(--attention); }
+  .row input.w { text-align: right; }
+  .row .rm { text-align: right; } .row .rm button { background: none; border: 0; color: var(--faint); cursor: pointer; font-size: 12px; padding: 0; }
+  .row .rm button:hover { color: var(--text); }
+  .row .msg { grid-column: 1 / -1; font-size: 12.5px; color: var(--attention); margin-top: -2px; }
+  .row .msg.ok { color: var(--positive); }
+  .more { display: flex; justify-content: space-between; padding: 10px 12px; border-top: 1px solid var(--border); background: var(--shell); color: var(--muted); font-size: 13px; }
+
+  /* token detail */
+  .thead { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; }
+  .thead .t { flex: 1; } .chips { display: flex; gap: 6px; margin-top: 8px; }
+  .tabs { display: flex; gap: 14px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .tabs span { padding: 8px 2px; color: var(--muted); } .tabs .on { color: var(--text); font-weight: 600; border-bottom: 2px solid var(--brand); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); margin-bottom: 24px; }
+  .stat { padding: 20px 24px; } .stat + .stat { border-left: 1px solid var(--border); }
+  .stat .k { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--muted); }
+  .stat .v { font-size: 30px; margin: 4px 0 6px; } .stat .d { color: var(--muted); font-size: 12px; }
+  .meter { height: 4px; background: var(--brand); border-radius: 2px; margin-bottom: 8px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .two .kv { grid-template-columns: 1fr auto auto; }
+  .doc-row { display: flex; gap: 10px; align-items: center; padding: 12px 24px; border-top: 1px solid var(--border); }
+  .rq { display: grid; grid-template-columns: 100px minmax(0, 1fr) 80px 150px 170px 110px 130px; gap: 12px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--border); font-size: 14px; }
+  .rq.head { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .04em; padding-top: 10px; padding-bottom: 10px; }
+  .rq.open { cursor: pointer; } .rq.open:hover { background: var(--brand-soft); }
+  .rq .d { color: var(--muted); font-size: 12px; }
+  .doc-row .t { flex: 1; } .doc-row .d { color: var(--muted); font-size: 12px; }
+
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #23272e; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13px; z-index: 30; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+  .finish { padding: 40px 24px; text-align: center; }
+  .finish .ok { width: 44px; height: 44px; border-radius: 50%; background: var(--positive-soft); color: var(--positive); display: grid; place-items: center; margin: 0 auto 12px; }
+  .finish .ok svg { width: 22px; height: 22px; stroke-width: 2.5; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div class="proto" id="proto"></div>
+<header class="top">
+  <div class="logo"><span class="mk"></span>Universal Mint</div>
+  <div class="sp"></div>
+  <span class="bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+  <div class="me" id="me"></div>
+</header>
+<div class="panel">
+  <aside>
+    <div class="org"><span class="mono"><svg class="i" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></svg></span>
+      <div style="flex:1"><div class="n">Ault Global Commodities</div><div class="h">Issuer</div></div>
+      <svg class="i" viewBox="0 0 24 24" style="color:var(--faint);width:14px"><path d="m6 9 6 6 6-6"/></svg></div>
+    <nav id="nav"></nav>
+    <div class="settings"><div class="nav"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</div></div>
+  </aside>
+  <main id="main"></main>
+</div>
+<div id="layer"></div>
+
+<script>
+// ---------- data ----------
+const ICON = {
+  home: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+  inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  coins: '<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/>',
+  megaphone: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>',
+  wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  key: '<path d="M2.59 18.41A2 2 0 0 0 2 19.83V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.17a2 2 0 0 0 1.42-.59l.81-.81a6.5 6.5 0 1 0-4.24-4.24z"/><circle cx="16.5" cy="7.5" r=".5"/>',
+  left: '<path d="m12 19-7-7 7-7M19 12H5"/>',
+};
+const ic = (n, s = '') => `<svg class="i" viewBox="0 0 24 24" ${s}>${ICON[n]}</svg>`;
+
+const USERS = { juya: ['JU', 'Juya Kim', 'juya.k@bharvest.io'], jason: ['JL', 'Jason Lee', 'jason.l@bharvest.io'] };
+const WALLETS = [['Ault Silver bars', '0x41e…77c3'], ['Ault operations', '0x9b0…12fa']];
+
+// Documents are 1236×1600 renders; boxes are [x, y, w, h] in those pixels (from the Figma drafts).
+const DOC_W = 1236, DOC_H = 1600;
+const DOCS = {
+  transfer: { src: 'transfer.png', title: 'Transfer request', file: 'TWR -Internal Metal Transfer Request Form.pdf' },
+  receipt: { src: 'deposit.png', title: 'Deposit confirmation', file: 'VAU079 Deposit Confirmation 9-17-26.pdf' },
+  bars: { src: 'serialization.png', title: 'Bar list (serialization of holdings)', file: 'Ault Global Commodities Serialization of Holdings VAU079 9-17-26.pdf' },
+};
+const BOX = {
+  ounces: [964, 515, 111, 79],
+  customer: [273, 393, 567, 37], account: [255, 444, 111, 37], total: [491, 659, 367, 39],
+  serials: [79, 259, 285, 1241],
+  toAccount: [632, 286, 336, 30], toTitle: [632, 243, 512, 30], fromAccount: [98, 300, 402, 30], description: [98, 533, 374, 42],
+};
+// IS2a: each line on the right and where it was read in the transfer request (first box = main source).
+const SRC = { token: [BOX.toAccount, BOX.toTitle], amount: [BOX.ounces, BOX.description] };
+const ROW = { top: 280, h: 23.92 };
+const rowBox = docRow => [79, ROW.top + docRow * ROW.h - 2, 285, ROW.h + 4];
+
+const FIRST = 26074533;
+const freshBars = () => Array.from({ length: 50 }, (_, i) => ({ serial: String(FIRST + i), weight: '100.0', docRow: i, flagged: false }));
+
+const SCREENS = [
+  ['IS0', '토큰 상세 · Issue 시작', '헤더 Issue 버튼으로 시작'],
+  ['IS1', '약관 (처음 발행만)', '필수 조항을 체크해야 진행', '확인 필요: 매번인지 토큰별 1회인지 (Q2)'],
+  ['IS2', 'Amount · 서류 올리기', '수량을 정하는 서류를 먼저 올림. 왼쪽 문서, 오른쪽 판단 카드', '확인 필요: 요청 시점에 이전 요청서가 이미 있나 (Q10)'],
+  ['IS2a', 'Amount · 수량 확인', '핵심인 5,000 oz 칸을 처음부터 테두리로 강조', '확인 필요: 문서 판독 신규 개발, 안 되면 온스 직접 입력 (Q26)'],
+  ['IS3', 'Recipient · treasury', '고른 행만 펼침, 기본은 treasury 기본 지갑', '확인 필요: 투자자 지갑 발행의 목적·빈도 (Q5)'],
+  ['IS4', 'Review', '제출 전 검토. 수정은 각 단계로'],
+  ['IS5b', '제출 · 조직 승인 제안', '승인이 더 필요하면 제안만 접수, 요청은 승인 후 생성', '확인 필요: 같은 조직 내부 승인 필요 여부 (Q3)'],
+  ['RQ', 'Requests · 운영자 진입', '피그마에 없음. 승인된 요청은 운영자 Requests 목록에 뜨고, ISS-0012 행을 눌러 입고 확인으로 들어감'],
+  ['D1', '입고 확인 · 확인서 올리기 전', '체크 항목은 업로드 후 활성'],
+  ['D1a', '입고 확인 · 확인서 올린 뒤', '확인서를 올리면 체크 항목 활성. 줄에 hover하면 그 위치로 약 200% 확대 + 테두리 강조 (D1a-h)'],
+  ['D2', '입고 확인 · 바 목록과 확정', '확인 항목을 위로, 표는 50개 전체를 기본으로 보여줌. 왼쪽 문서의 시리얼을 누르면 오른쪽 해당 바로 포커스', '확인 필요: 입고 확인과 승인 연속 처리 (Q27), 판독 표시 (Q33)'],
+];
+
+// ---------- state ----------
+let S;
+function reset() {
+  const bars = freshBars();
+  // What the reader got wrong in the bar list: bar 17 lost a digit, bar 31 repeats bar 30.
+  bars[16].serial = '2607454'; bars[16].flagged = true;
+  bars[30].serial = '26074562'; bars[30].flagged = true;
+  S = { screen: 'IS0', terms: [false, false, false], transfer: false, recipient: 'treasury', wallet: 0, walletList: false,
+        investor: '', dialog: null, receipt: false, checks: { sent: false, recv: false }, bars, showAll: true,
+        weightChecked: true, serialsChecked: false, confirmed: false, zoom: 1, hot: null, toast: null };
+}
+reset();
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function go(screen, extra = {}) {
+  Object.assign(S, { screen, zoom: 1, hot: null, walletList: false }, extra);
+  if (screen === 'IS2a' || screen === 'IS3' || screen === 'IS4') S.transfer = true;
+  if (screen === 'D1a' || screen === 'D2') S.receipt = true;
+  if (screen === 'D2') S.checks = { sent: true, recv: true };
+  if (screen.startsWith('IS') && screen !== 'IS0' && screen !== 'IS1') S.terms = [true, true, S.terms[2]];
+  render(); window.scrollTo(0, 0);
+}
+function toast(msg) { S.toast = msg; renderLayer(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; renderLayer(); }, 2600); }
+
+// ---------- bar validation ----------
+function barIssue(i) {
+  const b = S.bars[i];
+  if (!/^\d+$/.test(b.serial)) return b.serial ? 'Only digits in a serial.' : 'Serial is empty.';
+  if (b.serial.length !== 8) return b.flagged && b.serial === '2607454' ? 'Unclear in the document. 7 digits read, check the last one.' : `${b.serial.length} digits. A serial has 8.`;
+  // A repeat is reported once, on the later bar.
+  const j = S.bars.findIndex((o, k) => k < i && o.serial === b.serial);
+  if (j >= 0) return `Same serial as bar ${j + 1}. One of them is wrong.`;
+  if (!(Number(b.weight) > 0)) return 'Weight is missing.';
+  return null;
+}
+const barIssues = () => S.bars.map((_, i) => barIssue(i)).filter(Boolean).length;
+function serialSummary() {
+  const all = S.bars.map((b, i) => [i, barIssue(i)]).filter(([, m]) => m);
+  if (!all.length) return 'All read. Every serial is unique.';
+  const rep = all.filter(([, m]) => m.startsWith('Same serial')), other = all.filter(([, m]) => !m.startsWith('Same serial'));
+  // Each count jumps to the first bar of its kind.
+  const jump = (list, word) => list.length && `<button class="link" data-act="toBar" data-i="${list[0][0]}">${list.length} ${word}</button>`;
+  return [jump(other, 'unclear'), jump(rep, 'repeated')].filter(Boolean).join(', ') + '. Fix the flagged bars.';
+}
+const totals = () => ({ oz: S.bars.reduce((s, b) => s + (Number(b.weight) || 0), 0), n: S.bars.length });
+console.assert((() => { const keep = S; reset(); const n = barIssues(); S = keep; return n === 2; })(), 'seeded bar list has exactly the 2 flagged bars');
+
+// ---------- pieces ----------
+const isFlow = () => S.screen.startsWith('IS');
+function stepper(names, cur) {
+  return `<div class="card steps ${names.length < 3 ? 'short' : ''}">` + names.map((n, i) => {
+    const st = i < cur ? 'done' : i === cur ? 'cur' : '';
+    return (i ? `<span class="bar ${i <= cur ? 'done' : ''}"></span>` : '') + `<span class="step ${st}"><span class="dot">${st === 'done' ? ic('check') : ''}</span>${n}</span>`;
+  }).join('') + '</div>';
+}
+const issueHead = () => `<a class="back link" data-go="IS0">${ic('left', 'style="width:14px"')}Ault Silver</a>
+  <div class="phead"><span class="tok"></span><div><h1>Issue Ault Silver</h1><div class="sub">ASLV, held at The Wyoming Reserve</div></div></div>`;
+const depositHead = () => `<a class="back link" data-act="toRequests">${ic('left', 'style="width:14px"')}ISS-0012</a>
+  <div class="phead"><span class="tok"></span><div><h1>Confirm deposit</h1><div class="sub">ISS-0012, Ault Silver to your treasury, about 5,000 ASLV</div></div></div>`;
+const kv = (k, v, empty, extra = '') => `<div class="kv"><span class="k">${k}</span><span class="v ${empty ? 'empty' : ''}">${v}</span>${extra || '<span></span>'}</div>`;
+const recipientText = () => S.recipient === 'treasury' ? 'Your treasury' : 'An investor';
+const recipientLong = () => S.recipient === 'treasury' ? `Our treasury, ${WALLETS[S.wallet][0]} (${WALLETS[S.wallet][1]})` : `Investor wallet ${esc(short(S.investor))}`;
+const short = a => a.length > 12 ? a.slice(0, 5) + '…' + a.slice(-4) : a;
+const footBtns = (note, back, next, enabled = true, nextAct = '') =>
+  `<div class="foot"><a class="link" data-go="IS0">Cancel</a><span class="sp"></span>${note ? `<span class="note">${note}</span>` : ''}
+   ${back ? `<button class="btn" data-go="${back}">Back</button>` : ''}
+   <button class="btn primary" ${nextAct ? `data-act="${nextAct}"` : `data-go="${next}"`} ${enabled ? '' : 'disabled'}>${nextAct === 'submit' ? 'Submit request' : 'Continue'}</button></div>`;
+
+function docViewer(key, boxes) {
+  const d = DOCS[key];
+  const pct = ([x, y, w, h]) => `left:${x / DOC_W * 100}%;top:${y / DOC_H * 100}%;width:${w / DOC_W * 100}%;height:${h / DOC_H * 100}%`;
+  const lvl = S.zoom === 1 ? 'Fit width' : Math.round(S.zoom * 100) + '%';
+  return `<section class="card" aria-label="${d.title}">
+    <div class="docbar"><span>${d.title}</span><button class="link" data-act="replace">Replace</button></div>
+    <div class="vp" id="vp"> <div class="sheet ${key === 'bars' ? 'pick' : ''}" id="sheet" style="width:calc(${S.zoom * 100}% - 24px)">
+      <img src="${d.src}" alt="${d.title}">${boxes.map(([b, soft]) => `<span class="hl ${soft ? 'soft' : ''}" style="${pct(b)}"></span>`).join('')}
+    </div><div class="zoom"><button data-act="zoomOut" aria-label="Zoom out">−</button><span class="lv">${lvl}</span><button data-act="zoomIn" aria-label="Zoom in">+</button></div></div>
+    <div class="file">${d.file}</div></section>`;
+}
+function dropzone(title, desc, prepQ, prepA) {
+  return `<section class="card"><div class="docbar"><span>${title}</span></div>
+    <div class="guide"><span class="thumb"><i></i><i></i><i></i><i></i><i></i></span><div>
+      <div class="t">${prepQ[0]}</div><div class="d">${desc}</div><button class="link" style="font-size:13px" data-act="example">See an example</button></div></div>
+    <div class="drop" tabindex="0" role="button" data-act="upload" id="drop"><span class="up">${ic('upload')}</span>
+      <span class="t">Drop the file here or browse</span><span class="d">PDF up to 50 MB</span>
+      <span class="p">${prepQ[1]} <button class="link" data-act="copyEmail">${prepA}</button></span></div></section>`;
+}
+// Keep the current zoom target in view after a render.
+function placeView() {
+  const vp = $('#vp'); if (!vp) return;
+  const target = S.hot && S.hot.box;
+  if (!target || S.zoom === 1) { vp.scrollTop = 0; vp.scrollLeft = 0; return; }
+  const sheet = $('#sheet'), k = sheet.clientWidth / DOC_W, [x, y, w, h] = target;
+  vp.scrollLeft = 12 + (x + w / 2) * k - vp.clientWidth / 2;
+  vp.scrollTop = 12 + (y + h / 2) * k - vp.clientHeight / 2;
+}
+
+// ---------- screens ----------
+const V = {};
+V.IS0 = () => `<a class="back link" style="color:var(--muted)">${ic('left', 'style="width:14px"')}Tokens</a>
+  <div class="thead"><span class="tok"></span><div class="t"><h1>Ault Silver</h1><div class="chips"><span class="badge pos">Active</span><span class="badge">Silver</span><span class="badge">Ethereum</span><span class="badge">Permissioned ERC-20</span></div></div>
+    <button class="btn">${ic('upload')}Redeem</button><button class="btn primary" data-go="IS1">${ic('download')}Issue</button></div>
+  <div class="tabs"><span class="on">Overview</span><span>Investors</span><span>Reserve</span><span>Disclosures</span><span>Settings</span></div>
+  <div class="card stats"><div class="stat"><div class="k">SUPPLY</div><div class="v">5,000</div><div class="d">ASLV circulating</div></div>
+    <div class="stat"><div class="k">RESERVE</div><div class="v">100%</div><div class="meter"></div><div class="d">5,000 oz at The Wyoming Reserve</div></div>
+    <div class="stat"><div class="k">INVESTORS</div><div class="v">12</div><div class="d">have requested ASLV</div></div></div>
+  <div class="two"><section class="card"><div class="chead" style="display:flex;justify-content:space-between"><div><h2>Status</h2><p>What needs a look on this token.</p></div><a class="link" style="font-size:13px">View as investor →</a></div>
+      ${kv('Requests in progress', '', false, '<span>3, <a class="link">View in Requests →</a></span>')}${kv('Waiting on you', '', false, '<span>1</span>')}${kv('Contract', '', false, '<span>0x8a3f…c21e</span>')}${kv('Last attestation', '', false, '<span>Oct 27, 2026</span>')}</section>
+    <section class="card"><div class="chead"><h2>Recent disclosures</h2><p>Published notices for ASLV holders.</p></div>
+      ${[['Reserve attestation, Oct 2026', 'Published Oct 27'], ['Redemption fee updated to 0.5%', 'Published Oct 20'], ['Custody account renewed: VAU079', 'Published Oct 11']].map(([t, d]) => `<div class="doc-row">${ic('file', 'style="color:var(--faint)"')}<span class="t">${t}</span><span class="d">${d}</span></div>`).join('')}</section></div>`;
+
+const thisRequest = (amount, recip) => `<section class="card"><div class="over">This request</div>
+  ${kv('Token', 'Ault Silver (ASLV)')}${kv('Amount', amount || 'Next, from your transfer request', !amount)}${kv('Recipient', recip || 'After the amount', !recip)}</section>`;
+
+V.IS1 = () => {
+  const ok = S.terms[0] && S.terms[1];
+  const cl = [['Silver Token issuance terms', 1], ['Custody and reserve disclosure', 1], ['Marketing communications', 0]];
+  return issueHead() + stepper(['Terms', 'Amount', 'Recipient', 'Review'], 0) + `<div class="cols side">
+    <section class="card stack"><div class="chead"><h2>Accept the token terms</h2><p>Accept every required clause. You are asked once; later issuances skip this step.</p></div>
+      ${cl.map(([t, req], i) => `<div class="clause"><label><input type="checkbox" data-term="${i}" ${S.terms[i] ? 'checked' : ''}>${t}</label><span class="badge">${req ? 'Required' : 'Optional'}</span><a class="link" style="font-size:13px">Read</a></div>`).join('')}
+      <div class="foot"><a class="link" data-go="IS0">Cancel</a><span class="sp"></span>${ok ? '' : '<span class="note">Accept both required clauses to continue.</span>'}<button class="btn primary" data-go="IS2" ${ok ? '' : 'disabled'}>Accept and continue</button></div></section>
+    ${thisRequest()}</div>`;
+};
+
+V.IS2 = () => issueHead() + stepper(['Terms', 'Amount', 'Recipient', 'Review'], 1) + `<div class="cols doc">
+  ${dropzone('Transfer request', 'From The Wyoming Reserve. Shows VAU074 to VAU079 and the ounces.', ['Signed transfer request', 'No transfer request yet?'], 'Copy the email to The Wyoming Reserve')}
+  <section class="card stack"><div class="chead"><h2>Upload the signed transfer request</h2><p>We read the ounces from it to show how much will be minted.</p></div>
+    ${kv('Token', 'Ault Silver (ASLV)')}${kv('Amount', 'Read after you upload', true)}${kv('Recipient', 'Next step', true)}
+    <div style="min-height:150px"></div>${footBtns('Upload the transfer request to continue.', 'IS1', 'IS3', false)}</section></div>`;
+
+V.IS2a = () => issueHead() + stepper(['Terms', 'Amount', 'Recipient', 'Review'], 1) + `<div class="cols doc">
+  ${docViewer('transfer', S.hot ? SRC[S.hot.key].map((b, i) => [b, i > 0]) : [[BOX.ounces]])}
+  <section class="card stack"><div class="chead"><h2>Is this the right amount?</h2><p>Read from the document on the left. Click a line to see where.</p></div>
+    <div class="amount ${S.hot?.key === 'amount' ? 'on' : ''}" data-src="amount" tabindex="0" role="button"><div class="num">about 5,000<small>ASLV</small></div><div class="from">from 5,000 oz moving VAU074 to VAU079</div>
+      <div class="help">Not right?<button class="link" data-act="replace">Replace the file</button></div></div>
+    <div class="${S.hot?.key === 'token' ? 'on' : ''}" data-src="token" tabindex="0" role="button">${kv('Token', 'Ault Silver (ASLV)', false, '<span class="note">From VAU079</span>')}</div>${kv('Recipient', 'Next step', true)}
+    <div style="min-height:60px"></div><div class="notebox">The final amount is set from bar weights when the silver arrives.</div>
+    ${footBtns('', 'IS2', 'IS3')}</section></div>`;
+
+V.IS3 = () => {
+  const inv = S.recipient === 'investor', addrOk = /^0x[0-9a-fA-F]{40}$/.test(S.investor);
+  const w = WALLETS[S.wallet];
+  return issueHead() + stepper(['Terms', 'Amount', 'Recipient', 'Review'], 2) + `<div class="cols side">
+  <section class="card stack"><div class="chead"><h2>Where should about 5,000 ASLV go?</h2></div>
+    <div class="opt ${inv ? '' : 'on'}" data-recip="treasury"><div class="top"><input type="radio" name="r" ${inv ? '' : 'checked'} aria-label="Our treasury"><div><div class="t">Our treasury</div><div class="d">Mint to a wallet your organization holds.</div></div></div>
+      ${inv ? '' : `<div class="wallet">${ic('wallet', 'style="color:var(--brand)"')}<div class="w"><div>${w[0]}</div><div class="a">${w[1]}</div></div>${S.wallet === 0 ? '<span class="badge">Default</span>' : ''}<button class="btn" data-act="wallets">Change</button></div>
+        ${S.walletList ? `<div class="wlist">${WALLETS.map((x, i) => `<button data-wallet="${i}">${ic('wallet')}<span style="flex:1">${x[0]}<br><span class="a" style="color:var(--muted);font-size:12px">${x[1]}</span></span>${i === S.wallet ? ic('check', 'style="color:var(--brand)"') : ''}</button>`).join('')}</div>` : ''}`}</div>
+    <div class="opt ${inv ? 'on' : ''}" data-recip="investor"><div class="top"><input type="radio" name="r" ${inv ? 'checked' : ''} aria-label="An investor"><div><div class="t">An investor</div><div class="d">Mint straight to an investor's wallet.</div></div></div>
+      ${inv ? `<label class="field">Investor wallet address<input id="investor" value="${esc(S.investor)}" placeholder="0x…" autocomplete="off">${S.investor && !addrOk ? '<span class="err">An address is 0x and 40 characters.</span>' : ''}</label>` : ''}</div>
+    ${footBtns('', 'IS2a', 'IS4', !inv || addrOk)}</section>
+  ${thisRequest('About 5,000 ASLV', inv ? (addrOk ? 'An investor' : '') : recipientText())}</div>`;
+};
+
+const afterSubmit = () => `<section class="card"><div class="over">After you submit</div>
+  ${[['Deposit confirmation', 'Operator'], ['Mint approval', 'Governance'], ['Signing and mint', 'Fireblocks']].map(([t, b], i) => `<div class="seq"><span class="m">${i + 1}</span><span class="t">${t}</span><span class="badge">${b}</span></div>`).join('')}</section>`;
+V.IS4 = () => issueHead() + stepper(['Terms', 'Amount', 'Recipient', 'Review'], 3) + `<div class="cols side">
+  <section class="card stack"><div class="chead"><h2>Mint about 5,000 ASLV to ${S.recipient === 'treasury' ? 'your treasury' : 'an investor'}</h2></div>
+    ${kv('Token', 'Ault Silver (ASLV)')}${kv('Transfer request', DOCS.transfer.file, false, '<button class="link" data-go="IS2a">Edit</button>')}
+    ${kv('Amount', 'About 5,000 ASLV, final when the silver arrives')}${kv('Recipient', recipientLong(), false, '<button class="link" data-go="IS3">Edit</button>')}
+    ${footBtns('', 'IS3', '', true, 'submit')}</section>${afterSubmit()}</div>`;
+V.IS5b = V.IS4;
+
+// Not in Figma: the operator's way into D1. Only ISS-0012 is live in this prototype.
+V.RQ = () => {
+  const rows = [
+    ['ISS-0012', 'Ault Global Commodities', 'Issue', 'about 5,000 ASLV', S.confirmed ? 'Deposit confirmed' : 'Waiting on deposit', 'Nov 4, 2026', 1],
+    ['RDM-0008', 'Ault Global Commodities', 'Redeem', '200 ASLV', 'Waiting on payout', 'Nov 2, 2026'],
+    ['ISS-0011', 'Northgate Metals', 'Issue', 'about 1,000 NGAU', 'Waiting on approval', 'Oct 30, 2026'],
+    ['ISS-0010', 'Ault Global Commodities', 'Issue', '3,000 ASLV', 'Done', 'Oct 21, 2026'],
+  ];
+  return `<div class="phead"><div><h1>Requests</h1><div class="sub">Issue and redeem requests from issuers, newest first.</div></div></div>
+  <section class="card"><div class="rq head"><span>ID</span><span>ISSUER</span><span>TYPE</span><span>AMOUNT</span><span>STATUS</span><span>RECEIVED</span><span></span></div>
+  ${rows.map(([id, who, type, amt, st, d, live]) => `<div class="rq ${live ? 'open' : ''}" ${live ? 'data-act="openRequest" tabindex="0" role="button"' : ''}>
+    <span style="font-weight:600">${id}</span><span>${who}</span><span>${type}</span><span>${amt}</span>
+    <span><span class="badge ${st === 'Done' || st === 'Deposit confirmed' ? 'pos' : ''}">${st}</span></span><span class="d">${d}</span>
+    <span>${live && !S.confirmed ? '<span class="link" style="font-size:13px">Confirm deposit →</span>' : ''}</span></div>`).join('')}</section>`;
+};
+
+V.D1 = () => depositHead() + stepper(['Deposit receipt', 'Bar list'], 0) + `<div class="cols doc">
+  ${dropzone('Deposit confirmation', 'From The Wyoming Reserve. Shows the account, how many bars and the total ounces.', ['Deposit confirmation receipt', 'Not arrived yet?'], 'Copy a follow-up email')}
+  <section class="card stack"><div class="chead"><h2>Add the deposit confirmation</h2><p>The receipt The Wyoming Reserve sends when the silver arrives in VAU079.</p></div>
+    <div class="amount"><div class="num empty">—<small>oz deposited</small></div><div class="from">Read from the receipt after you upload</div></div>
+    ${checkRow('sent', 'Sent by', '—', 'Should match the requester', true)}${checkRow('recv', 'Received in', '—', 'Should match the vault account in the request', true)}
+    <div style="min-height:90px"></div>
+    <div class="foot"><span class="note">Upload the receipt to check it.</span><span class="sp"></span><button class="btn" data-act="toRequests">Back</button><button class="btn primary" disabled>Next: bar list</button></div></section></div>`;
+
+function checkRow(key, k, v, s, off) {
+  const hot = S.hot && S.hot.key === key;
+  return `<div class="check ${off ? 'off' : ''} ${hot ? 'hot' : ''}" data-hover="${off ? '' : key}" tabindex="${off ? -1 : 0}">
+    <input type="checkbox" data-check="${key}" ${S.checks[key] && !off ? 'checked' : ''} ${off ? 'disabled' : ''} aria-label="${k}">
+    <span class="k">${k}</span><span><div class="v">${v}</div><div class="s">${s}</div></span></div>`;
+}
+const RECEIPT_ROWS = { sent: BOX.customer, recv: BOX.account, amount: BOX.total };
+V.D1a = () => {
+  const n = Object.values(S.checks).filter(Boolean).length;
+  const hot = S.hot && S.hot.box;
+  return depositHead() + stepper(['Deposit receipt', 'Bar list'], 0) + `<div class="cols doc">
+  ${docViewer('receipt', hot ? [[hot]] : [])}
+  <section class="card stack"><div class="chead"><h2>Did the silver arrive?</h2><p>Check each line against the receipt on the left.</p></div>
+    <div class="amount" data-hover="amount" tabindex="0"><div class="num">5,000 oz<small>deposited</small></div><div class="from">in 50 bars of 100 oz, received Sep 17, 2026</div></div>
+    ${checkRow('sent', 'Sent by', 'Ault Global Commodities, Inc.', 'Same as the requester')}${checkRow('recv', 'Received in', 'VAU079', 'Same as the vault account in the request')}
+    <div style="min-height:90px"></div>
+    <div class="foot"><span class="note">${n} of 2 checked.</span><span class="sp"></span><button class="btn" data-go="D1">Back</button><button class="btn primary" data-go="D2" ${n === 2 ? '' : 'disabled'}>Next: bar list</button></div></section></div>`;
+};
+
+V.D2 = () => {
+  if (S.confirmed) return depositHead() + stepper(['Deposit receipt', 'Bar list'], 2) + `<section class="card finish"><div class="ok">${ic('check')}</div>
+    <h2 style="margin:0 0 6px;font-size:19px">Deposit confirmed</h2><p style="color:var(--muted);margin:0 0 18px">5,000 oz in 50 bars. Mint approval goes to governance next.</p>
+    <button class="btn" data-act="toRequests">Back to Requests</button> <button class="btn" data-act="restart">Start the flow again</button></section>`;
+  const issues = barIssues(), { oz, n } = totals(), weightOk = Math.abs(oz - 5000) < 0.05 && n === 50;
+  const list = S.showAll ? S.bars.map((_, i) => i) : S.bars.map((b, i) => (b.flagged || barIssue(i)) ? i : -1).filter(i => i >= 0);
+  const flaggedLeft = S.bars.filter((b, i) => b.flagged && barIssue(i)).length;
+  const hot = S.hot && S.hot.box;
+  const ready = issues === 0 && weightOk && S.weightChecked && S.serialsChecked;
+  const note = issues ? `Fix the ${issues === 1 ? 'flagged bar' : issues + ' flagged bars'} to confirm.` : !weightOk ? 'The total no longer matches the receipt.' : !S.serialsChecked || !S.weightChecked ? 'Tick both lines to confirm.' : 'Ready to confirm.';
+  return depositHead() + stepper(['Deposit receipt', 'Bar list'], 1) + `<div class="cols doc">
+  ${docViewer('bars', hot ? [[hot]] : [[BOX.serials, true]])}
+  <section class="card stack"><div class="chead"><h2>Do the bars match?</h2><p>Read from the bar list. Only the flagged bars need a look.</p></div>
+    <div class="check"><input type="checkbox" data-flag="weightChecked" ${S.weightChecked && weightOk ? 'checked' : ''} ${weightOk ? '' : 'disabled'} aria-label="Total weight"><span class="k">Total weight</span>
+      <span><div class="v">${oz.toLocaleString('en-US', { minimumFractionDigits: 1 })} oz in ${n} bars</div><div class="s ${weightOk ? '' : 'warn'}">${weightOk ? 'Same as the receipt' : 'The receipt says 5,000 oz in 50 bars.'}</div></span></div>
+    <div class="check"><input type="checkbox" data-flag="serialsChecked" ${S.serialsChecked && !issues ? 'checked' : ''} ${issues ? 'disabled' : ''} aria-label="Serials"><span class="k">Serials</span>
+      <span><div class="v">26074533 to 26074582</div><div class="s ${issues ? 'warn' : ''}">${serialSummary()}</div></span></div>
+    <div class="barshead">${S.showAll ? 'All bars' : 'Bars to check'} <span class="c ${flaggedLeft ? '' : 'ok'}">${S.showAll ? n : flaggedLeft ? `${flaggedLeft} of ${n}` : 'Done'}</span><span class="sp"></span><button class="link" style="letter-spacing:0;font-size:13px;font-weight:500" data-act="showAll">${S.showAll ? 'Show bars to check' : `Show all ${n}`}</button></div>
+    <div class="table"><div class="tr th"><span>#</span><span>BAR SERIAL NUMBER</span><span>WEIGHT (OZ)</span><span></span></div>
+      <div class="rows" id="rows">${list.map(i => barRow(i)).join('')}</div>
+      <div class="more"><span>${S.showAll ? '' : `${n - list.length} more read clearly`}</span><button class="link" data-act="addBar">+ Add bar</button></div></div>
+    <div class="foot"><span class="note">${note}</span><span class="sp"></span><button class="btn" data-go="D1a">Back</button><button class="btn primary" data-act="confirm" ${ready ? '' : 'disabled'}>Confirm deposit</button></div></section></div>`;
+};
+function barRow(i) {
+  const b = S.bars[i], issue = barIssue(i), hot = S.hot && S.hot.i === i;
+  const msg = issue ? `<div class="msg">${issue}</div>` : b.flagged ? '<div class="msg ok">Fixed.</div>' : '';
+  return `<div class="tr row ${issue ? 'flag' : ''} ${hot ? 'hot' : ''}" data-bar="${i}"><span class="n">${i + 1}</span>
+    <input class="s ${issue ? 'bad' : ''}" data-field="serial" value="${esc(b.serial)}" inputmode="numeric" aria-label="Bar ${i + 1} serial">
+    <input class="w" data-field="weight" value="${esc(b.weight)}" aria-label="Bar ${i + 1} weight">
+    <span class="rm"><button data-act="removeBar">Remove</button></span>${msg}</div>`;
+}
+
+// ---------- render ----------
+function render() {
+  const sc = S.screen;
+  const meta = SCREENS.find(s => s[0] === sc);
+  $('#proto').innerHTML = `<span style="color:#fff;font-weight:600">Issue flow</span><span class="chips">${SCREENS.map(s => `<button class="chip ${s[0] === sc ? 'on' : ''}" data-go="${s[0]}">${s[0]}</button>`).join('')}</span>
+    <span class="cap"><b>${meta[0]} ${meta[1]}</b>${meta[2]}${meta[3] ? ` <span class="q">${meta[3]}</span>` : ''}</span><button class="chip" data-act="restart">Restart</button>`;
+  const u = USERS[isFlow() ? 'juya' : 'jason'];
+  $('#me').innerHTML = `<span class="av">${u[0]}</span><div><div class="n">${u[1]}</div><div class="e">${u[2]}</div></div><svg class="i" viewBox="0 0 24 24" style="color:var(--faint);width:14px"><path d="m6 9 6 6 6-6"/></svg>`;
+  const active = isFlow() ? 'Tokens' : 'Requests';
+  $('#nav').innerHTML = [['home', 'Home'], ['inbox', 'Requests', 4], ['coins', 'Tokens'], ['megaphone', 'Disclosures']]
+    .map(([i, n, c]) => `<div class="nav ${n === active ? 'on' : ''}" ${n === 'Requests' && !isFlow() ? 'data-go="RQ" style="cursor:pointer"' : ''}>${ic(i)}${n}${c ? `<span class="cnt">${c}</span>` : ''}</div>`).join('');
+  if (sc === 'IS5b' && !S.dialog) S.dialog = 'propose';
+  $('#main').innerHTML = V[sc]();
+  placeView();
+  renderLayer();
+}
+function renderLayer() {
+  let h = '';
+  if (S.dialog === 'propose') h += `<div class="scrim" data-act="closeDialog"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dt">
+    <div class="chead"><h2 id="dt">Propose this issuance request?</h2><p>Your organization needs 2 of 4 approvals before the request is sent.</p></div>
+    ${kv('Who approves', 'Governance, 2 of 4. Your signature counts as 1.')}${kv('Then', 'Sent to the operator once approved')}${kv('Until then', 'You can withdraw the proposal')}${kv('Amount', 'About 5,000 ASLV, final at deposit')}
+    <div class="sign"><span class="ic">${ic('key')}</span><div><div class="t">Sign with your passkey</div><div class="d">Juya Kim, for Ault Global Commodities</div></div></div>
+    <div class="foot" style="justify-content:flex-end"><button class="btn" data-act="closeDialog">Cancel</button><button class="btn primary" data-act="propose">Sign and propose</button></div></div></div>`;
+  if (S.dialog === 'example') { const d = S.screen.startsWith('D') ? DOCS.receipt : DOCS.transfer;
+    h += `<div class="scrim lightbox" data-act="closeDialog"><img src="${d.src}" alt="Example ${d.title}"></div>`; }
+  if (S.toast) h += `<div class="toast" role="status">${S.toast}</div>`;
+  $('#layer').innerHTML = h;
+}
+
+// ---------- events ----------
+const EMAILS = {
+  IS2: 'Hello Wyoming Reserve team,\n\nPlease send the signed internal metal transfer request moving 5,000 oz (50 bars of 100 oz) from VAU074 to VAU079.\n\nThank you,\nAult Global Commodities',
+  D1: 'Hello Wyoming Reserve team,\n\nCould you confirm whether the 5,000 oz transfer into VAU079 has arrived, and send the deposit confirmation and bar list?\n\nThank you,\nAult Global Commodities',
+};
+const ACT = {
+  restart: () => { reset(); render(); },
+  toRequests: () => go('RQ'),
+  openRequest: () => go(S.confirmed ? 'D2' : 'D1', S.confirmed ? {} : { receipt: false }),
+  upload: () => { if (S.screen === 'IS2') go('IS2a'); else if (S.screen === 'D1') go('D1a', { checks: { sent: false, recv: false } }); },
+  replace: () => go(S.screen === 'D1a' ? 'D1' : S.screen === 'D2' ? 'D2' : 'IS2', S.screen === 'D2' ? {} : { transfer: false }),
+  example: () => { S.dialog = 'example'; renderLayer(); },
+  copyEmail: () => { try { navigator.clipboard.writeText(EMAILS[S.screen] || ''); } catch (e) {} toast('Email copied. Paste it into your mail app.'); },
+  zoomIn: () => { S.zoom = Math.min(3, S.zoom === 1 ? 1.5 : S.zoom + 0.5); render(); },
+  zoomOut: () => { S.zoom = Math.max(1, S.zoom - 0.5); render(); },
+  wallets: () => { S.walletList = !S.walletList; render(); },
+  submit: () => go('IS5b', { dialog: 'propose' }),
+  closeDialog: () => { const was = S.dialog; S.dialog = null; if (was === 'propose') S.screen = 'IS4'; render(); },
+  propose: () => { S.dialog = null; go('RQ'); toast('Proposal sent. Showing the operator\'s Requests once it is approved.'); },
+  toBar: el => focusBar(+el.dataset.i),
+  showAll: () => { S.showAll = !S.showAll; render(); },
+  addBar: () => { S.bars.push({ serial: '', weight: '100.0', docRow: null, flagged: false }); S.serialsChecked = false; render(); const r = $('#rows'); r.scrollTop = r.scrollHeight; r.lastElementChild.querySelector('input').focus(); },
+  removeBar: el => { const i = +el.closest('[data-bar]').dataset.bar; S.bars.splice(i, 1); S.hot = null; S.serialsChecked = false; render(); },
+  confirm: () => { S.confirmed = true; render(); toast('Deposit confirmed.'); },
+};
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (S.screen === 'D2' && t.closest('#sheet')) { pickBar(e); return; }
+  const act = t.closest('[data-act]'), goEl = t.closest('[data-go]');
+  if (act) {
+    if (act.classList.contains('scrim') && t !== act) return; // clicks inside the dialog
+    e.stopPropagation(); ACT[act.dataset.act](act); return;
+  }
+  if (goEl) { go(goEl.dataset.go); return; }
+  const src = t.closest('[data-src]');
+  if (src) { showSource(src.dataset.src); return; }
+  const recip = t.closest('[data-recip]');
+  if (recip && !t.closest('.wallet, .wlist, .field')) { S.recipient = recip.dataset.recip; render(); if (S.recipient === 'investor') $('#investor')?.focus(); return; }
+  const w = t.closest('[data-wallet]');
+  if (w) { S.wallet = +w.dataset.wallet; S.walletList = false; render(); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.term) { S.terms[+t.dataset.term] = t.checked; render(); }
+  if (t.dataset.check) { S.checks[t.dataset.check] = t.checked; render(); }
+  if (t.dataset.flag) { S[t.dataset.flag] = t.checked; render(); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'investor') { S.investor = t.value.trim(); const pos = t.selectionStart; render(); const n = $('#investor'); n.focus(); n.setSelectionRange(pos, pos); }
+  const row = t.closest('[data-bar]');
+  if (row) {
+    const i = +row.dataset.bar, f = t.dataset.field;
+    S.bars[i][f] = t.value.trim(); S.serialsChecked = false;
+    const pos = t.selectionStart, top = $('#rows').scrollTop; render();
+    $('#rows').scrollTop = top;
+    const n = document.querySelector(`[data-bar="${i}"] [data-field="${f}"]`); if (n) { n.focus(); n.setSelectionRange(pos, pos); }
+  }
+});
+// Document → line (D2): clicking a serial in the bar list focuses that bar on the right.
+function pickBar(e) {
+  const r = $('#sheet').getBoundingClientRect(), k = r.width / DOC_W;
+  const x = (e.clientX - r.left) / k, y = (e.clientY - r.top) / k;
+  const docRow = Math.floor((y - ROW.top) / ROW.h);
+  if (x < 79 || x > 364 || docRow < 0 || docRow >= 50) return;
+  const i = S.bars.findIndex(b => b.docRow === docRow);
+  if (i < 0) { toast(`Bar ${docRow + 1} in the document was removed from the list.`); return; }
+  focusBar(i);
+}
+function focusBar(i) {
+  if (!document.querySelector(`[data-bar="${i}"]`)) { S.showAll = true; render(); }
+  const row = document.querySelector(`[data-bar="${i}"]`), rows = $('#rows');
+  rows.scrollTop += row.getBoundingClientRect().top - rows.getBoundingClientRect().top - rows.clientHeight / 2 + row.offsetHeight / 2;
+  row.querySelector('[data-field="serial"]').focus({ preventScroll: true });
+}
+// Line → document: hovering or focusing a checked line zooms to where it was read (D1a-h, D2).
+// IS2a: clicking a line toggles a 200% view of where it was read.
+function showSource(key) {
+  S.hot = S.hot?.key === key ? null : { key, box: SRC[key][0] }; S.zoom = S.hot ? 2 : 1;
+  render(); document.querySelector(`[data-src="${key}"]`)?.focus();
+}
+function setHot(next) {
+  if (S.screen !== 'D1a' && S.screen !== 'D2') return;
+  const same = (S.hot && next && S.hot.key === next.key && S.hot.i === next.i) || (!S.hot && !next);
+  if (same) return;
+  S.hot = next; S.zoom = next ? 2 : 1;
+  // Re-render only the document and the row highlight so inputs keep focus.
+  const vpCard = $('#vp')?.closest('section'); if (!vpCard) return;
+  const key = S.screen === 'D2' ? 'bars' : 'receipt';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = docViewer(key, next ? [[next.box]] : S.screen === 'D2' ? [[BOX.serials, true]] : []);
+  vpCard.replaceWith(tmp.firstElementChild);
+  document.querySelectorAll('[data-hover]').forEach(el => el.classList.toggle('hot', !!next && el.dataset.hover === next.key));
+  document.querySelectorAll('[data-bar]').forEach(el => el.classList.toggle('hot', !!next && +el.dataset.bar === next.i));
+  placeView();
+}
+function hotFrom(el) {
+  if (!el) return null;
+  const h = el.closest('[data-hover]');
+  if (h && h.dataset.hover && S.screen === 'D1a') return { key: h.dataset.hover, box: RECEIPT_ROWS[h.dataset.hover] };
+  const r = el.closest('[data-bar]');
+  if (r && S.screen === 'D2') { const b = S.bars[+r.dataset.bar]; return b.docRow == null ? null : { key: 'bar' + r.dataset.bar, i: +r.dataset.bar, box: rowBox(b.docRow) }; }
+  return null;
+}
+document.addEventListener('mouseover', e => { if (e.target.closest('main') && !e.target.closest('#vp')) setHot(hotFrom(e.target) || (document.activeElement && hotFrom(document.activeElement))); });
+document.addEventListener('focusin', e => setHot(hotFrom(e.target)));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && S.dialog) ACT.closeDialog();
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset?.act === 'openRequest') { e.preventDefault(); ACT.openRequest(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'drop') { e.preventDefault(); ACT.upload(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset?.src) { e.preventDefault(); showSource(e.target.dataset.src); }
+});
+['dragover', 'dragleave', 'drop'].forEach(ev => document.addEventListener(ev, e => {
+  const d = e.target.closest && e.target.closest('#drop'); if (!d) return;
+  e.preventDefault(); d.classList.toggle('over', ev === 'dragover'); if (ev === 'drop') ACT.upload();
+}));
+render();
+</script>
+</body>
+</html>
