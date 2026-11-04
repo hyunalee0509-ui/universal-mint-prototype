@@ -345,6 +345,7 @@ const totals = () => ({ oz: S.bars.reduce((s, b) => s + (Number(b.weight) || 0),
 console.assert((() => { const keep = S; reset(); const n = barIssues(); S = keep; return n === 2; })(), 'seeded bar list has exactly the 2 flagged bars');
 
 // ---------- pieces ----------
+const NAV_GO = { Requests: 'RQ', Tokens: 'IS0' };
 const isFlow = () => S.screen.startsWith('IS');
 function stepper(names, cur) {
   return `<div class="card steps ${names.length < 3 ? 'short' : ''}">` + names.map((n, i) => {
@@ -404,7 +405,7 @@ V.IS0 = () => `<a class="back link" style="color:var(--muted)">${ic('left', 'sty
     <div class="stat"><div class="k">RESERVE</div><div class="v">100%</div><div class="meter"></div><div class="d">5,000 oz at The Wyoming Reserve</div></div>
     <div class="stat"><div class="k">INVESTORS</div><div class="v">12</div><div class="d">have requested ASLV</div></div></div>
   <div class="two"><section class="card"><div class="chead" style="display:flex;justify-content:space-between"><div><h2>Status</h2><p>What needs a look on this token.</p></div><a class="link" style="font-size:13px">View as investor →</a></div>
-      ${kv('Requests in progress', '', false, '<span>3, <a class="link">View in Requests →</a></span>')}${kv('Waiting on you', '', false, '<span>1</span>')}${kv('Contract', '', false, '<span>0x8a3f…c21e</span>')}${kv('Last attestation', '', false, '<span>Oct 27, 2026</span>')}</section>
+      ${kv('Requests in progress', '', false, '<span>3, <a class="link" data-go="RQ">View in Requests →</a></span>')}${kv('Waiting on you', '', false, '<span>1</span>')}${kv('Contract', '', false, '<span>0x8a3f…c21e</span>')}${kv('Last attestation', '', false, '<span>Oct 27, 2026</span>')}</section>
     <section class="card"><div class="chead"><h2>Recent disclosures</h2><p>Published notices for ASLV holders.</p></div>
       ${[['Reserve attestation, Oct 2026', 'Published Oct 27'], ['Redemption fee updated to 0.5%', 'Published Oct 20'], ['Custody account renewed: VAU079', 'Published Oct 11']].map(([t, d]) => `<div class="doc-row">${ic('file', 'style="color:var(--faint)"')}<span class="t">${t}</span><span class="d">${d}</span></div>`).join('')}</section></div>`;
 
@@ -544,7 +545,7 @@ function render() {
   $('#me').innerHTML = `<span class="av">${u[0]}</span><div><div class="n">${u[1]}</div><div class="e">${u[2]}</div></div><svg class="i" viewBox="0 0 24 24" style="color:var(--faint);width:14px"><path d="m6 9 6 6 6-6"/></svg>`;
   const active = isFlow() ? 'Tokens' : 'Requests';
   $('#nav').innerHTML = [['home', 'Home'], ['inbox', 'Requests', 4], ['coins', 'Tokens'], ['megaphone', 'Disclosures']]
-    .map(([i, n, c]) => `<div class="nav ${n === active ? 'on' : ''}" ${n === 'Requests' && !isFlow() ? 'data-go="RQ" style="cursor:pointer"' : ''}>${ic(i)}${n}${c ? `<span class="cnt">${c}</span>` : ''}</div>`).join('');
+    .map(([i, n, c]) => `<div class="nav ${n === active ? 'on' : ''}" ${NAV_GO[n] ? `data-go="${NAV_GO[n]}" style="cursor:pointer"` : ''}>${ic(i)}${n}${c ? `<span class="cnt">${c}</span>` : ''}</div>`).join('');
   if (sc === 'IS5b' && !S.dialog) S.dialog = 'propose';
   $('#main').innerHTML = V[sc]();
   placeView();
