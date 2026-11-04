@@ -72,7 +72,7 @@
   .foot { display: flex; align-items: center; gap: 12px; padding: 18px 24px 22px; margin-top: auto; }
   .foot .sp { flex: 1; }
   .foot .note { color: var(--muted); font-size: 13px; }
-  .btn { height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface); cursor: pointer; font-weight: 500; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; }
+  .btn { height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface); cursor: pointer; font-weight: 500; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
   .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
   .btn.primary:disabled { background: var(--brand-disabled); border-color: var(--brand-disabled); cursor: not-allowed; }
   .btn:focus-visible, .link:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
@@ -211,6 +211,50 @@
   .rq.head { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .04em; padding-top: 10px; padding-bottom: 10px; }
   .rq.open { cursor: pointer; } .rq.open:hover { background: var(--brand-soft); }
   .rq .d { color: var(--muted); font-size: 12px; }
+  /* redeem request */
+  .bigamt { margin: 0 24px; display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--brand); border-radius: 10px; padding: 0 16px; height: 62px; }
+  .bigamt.bad { border-color: var(--critical); }
+  .bigamt input { border: 0; outline: 0; font: 600 30px "DM Sans", sans-serif; width: 110px; background: none; }
+  .bigamt .u { color: var(--muted); } .bigamt .eq { margin-left: auto; color: var(--muted); font-size: 13px; }
+  .qchips { display: flex; gap: 8px; margin: 14px 24px 10px; }
+  .qchip { height: 32px; padding: 0 14px; border: 1px solid var(--border); border-radius: 8px; background: #fff; cursor: pointer; font: inherit; font-size: 13px; }
+  .qchip.on { border-color: var(--brand); background: var(--brand-soft); font-weight: 600; }
+  .hint { margin: 0 24px; color: var(--muted); font-size: 12px; } .hint.err { color: var(--critical); }
+  .ship { margin: 0 16px 16px; background: #fff; border-radius: 8px; padding: 6px 14px; }
+  .ship div { display: grid; grid-template-columns: 90px 1fr auto; gap: 10px; padding: 6px 0; font-size: 13px; } .ship .k { color: var(--muted); }
+  /* call confirmation */
+  .callinfo { margin: 16px; padding: 14px 16px; border-radius: 10px; background: var(--sunken); display: flex; gap: 14px; font-size: 13px; }
+  .callinfo .t { font-weight: 600; } .callinfo .d { color: var(--muted); margin: 2px 0 4px; }
+  .waveic { width: 48px; height: 48px; flex: none; background: #fff; border: 1px solid var(--border); border-radius: 6px; display: grid; place-items: center; color: var(--faint); }
+  .player { margin: 12px; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .player .pt { display: flex; gap: 10px; align-items: center; } .player .pt .f { flex: 1; } .player .pt .d { color: var(--muted); font-size: 12px; }
+  .play { width: 30px; height: 30px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; border: 0; flex: none; }
+  .wave { position: relative; display: flex; align-items: center; gap: 3px; height: 56px; margin: 30px 0 8px; }
+  .wave i { flex: 1; background: #d4d7dc; border-radius: 2px; } .wave i.p { background: var(--brand); }
+  .wmk { position: absolute; top: -26px; transform: translateX(-50%); width: 18px; height: 18px; border-radius: 50%; background: var(--brand); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; border: 0; cursor: pointer; padding: 0; }
+  .wmk.bad { background: var(--critical); } .wmk.off { background: var(--border-strong); }
+  .times { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .callkv { margin: 0 12px 12px; background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .callkv .kv:first-child { border-top: 0; }
+  .chead.split { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .counter { font-size: 12px; color: var(--muted); white-space: nowrap; } .counter.bad { color: var(--critical); }
+  .ci { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 12px 0; margin: 0 24px; border-top: 1px solid var(--border); }
+  .ci .t { font-weight: 600; font-size: 14px; } .ci .d { color: var(--muted); font-size: 12px; }
+  .ci.off .t { color: var(--faint); } .ci.off .d { color: var(--faint); }
+  .seg { display: inline-flex; background: var(--sunken); border-radius: 6px; padding: 2px; }
+  .seg button { border: 0; background: none; padding: 5px 10px; font: inherit; font-size: 12px; color: var(--muted); border-radius: 5px; cursor: pointer; }
+  .seg button.m { background: var(--positive-soft); color: var(--positive); font-weight: 600; }
+  .seg button.d { background: var(--attention-soft); color: var(--critical); font-weight: 600; }
+  .seg button:disabled { cursor: not-allowed; color: var(--faint); }
+  .tchip { font: 12px "DM Mono", monospace; background: var(--brand-soft); color: var(--brand); border: 0; border-radius: 5px; padding: 3px 7px; cursor: pointer; }
+  .warnbox { margin: 16px 24px 0; padding: 14px 16px; background: var(--attention-soft); border-radius: 10px; font-size: 13px; }
+  .warnbox .t { font-weight: 600; } .warnbox p { color: var(--muted); margin: 4px 0 10px; }
+  .warnbox input { width: 100%; height: 36px; border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; font: inherit; }
+  .fee { margin: 16px 24px 0; } .fee .l { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+  .feebox { display: flex; align-items: center; border: 1px solid var(--border-strong); border-radius: 8px; height: 40px; padding: 0 12px; }
+  .feebox input { flex: 1; border: 0; outline: 0; font: inherit; background: none; } .feebox span { color: var(--muted); font-size: 12px; }
+  .fee .h { color: var(--muted); font-size: 12px; margin-top: 6px; } .fee.off .l, .fee.off input { color: var(--faint); }
+  .btn.danger { color: var(--critical); } .btn.danger.primary { background: var(--critical); border-color: var(--critical); color: #fff; }
   .doc-row .t { flex: 1; } .doc-row .d { color: var(--muted); font-size: 12px; }
 
   .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #23272e; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13px; z-index: 30; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
@@ -230,7 +274,7 @@
 </header>
 <div class="panel">
   <aside>
-    <div class="org"><span class="mono"><svg class="i" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></svg></span>
+    <div class="org" id="org"><span class="mono"><svg class="i" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></svg></span>
       <div style="flex:1"><div class="n">Ault Global Commodities</div><div class="h">Issuer</div></div>
       <svg class="i" viewBox="0 0 24 24" style="color:var(--faint);width:14px"><path d="m6 9 6 6 6-6"/></svg></div>
     <nav id="nav"></nav>
@@ -253,11 +297,12 @@ const ICON = {
   file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>',
   wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
   key: '<path d="M2.59 18.41A2 2 0 0 0 2 19.83V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.17a2 2 0 0 0 1.42-.59l.81-.81a6.5 6.5 0 1 0-4.24-4.24z"/><circle cx="16.5" cy="7.5" r=".5"/>',
+  wave: '<path d="M3 12h1M7 8v8M11 5v14M15 9v6M19 7v10M22 12h-1"/>',
   left: '<path d="m12 19-7-7 7-7M19 12H5"/>',
 };
 const ic = (n, s = '') => `<svg class="i" viewBox="0 0 24 24" ${s}>${ICON[n]}</svg>`;
 
-const USERS = { juya: ['JU', 'Juya Kim', 'juya.k@bharvest.io'], jason: ['JL', 'Jason Lee', 'jason.l@bharvest.io'] };
+const USERS = { juya: ['JU', 'Juya Kim', 'juya.k@bharvest.io'], jason: ['JL', 'Jason Lee', 'jason.l@bharvest.io'], daniel: ['DC', 'Daniel Cho', 'daniel.cho@aultglobal.io'] };
 const WALLETS = [['Ault Silver bars', '0x41e…77c3'], ['Ault operations', '0x9b0…12fa']];
 
 // Documents are 1236×1600 renders; boxes are [x, y, w, h] in those pixels (from the Figma drafts).
@@ -281,6 +326,7 @@ const rowBox = docRow => [79, ROW.top + docRow * ROW.h - 2, 285, ROW.h + 4];
 const FIRST = 26074533;
 const freshBars = () => Array.from({ length: 50 }, (_, i) => ({ serial: String(FIRST + i), weight: '100.0', docRow: i, flagged: false }));
 
+// Redeem (Figma section 2188:169031): investor request RD2 to RD4, then the Account Manager's call check RC1, RC2, RC1x.
 const SCREENS = [
   ['IS0', '토큰 상세 · Issue 시작', '헤더 Issue 버튼으로 시작'],
   ['IS1', '약관 (처음 발행만)', '필수 조항을 체크해야 진행', '확인 필요: 매번인지 토큰별 1회인지 (Q2)'],
@@ -289,10 +335,16 @@ const SCREENS = [
   ['IS3', 'Recipient · treasury', '고른 행만 펼침, 기본은 treasury 기본 지갑', '확인 필요: 투자자 지갑 발행의 목적·빈도 (Q5)'],
   ['IS4', 'Review', '제출 전 검토. 수정은 각 단계로'],
   ['IS5b', '제출 · 조직 승인 제안', '승인이 더 필요하면 제안만 접수, 요청은 승인 후 생성', '확인 필요: 같은 조직 내부 승인 필요 여부 (Q3)'],
-  ['RQ', 'Requests · 운영자 진입', '피그마에 없음. 승인된 요청은 운영자 Requests 목록에 뜨고, ISS-0012 행을 눌러 입고 확인으로 들어감'],
+  ['RQ', 'Requests · 운영자 진입', '피그마에 없음. 운영자 Requests 목록. ISS-0012는 입고 확인(D1), RED-0003은 통화 확인(RC1)으로 들어감'],
   ['D1', '입고 확인 · 확인서 올리기 전', '체크 항목은 업로드 후 활성'],
   ['D1a', '입고 확인 · 확인서 올린 뒤', '확인서를 올리면 체크 항목 활성. 줄에 hover하면 그 위치로 약 200% 확대 + 테두리 강조 (D1a-h)'],
   ['D2', '입고 확인 · 바 목록과 확정', '확인 항목을 위로, 표는 50개 전체를 기본으로 보여줌. 왼쪽 문서의 시리얼을 누르면 오른쪽 해당 바로 포커스', '확인 필요: 입고 확인과 승인 연속 처리 (Q27), 판독 표시 (Q33)'],
+  ['RD2', '상환 신청 · Amount', 'Tokens의 토큰 상세에서 Redeem 버튼으로 시작. Issue와 같은 전체 페이지 단계(Amount → Delivery → Review)'],
+  ['RD3', '상환 신청 · Delivery', 'FedEx 배송 또는 보관소 이전. 오른쪽 요약에 연락처'],
+  ['RD4', '상환 신청 · Review', '제출 뒤 순서를 안내(통화 확인 → 토큰·수수료 보내기 → 배송)'],
+  ['RC1', '통화 확인 · 녹음 올리기 전', 'Requests의 RED-0003에서 진입. 왼쪽 근거, 오른쪽 대조. 통화 일정(Call time) 추가', '확인 필요: 일정 기록·알림 신규 개발 (Q32), 녹음 한도·체크 저장 (Q13)'],
+  ['RC2', '통화 확인 · 모두 일치, 서명', '파형 위 번호로 대조, 4 of 4 marked. 통화 정보 카드 추가', '확인 필요: 수수료 확정 시점 (Q11)'],
+  ['RC1x', '통화 확인 · 다른 답, 중단', '일치한 항목은 한 줄로 접고 다른 항목만 펼침', '확인 필요: Halt 허용 (Q13)'],
 ];
 
 // ---------- state ----------
@@ -304,7 +356,8 @@ function reset() {
   bars[30].serial = '26074562'; bars[30].flagged = true;
   S = { screen: 'IS0', terms: [false, false, false], transfer: false, recipient: 'treasury', wallet: 0, walletList: false,
         investor: '', dialog: null, receipt: false, checks: { sent: false, recv: false }, bars, showAll: true,
-        weightChecked: true, serialsChecked: false, confirmed: false, zoom: 1, hot: null, toast: null };
+        weightChecked: true, serialsChecked: false, confirmed: false, zoom: 1, hot: null, toast: null, via: 'issue',
+        red: { amount: '500', delivery: 'fedex', recording: false, marks: [null, null, null, null], fee: '25', note: '', t: 96, status: 'Waiting on call' } };
 }
 reset();
 
@@ -313,6 +366,8 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 
 function go(screen, extra = {}) {
   Object.assign(S, { screen, zoom: 1, hot: null, walletList: false }, extra);
+  if (screen.startsWith('RC') && rcScreen() !== screen) setCallState(screen);
+  if (screen.startsWith('RC')) S.via = 'redeem';
   if (screen === 'IS2a' || screen === 'IS3' || screen === 'IS4') S.transfer = true;
   if (screen === 'D1a' || screen === 'D2') S.receipt = true;
   if (screen === 'D2') S.checks = { sent: true, recv: true };
@@ -346,7 +401,8 @@ console.assert((() => { const keep = S; reset(); const n = barIssues(); S = keep
 
 // ---------- pieces ----------
 const NAV_GO = { Requests: 'RQ', Tokens: 'IS0' };
-const isFlow = () => S.screen.startsWith('IS');
+const isFlow = () => S.screen.startsWith('IS') || S.screen.startsWith('RD');
+const who = () => S.screen.startsWith('RD') ? 'juya' : S.screen.startsWith('IS') ? 'juya' : S.screen.startsWith('RC') || (S.screen === 'RQ' && S.via === 'redeem') ? 'daniel' : 'jason';
 function stepper(names, cur) {
   return `<div class="card steps ${names.length < 3 ? 'short' : ''}">` + names.map((n, i) => {
     const st = i < cur ? 'done' : i === cur ? 'cur' : '';
@@ -399,7 +455,7 @@ function placeView() {
 const V = {};
 V.IS0 = () => `<a class="back link" style="color:var(--muted)">${ic('left', 'style="width:14px"')}Tokens</a>
   <div class="thead"><span class="tok"></span><div class="t"><h1>Ault Silver</h1><div class="chips"><span class="badge pos">Active</span><span class="badge">Silver</span><span class="badge">Ethereum</span><span class="badge">Permissioned ERC-20</span></div></div>
-    <button class="btn">${ic('upload')}Redeem</button><button class="btn primary" data-go="IS1">${ic('download')}Issue</button></div>
+    <button class="btn" data-go="RD2">${ic('upload')}Redeem</button><button class="btn primary" data-go="IS1">${ic('download')}Issue</button></div>
   <div class="tabs"><span class="on">Overview</span><span>Investors</span><span>Reserve</span><span>Disclosures</span><span>Settings</span></div>
   <div class="card stats"><div class="stat"><div class="k">SUPPLY</div><div class="v">5,000</div><div class="d">ASLV circulating</div></div>
     <div class="stat"><div class="k">RESERVE</div><div class="v">100%</div><div class="meter"></div><div class="d">5,000 oz at The Wyoming Reserve</div></div>
@@ -460,20 +516,121 @@ V.IS4 = () => issueHead() + stepper(['Terms', 'Amount', 'Recipient', 'Review'], 
     ${footBtns('', 'IS3', '', true, 'submit')}</section>${afterSubmit()}</div>`;
 V.IS5b = V.IS4;
 
+// ---------- redeem ----------
+const fmt = n => Number(n || 0).toLocaleString('en-US');
+const amtOk = () => /^\d+$/.test(S.red.amount) && +S.red.amount >= 100 && +S.red.amount <= 1200 && +S.red.amount % 100 === 0;
+const fedex = () => S.red.delivery === 'fedex';
+const ADDRESS = '221 Pine St, Cheyenne, WY', PHONE = '+1 307 555 0142';
+const redeemHead = () => `<a class="back link" data-go="IS0">${ic('left', 'style="width:14px"')}Ault Silver</a>
+  <div class="phead"><span class="tok"></span><div><h1>Redeem Ault Silver</h1><div class="sub">ASLV, you hold 1,250</div></div></div>`;
+const thisRedeem = step => `<section class="card"><div class="over">This request</div>
+  ${kv('Token', 'Ault Silver (ASLV)')}${kv('Amount', amtOk() ? `${fmt(S.red.amount)} ASLV (${fmt(S.red.amount)} oz)` : 'Enter an amount', !amtOk())}
+  ${kv('Delivery', step < 1 ? 'Next step' : fedex() ? 'FedEx to Cheyenne, WY' : 'Custody transfer', step < 1)}${step >= 1 && fedex() ? kv('Phone', PHONE) : ''}</section>`;
+
+V.RD2 = () => {
+  const ok = amtOk();
+  return redeemHead() + stepper(['Amount', 'Delivery', 'Review'], 0) + `<div class="cols side">
+  <section class="card stack"><div class="chead"><h2>How much do you want to redeem?</h2></div>
+    <label class="bigamt ${ok || !S.red.amount ? '' : 'bad'}"><input id="ramt" inputmode="numeric" value="${esc(S.red.amount)}" aria-label="Amount in ASLV"><span class="u">ASLV</span><span class="eq">${ok ? `= ${fmt(S.red.amount)} oz of silver` : ''}</span></label>
+    <div class="qchips">${[100, 500, 1000, 1200].map(v => `<button class="qchip ${+S.red.amount === v ? 'on' : ''}" data-act="redAmt" data-v="${v}">${v === 1200 ? 'Max 1,200' : fmt(v)}</button>`).join('')}</div>
+    <div class="hint ${ok || !S.red.amount ? '' : 'err'}">${ok || !S.red.amount ? 'In steps of 100 ASLV. You hold 1,250.' : 'Use steps of 100 ASLV, up to 1,200.'}</div>
+    ${footBtns('', '', 'RD3', ok)}</section>${thisRedeem(0)}</div>`;
+};
+V.RD3 = () => redeemHead() + stepper(['Amount', 'Delivery', 'Review'], 1) + `<div class="cols side">
+  <section class="card stack"><div class="chead"><h2>How do you want to get it?</h2></div>
+    <div class="opt ${fedex() ? 'on' : ''}" data-deliv="fedex"><div class="top"><input type="radio" name="dl" ${fedex() ? 'checked' : ''} aria-label="FedEx delivery"><div><div class="t">FedEx delivery</div><div class="d">Insured bars shipped to you. Someone signs on arrival.</div></div></div>
+      ${fedex() ? `<div class="ship"><div><span class="k">Ships to</span><span>${ADDRESS}</span><button class="link" data-act="changeAddress">Change</button></div>
+        <div><span class="k">Arrives</span><span>5–7 business days after your call</span><span></span></div>
+        <div><span class="k">You get</span><span>Whole bars. Exact weight is set when they are picked.</span><span></span></div></div>` : ''}</div>
+    <div class="opt ${fedex() ? '' : 'on'}" data-deliv="custody"><div class="top"><input type="radio" name="dl" ${fedex() ? '' : 'checked'} aria-label="Custody transfer"><div><div class="t">Custody transfer</div><div class="d">Moved to your account at a vault. Nothing ships.</div></div></div></div>
+    ${footBtns('', 'RD2', 'RD4')}</section>${thisRedeem(1)}</div>`;
+V.RD4 = () => redeemHead() + stepper(['Amount', 'Delivery', 'Review'], 2) + `<div class="cols side">
+  <section class="card stack"><div class="chead"><h2>Redeem ${fmt(S.red.amount)} ASLV by ${fedex() ? 'FedEx delivery' : 'custody transfer'}</h2></div>
+    ${kv('Token', 'Ault Silver (ASLV)')}${kv('Amount', `${fmt(S.red.amount)} ASLV, ${fmt(S.red.amount)} oz of silver`, false, '<button class="link" data-go="RD2">Edit</button>')}
+    ${kv('Delivery', fedex() ? `FedEx to ${ADDRESS}` : 'Custody transfer to your vault account', false, '<button class="link" data-go="RD3">Edit</button>')}
+    ${kv('Send from', 'Personal wallet 0x3B9e…71aC')}${kv('Fee', 'Set on the call with your Account Manager')}
+    <div class="foot"><a class="link" data-go="IS0">Cancel</a><span class="sp"></span><button class="btn" data-go="RD3">Back</button><button class="btn primary" data-act="redeemSubmit">Submit request</button></div></section>
+  <section class="card"><div class="over">After you submit</div>
+  ${[['Call to confirm', 'Daniel Cho'], ['Send tokens and fee', 'You'], [fedex() ? 'Shipping and delivery' : 'Custody transfer', fedex() ? 'Ault, FedEx' : 'Ault, vault']].map(([t, b], i) => `<div class="seq"><span class="m">${i + 1}</span><span class="t">${t}</span><span class="badge">${b}</span></div>`).join('')}</section></div>`;
+
+// The call check is one screen in three states; S.screen follows the state (RC1 before the recording, RC1x once anything differs).
+const CALL_LEN = 402;
+const callItems = () => [
+  ['Investor identity', 'Juya Kim, KYC verified', 42, 'identity'],
+  ['Redemption amount', `Burn ${fmt(S.red.amount)} ASLV`, 96, 'amount'],
+  ['Delivery method', fedex() ? 'FedEx delivery' : 'Custody transfer', 130, 'delivery method'],
+  ['Delivery destination', fedex() ? ADDRESS : 'Your vault account', 171, 'destination'],
+];
+const rcScreen = () => !S.red.recording ? 'RC1' : S.red.marks.includes('d') ? 'RC1x' : 'RC2';
+function setCallState(screen) {
+  const r = S.red;
+  r.recording = screen !== 'RC1';
+  r.marks = screen === 'RC2' ? ['m', 'm', 'm', 'm'] : screen === 'RC1x' ? ['m', 'm', 'm', 'd'] : [null, null, null, null];
+  r.note = screen === 'RC1x' ? 'Investor now wants delivery to 18 Elm Rd, Laramie, WY' : '';
+  r.t = screen === 'RC1x' ? 308 : 96;
+}
+const mmss = t => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+const WAVE = Array.from({ length: 52 }, (_, i) => 18 + Math.round(Math.abs(Math.sin(i * 1.7) * 26 + Math.cos(i * 0.6) * 12)));
+const seg = (i, rec) => `<span class="seg">${[['m', '✓ Matches', 'Matches'], ['d', 'Different', 'Different']].map(([v, on, off]) =>
+  `<button class="${S.red.marks[i] === v ? v : ''}" data-act="mark" data-i="${i}" data-v="${v}" ${rec ? '' : 'disabled'}>${S.red.marks[i] === v ? on : off}</button>`).join('')}</span>`;
+V.RC1 = V.RC2 = V.RC1x = () => {
+  const r = S.red, rec = r.recording, items = callItems();
+  const marked = r.marks.filter(Boolean).length, diff = r.marks.map((m, i) => m === 'd' ? i : -1).filter(i => i >= 0);
+  const left = !rec ? `<section class="card"><div class="docbar"><span>Call recording</span></div>
+      <div class="callinfo"><span class="waveic">${ic('wave')}</span><div><div class="t">Call Juya Kim at ${PHONE}</div>
+        <div class="d">Go through the 4 items on the right and quote the ${esc(r.fee || '25')} USDT fee. Record the whole call.</div>
+        <div><span style="color:var(--muted)">Scheduled</span> <b style="font-weight:600">Wed, Nov 5, 10:00 MT</b> <button class="link" data-act="reschedule">Change</button></div>
+        <button class="link" data-act="copyScript" style="margin-top:4px">Copy the call script</button></div></div>
+      <div class="drop" tabindex="0" role="button" data-act="upload" id="drop"><span class="up">${ic('upload')}</span>
+        <span class="t">Drop the recording here or browse</span><span class="d">MP3, M4A or MP4 up to 50 MB</span>
+        <span class="p">Recorded on Google Meet? <button class="link" data-act="meet">Download it from Drive, then drop it here</button></span></div></section>`
+    : `<section class="card" style="background:var(--shell)"><div class="docbar" style="background:#fff;border-radius:12px 12px 0 0"><span>Call recording</span><button class="link" data-act="replaceRecording">Replace</button></div>
+      <div class="player"><div class="pt"><span class="play">▶</span><div class="f"><div style="font-weight:600">Call_JuyaKim_20Oct.m4a</div><div class="d">6:42, 8.1 MB, uploaded today at 10:05</div></div><span class="badge pos">Sealed</span></div>
+        <div class="wave">${WAVE.map((h, i) => `<i class="${i / WAVE.length < r.t / CALL_LEN ? 'p' : ''}" style="height:${h}px"></i>`).join('')}
+          ${items.map(([n, , t], i) => `<button class="wmk ${r.marks[i] === 'd' ? 'bad' : r.marks[i] ? '' : 'off'}" style="left:${t / CALL_LEN * 100}%" data-act="seek" data-t="${t}" aria-label="Item ${i + 1}, ${n}, at ${mmss(t)}">${i + 1}</button>`).join('')}</div>
+        <div class="times"><span>${mmss(r.t)}</span><span>06:42</span></div></div>
+      <div class="callkv">${kv('Call time', 'Wed, Nov 5, 10:00 MT')}${kv('Called', `Juya Kim, ${PHONE}`)}${kv('Recorded by', 'Daniel Cho')}</div></section>`;
+  const row = i => { const [n, d, t] = items[i];
+    return `<div class="ci ${rec ? '' : 'off'}"><div><div class="t">${n}</div><div class="d">${esc(d)}</div></div>${rec ? `<button class="tchip" data-act="seek" data-t="${t}">${mmss(t)}</button>` : '<span></span>'}${seg(i, rec)}</div>`; };
+  let rows;
+  if (diff.length) {
+    const ok = r.marks.map((m, i) => m === 'm' ? i : -1).filter(i => i >= 0);
+    const rest = r.marks.map((m, i) => m !== 'm' ? i : -1).filter(i => i >= 0);
+    const names = ok.map(i => items[i][3]); if (names.length) names[0] = names[0][0].toUpperCase() + names[0].slice(1);
+    rows = (ok.length ? `<div class="ci"><div><div class="t">${ok.length} item${ok.length > 1 ? 's' : ''} match</div><div class="d">${names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names.at(-1) : names[0]}</div></div><span></span>
+        <span class="seg"><button class="m" data-act="unfold">✓ Matches</button><button disabled>Different</button></span></div>` : '') + rest.map(row).join('') +
+      `<div class="warnbox"><div class="t">Juya Kim gave a different ${items[diff[0]][3]} on the call</div>
+        <p>You can't change the investor's request. Halt it so Juya Kim can submit a new one. No tokens have moved yet.</p>
+        <input id="rnote" value="${esc(r.note)}" placeholder="What did Juya Kim say?" aria-label="What Juya Kim said"></div>`;
+  } else rows = items.map((_, i) => row(i)).join('') + `<div class="fee ${rec ? '' : 'off'}"><div class="l">Redemption fee</div>
+      <label class="feebox"><input id="rfee" inputmode="decimal" value="${esc(r.fee)}" ${rec ? '' : 'disabled'} aria-label="Redemption fee in USDT"><span>USDT</span></label>
+      <div class="h">Quote it on the call. Change it only if you agreed a different fee.</div></div>`;
+  const feeOk = Number(r.fee) > 0, ready = rec && marked === 4 && !diff.length && feeOk;
+  const note = !rec ? 'Upload the recording to mark these.' : diff.length ? 'Halting closes RED-0003 and tells Juya Kim why.' : ready ? 'All 4 match. Ready to sign.' : !feeOk && marked === 4 ? 'Enter the fee you quoted.' : `${4 - marked} left to mark.`;
+  const counter = !rec ? '' : diff.length ? `<span class="counter bad">${diff.length} different</span>` : `<span class="counter">${marked} of 4 marked</span>`;
+  return `<a class="back link" data-act="toRequests">${ic('left', 'style="width:14px"')}RED-0003</a>
+  <div class="phead"><span class="tok"></span><div><h1>Confirm on a call</h1><div class="sub">RED-0003, redeem ${fmt(r.amount)} ASLV for Juya Kim, ${fedex() ? 'FedEx delivery' : 'custody transfer'}</div></div></div>
+  ${stepper(['Call recording', 'Check and sign'], rec ? 1 : 0)}<div class="cols doc">${left}
+  <section class="card stack"><div class="chead split"><div><h2>What you confirmed on the call</h2><p>${rec ? 'Mark each one against the recording.' : 'These open once the recording is in.'}</p></div>${counter}</div>
+    ${rows}
+    <div class="foot"><span class="note">${note}</span><span class="sp"></span>${diff.length ? '<button class="btn danger primary" data-act="halt">Halt request</button>'
+      : `<button class="btn danger" data-act="halt">Halt request</button><button class="btn primary" data-act="rcSign" ${ready ? '' : 'disabled'}>Sign and confirm</button>`}</div></section></div>`;
+};
+
 // Not in Figma: the operator's way into D1. Only ISS-0012 is live in this prototype.
 V.RQ = () => {
   const rows = [
     ['ISS-0012', 'Ault Global Commodities', 'Issue', 'about 5,000 ASLV', S.confirmed ? 'Deposit confirmed' : 'Waiting on deposit', 'Nov 4, 2026', 1],
-    ['RDM-0008', 'Ault Global Commodities', 'Redeem', '200 ASLV', 'Waiting on payout', 'Nov 2, 2026'],
+    ['RED-0003', 'Juya Kim', 'Redeem', `${fmt(S.red.amount)} ASLV`, S.red.status, 'Nov 4, 2026', 2],
     ['ISS-0011', 'Northgate Metals', 'Issue', 'about 1,000 NGAU', 'Waiting on approval', 'Oct 30, 2026'],
     ['ISS-0010', 'Ault Global Commodities', 'Issue', '3,000 ASLV', 'Done', 'Oct 21, 2026'],
   ];
   return `<div class="phead"><div><h1>Requests</h1><div class="sub">Issue and redeem requests from issuers, newest first.</div></div></div>
   <section class="card"><div class="rq head"><span>ID</span><span>ISSUER</span><span>TYPE</span><span>AMOUNT</span><span>STATUS</span><span>RECEIVED</span><span></span></div>
-  ${rows.map(([id, who, type, amt, st, d, live]) => `<div class="rq ${live ? 'open' : ''}" ${live ? 'data-act="openRequest" tabindex="0" role="button"' : ''}>
+  ${rows.map(([id, who, type, amt, st, d, live]) => `<div class="rq ${live ? 'open' : ''}" ${live ? `data-act="${live === 2 ? 'openRedeem' : 'openRequest'}" tabindex="0" role="button"` : ''}>
     <span style="font-weight:600">${id}</span><span>${who}</span><span>${type}</span><span>${amt}</span>
-    <span><span class="badge ${st === 'Done' || st === 'Deposit confirmed' ? 'pos' : ''}">${st}</span></span><span class="d">${d}</span>
-    <span>${live && !S.confirmed ? '<span class="link" style="font-size:13px">Confirm deposit →</span>' : ''}</span></div>`).join('')}</section>`;
+    <span><span class="badge ${['Done', 'Deposit confirmed', 'Waiting on tokens'].includes(st) ? 'pos' : ''}">${st}</span></span><span class="d">${d}</span>
+    <span>${live === 1 && !S.confirmed ? '<span class="link" style="font-size:13px">Confirm deposit →</span>' : live === 2 && S.red.status === 'Waiting on call' ? '<span class="link" style="font-size:13px">Confirm on a call →</span>' : ''}</span></div>`).join('')}</section>`;
 };
 
 V.D1 = () => depositHead() + stepper(['Deposit receipt', 'Bar list'], 0) + `<div class="cols doc">
@@ -537,14 +694,17 @@ function barRow(i) {
 
 // ---------- render ----------
 function render() {
+  if (S.screen.startsWith('RC')) S.screen = rcScreen();
   const sc = S.screen;
   const meta = SCREENS.find(s => s[0] === sc);
-  $('#proto').innerHTML = `<span style="color:#fff;font-weight:600">Issue flow</span><span class="chips">${SCREENS.map(s => `<button class="chip ${s[0] === sc ? 'on' : ''}" data-go="${s[0]}">${s[0]}</button>`).join('')}</span>
+  $('#proto').innerHTML = `<span style="color:#fff;font-weight:600">Issue and Redeem</span><span class="chips">${SCREENS.map(s => `<button class="chip ${s[0] === sc ? 'on' : ''}" data-go="${s[0]}">${s[0]}</button>`).join('')}</span>
     <span class="cap"><b>${meta[0]} ${meta[1]}</b>${meta[2]}${meta[3] ? ` <span class="q">${meta[3]}</span>` : ''}</span><button class="chip" data-act="restart">Restart</button>`;
-  const u = USERS[isFlow() ? 'juya' : 'jason'];
+  const u = USERS[who()], personal = sc.startsWith('RD');
+  $('#org').querySelector('.n').textContent = personal ? 'Juya Kim' : 'Ault Global Commodities';
+  $('#org').querySelector('.h').textContent = personal ? 'Personal' : 'Issuer';
   $('#me').innerHTML = `<span class="av">${u[0]}</span><div><div class="n">${u[1]}</div><div class="e">${u[2]}</div></div><svg class="i" viewBox="0 0 24 24" style="color:var(--faint);width:14px"><path d="m6 9 6 6 6-6"/></svg>`;
   const active = isFlow() ? 'Tokens' : 'Requests';
-  $('#nav').innerHTML = [['home', 'Home'], ['inbox', 'Requests', 4], ['coins', 'Tokens'], ['megaphone', 'Disclosures']]
+  $('#nav').innerHTML = [['home', 'Home'], ['inbox', 'Requests', personal ? 1 : 4], ['coins', 'Tokens'], ['megaphone', 'Disclosures']]
     .map(([i, n, c]) => `<div class="nav ${n === active ? 'on' : ''}" ${NAV_GO[n] ? `data-go="${NAV_GO[n]}" style="cursor:pointer"` : ''}>${ic(i)}${n}${c ? `<span class="cnt">${c}</span>` : ''}</div>`).join('');
   if (sc === 'IS5b' && !S.dialog) S.dialog = 'propose';
   $('#main').innerHTML = V[sc]();
@@ -572,8 +732,22 @@ const EMAILS = {
 const ACT = {
   restart: () => { reset(); render(); },
   toRequests: () => go('RQ'),
-  openRequest: () => go(S.confirmed ? 'D2' : 'D1', S.confirmed ? {} : { receipt: false }),
-  upload: () => { if (S.screen === 'IS2') go('IS2a'); else if (S.screen === 'D1') go('D1a', { checks: { sent: false, recv: false } }); },
+  openRedeem: () => go(rcScreen()),
+  redAmt: el => { S.red.amount = el.dataset.v; render(); },
+  changeAddress: () => toast('Address changes are outside this prototype.'),
+  redeemSubmit: () => { Object.assign(S.red, { status: 'Waiting on call' }); setCallState('RC1'); go('RQ', { via: 'redeem' }); toast('Request sent. Showing what Daniel Cho, your Account Manager, sees.'); },
+  reschedule: () => toast('Rescheduling is outside this prototype.'),
+  meet: () => toast('Opens Google Drive. Outside this prototype.'),
+  copyScript: () => { try { navigator.clipboard.writeText(callItems().map(([n, d], i) => `${i + 1}. ${n}: ${d}`).join('\n') + `\nFee: ${S.red.fee} USDT`); } catch (e) {} toast('Call script copied.'); },
+  replaceRecording: () => { setCallState('RC1'); render(); },
+  seek: el => { S.red.t = +el.dataset.t; render(); },
+  mark: el => { const i = +el.dataset.i, v = el.dataset.v; S.red.marks[i] = S.red.marks[i] === v ? null : v; S.red.t = callItems()[i][2]; render(); },
+  unfold: () => { S.red.marks = S.red.marks.map(m => m === 'm' ? null : m); render(); },
+  halt: () => { S.red.status = 'Halted'; go('RQ', { via: 'redeem' }); toast('RED-0003 halted. Juya Kim was told why.'); },
+  rcSign: () => { S.red.status = 'Waiting on tokens'; go('RQ', { via: 'redeem' }); toast(`Signed. Juya Kim is asked to send ${fmt(S.red.amount)} ASLV and the ${S.red.fee} USDT fee.`); },
+  openRequest: () => (S.via = 'issue') && go(S.confirmed ? 'D2' : 'D1', S.confirmed ? {} : { receipt: false }),
+  upload: () => { if (S.screen === 'RC1') { S.red.recording = true; render(); return; }
+    if (S.screen === 'IS2') go('IS2a'); else if (S.screen === 'D1') go('D1a', { checks: { sent: false, recv: false } }); },
   replace: () => go(S.screen === 'D1a' ? 'D1' : S.screen === 'D2' ? 'D2' : 'IS2', S.screen === 'D2' ? {} : { transfer: false }),
   example: () => { S.dialog = 'example'; renderLayer(); },
   copyEmail: () => { try { navigator.clipboard.writeText(EMAILS[S.screen] || ''); } catch (e) {} toast('Email copied. Paste it into your mail app.'); },
@@ -582,7 +756,7 @@ const ACT = {
   wallets: () => { S.walletList = !S.walletList; render(); },
   submit: () => go('IS5b', { dialog: 'propose' }),
   closeDialog: () => { const was = S.dialog; S.dialog = null; if (was === 'propose') S.screen = 'IS4'; render(); },
-  propose: () => { S.dialog = null; go('RQ'); toast('Proposal sent. Showing the operator\'s Requests once it is approved.'); },
+  propose: () => { S.dialog = null; go('RQ', { via: 'issue' }); toast('Proposal sent. Showing the operator\'s Requests once it is approved.'); },
   toBar: el => focusBar(+el.dataset.i),
   showAll: () => { S.showAll = !S.showAll; render(); },
   addBar: () => { S.bars.push({ serial: '', weight: '100.0', docRow: null, flagged: false }); S.serialsChecked = false; render(); const r = $('#rows'); r.scrollTop = r.scrollHeight; r.lastElementChild.querySelector('input').focus(); },
@@ -600,6 +774,8 @@ document.addEventListener('click', e => {
   if (goEl) { go(goEl.dataset.go); return; }
   const src = t.closest('[data-src]');
   if (src) { showSource(src.dataset.src); return; }
+  const dl = t.closest('[data-deliv]');
+  if (dl && !t.closest('.ship')) { S.red.delivery = dl.dataset.deliv; render(); return; }
   const recip = t.closest('[data-recip]');
   if (recip && !t.closest('.wallet, .wlist, .field')) { S.recipient = recip.dataset.recip; render(); if (S.recipient === 'investor') $('#investor')?.focus(); return; }
   const w = t.closest('[data-wallet]');
@@ -613,6 +789,11 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('input', e => {
   const t = e.target;
+  if (t.id === 'ramt' || t.id === 'rfee') {
+    S.red[t.id === 'ramt' ? 'amount' : 'fee'] = t.value.replace(t.id === 'ramt' ? /[^\d]/g : /[^\d.]/g, '');
+    const pos = t.selectionStart, id = t.id; render(); const n = document.getElementById(id); n.focus(); n.setSelectionRange(pos, pos);
+  }
+  if (t.id === 'rnote') S.red.note = t.value;
   if (t.id === 'investor') { S.investor = t.value.trim(); const pos = t.selectionStart; render(); const n = $('#investor'); n.focus(); n.setSelectionRange(pos, pos); }
   const row = t.closest('[data-bar]');
   if (row) {
@@ -672,7 +853,7 @@ document.addEventListener('mouseover', e => { if (e.target.closest('main') && !e
 document.addEventListener('focusin', e => setHot(hotFrom(e.target)));
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && S.dialog) ACT.closeDialog();
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset?.act === 'openRequest') { e.preventDefault(); ACT.openRequest(); }
+  if ((e.key === 'Enter' || e.key === ' ') && ['openRequest', 'openRedeem'].includes(e.target.dataset?.act)) { e.preventDefault(); ACT[e.target.dataset.act](); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'drop') { e.preventDefault(); ACT.upload(); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset?.src) { e.preventDefault(); showSource(e.target.dataset.src); }
 });
