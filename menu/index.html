@@ -3566,7 +3566,7 @@ function guide() {
 }
 const openFlows = new Set();
 function flowTab() {
-  const cur = scOf(ST.s), here = openOv || current;
+  const cur = scOf(ST.s), here = openOv || current, top = $('rv-list').scrollTop;
   $('rv-flows').innerHTML = Object.entries(SC).filter(([k]) => k !== 'ops').map(([k, v]) => {
     const steps = STATES.map((x, i) => [x, i]).filter(([x]) => x.sc === k);
     const on = k === cur, open = on || openFlows.has(k);
@@ -3582,6 +3582,7 @@ function flowTab() {
       + (on ? `<div class="rv-fo"><label><input type="checkbox" data-gd="hint"${ST.hint ? ' checked' : ''}>다음 버튼 강조</label><a data-gd="sc" data-k="${k}">처음부터 다시</a><a data-gd="end">흐름 끝내기</a></div>` : '');
   }).join('') + '<div class="rv-fl off"><span class="tt"><b>▸ 투자자(Standard, Personal)</b><span>신청부터 첫 요청까지</span></span><em>준비 중</em></div>'
     + '<p class="rv-lg"><i></i>점선 = Figma에 없는 화면</p>';
+  $('rv-list').scrollTop = top;
 }
 function hints() {
   document.querySelectorAll('.gd-hl').forEach(e => e.classList.remove('gd-hl'));
@@ -3604,8 +3605,8 @@ function fastForward() {
   guide(); dot();
 }
 function startScenario(n) { setState(n); go(STATES[n].start); guide(); dot(); }
-function openScreen(c) {
-  $('rv-list').classList.remove('show');
+function openScreen(c, keep) {
+  if (!keep) $('rv-list').classList.remove('show');
   viaGo = true;
   if (location.hash === '#' + c) { viaGo = false; route(); } else location.hash = c;
 }
@@ -3613,13 +3614,14 @@ function onGd(e) {
   const a = e.target.closest('[data-gd]');
   if (!a || a.tagName === 'INPUT') return;
   e.preventDefault();
+  e.stopPropagation();
   const k = a.dataset.gd;
   if (k === 'ff') fastForward();
-  else if (k === 'sc') { $('rv-list').classList.remove('show'); startScenario(SC[a.dataset.k].from); }
-  else if (k === 'st') { $('rv-list').classList.remove('show'); startScenario(+a.dataset.n); }
-  else if (k === 'scr') { if (+a.dataset.n !== ST.s) setState(+a.dataset.n); openScreen(a.dataset.c); }
+  else if (k === 'sc') startScenario(SC[a.dataset.k].from);
+  else if (k === 'st') startScenario(+a.dataset.n);
+  else if (k === 'scr') { if (+a.dataset.n !== ST.s) setState(+a.dataset.n); openScreen(a.dataset.c, true); }
   else if (k === 'tog') { if (scOf(ST.s) !== a.dataset.k) { openFlows.has(a.dataset.k) ? openFlows.delete(a.dataset.k) : openFlows.add(a.dataset.k); flowTab(); } }
-  else if (k === 'end') { $('rv-list').classList.remove('show'); setState(9); render(current); }
+  else if (k === 'end') { setState(9); render(current); }
 }
 $('rv-tag').addEventListener('click', onGd);
 $('rv-list').addEventListener('click', onGd);
@@ -3765,7 +3767,7 @@ function showTab(tab) {
 $('rv-open').addEventListener('click', () => {
   const box = $('rv-list');
   box.classList.toggle('show');
-  if (box.classList.contains('show')) showTab(scOf(ST.s) === 'ops' ? 'screens' : 'flows');
+  if (box.classList.contains('show')) showTab('flows');
 });
 
 function route() {
