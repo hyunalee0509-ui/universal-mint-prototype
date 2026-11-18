@@ -178,6 +178,7 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 .menu button{display:flex;width:100%;gap:8px;align-items:center;border:0;background:none;border-radius:8px;padding:8px 10px;text-align:left;font-size:13px}
 .menu button:hover{background:var(--bg-subtle)}
 .menu small{display:block;color:var(--muted);font-size:12px}
+.menu.pop{position:fixed;z-index:55;overflow:auto;overscroll-behavior:contain}
 .menu .mgroup{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);padding:8px 10px 4px}
 .menu .mgroup:not(:first-child){border-top:1px solid var(--border);margin-top:4px}
 .menu .mmeta{font-size:12px;color:var(--muted);font-weight:400}
@@ -824,7 +825,7 @@ V.ad4 = () => {
     </div>
     <div class="field" style="max-width:calc(50% + 14px)"><label class="label" for="xq">Excluded investors <span class="opt">(optional)</span></label>
       <div class="xsearch" style="position:relative"><input class="input" id="xq" data-xq placeholder="Search investors by name or wallet" value="${esc(S.xq||'')}" autocomplete="off" role="combobox" aria-expanded="${!!S.xOpen}" aria-controls="xlist">
-      ${S.xOpen?`<div class="menu" id="xlist" role="listbox" style="top:48px;left:0;right:0">${cand.map(x=>`<button role="option" data-a="exAdd" data-v="${x.id}"><span class="grow">${esc(x.name)}<small>${esc(x.sub)}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">No investors match.</div>'}</div>`:''}</div>
+</div>
       ${ex.map(x=>`<div class="file"><span class="grow"><span style="display:block;font-weight:500;font-size:13px">${esc(x.name)}</span><span class="hint">${esc(x.sub)}</span></span><button class="link danger" data-a="exRm" data-v="${x.id}">Remove</button></div>`).join('')}
       <span class="hint">Excluded investors can’t request this token, even if they pass KYC.</span></div>
     <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Terms investors accept</span>
@@ -834,13 +835,40 @@ V.ad4 = () => {
 };
 const sizeHint = (v, verb, s) => v>0 ? `Investors ${verb} ${v.toLocaleString('en-US')}, ${(v*2).toLocaleString('en-US')}, ${(v*3).toLocaleString('en-US')} ${s}…` : '';
 
+function xMenu(){
+  const d = S.d, q = (S.xq||'').toLowerCase();
+  const cand = INVESTORS.filter(x=>!d.excluded.includes(x.id) && (!q || (x.name+' '+x.sub).toLowerCase().includes(q)));
+  return `<div class="menu pop" id="xlist" role="listbox" data-anchor="#xq" data-match="1">${cand.map(x=>`<button role="option" data-a="exAdd" data-v="${x.id}"><span class="grow">${esc(x.name)}<small>${esc(x.sub)}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">No investors match.</div>'}</div>`;
+}
+// Dropdowns render in the top layer (#layer), positioned against their trigger, so no card or panel can clip them
+function popHTML(){
+  if (S.modal) return '';
+  if (S.screen==='ad5' && S.menu) return roleMenu(S.menu);
+  if (S.screen==='ad4' && S.xOpen) return xMenu();
+  return '';
+}
+function placePops(){
+  document.querySelectorAll('#layer .pop').forEach(m=>{
+    const a = document.querySelector(m.dataset.anchor); if (!a){ m.hidden = true; return; }
+    const r = a.getBoundingClientRect(), gap = 6, pad = 12;
+    const w = m.dataset.match ? r.width : 300;
+    m.style.width = w + 'px';
+    m.style.left = Math.max(pad, Math.min(r.left, innerWidth - w - pad)) + 'px';
+    m.style.maxHeight = 'none';
+    const h = m.scrollHeight, below = innerHeight - r.bottom - gap - pad, above = r.top - gap - pad;
+    if (h <= below || below >= above){ m.style.top = (r.bottom + gap) + 'px'; m.style.maxHeight = Math.max(120, below) + 'px'; }
+    else { const mh = Math.min(h, above); m.style.top = (r.top - gap - mh) + 'px'; m.style.maxHeight = mh + 'px'; }
+  });
+}
+addEventListener('scroll', placePops, true);
+addEventListener('resize', placePops);
 function roleMenu(k){
   const left = MEMBERS.filter(m=>!S.d.roles[k].includes(m.id));
   const body = MEMBER_GROUPS.map(([kind,title])=>{
     const items = left.filter(m=>m.kind===kind);
     return items.length ? `<div class="mgroup">${title}</div>` + items.map(m=>`<button role="menuitem" data-a="pick" data-v="${k}:${m.id}"><span class="grow">${esc(m.name)}${m.meta?` <span class="mmeta">${m.meta}</span>`:''}<small>${esc(m.sub)}</small></span></button>`).join('') : '';
   }).join('');
-  return `<div class="menu" role="menu" style="top:32px;left:0;width:300px;max-height:340px;overflow:auto">${body||'<div class="hint" style="padding:8px">Everyone is already added.</div>'}</div>`;
+  return `<div class="menu pop" role="menu" data-anchor='[data-a="addRole"][data-v="${k}"]'>${body||'<div class="hint" style="padding:8px">Everyone is already added.</div>'}</div>`;
 }
 V.ad5 = () => {
   const d = S.d, t = T();
@@ -851,7 +879,6 @@ V.ad5 = () => {
     <div class="rolerow"><div><div class="label">${n}${req?' <span class="req">*</span>':''}</div><div class="hint">${t.roles[k]}</div></div>
      <div class="chips" style="position:relative">${d.roles[k].map(id=>{const m=MEMBERS.find(x=>x.id===id);return `<span class="chip">${esc(m.name)}${m.meta?` <small>${m.meta}</small>`:''}<button aria-label="Remove ${esc(m.name)}" data-a="rmRole" data-v="${k}:${id}">×</button></span>`}).join('')}
       <button class="addchip" data-a="addRole" data-v="${k}" aria-expanded="${S.menu===k}">+ Add</button>
-      ${S.menu===k?roleMenu(k):''}
       ${S.errs[k] && !d.roles[k].length ? `<span class="err" style="width:100%">${S.errs[k]}</span>` : ''}</div></div>`).join('')}
    </div></div>
   <div class="card"><div class="card-h" style="padding-bottom:12px"><div class="eyebrow">Wallets and agreements</div></div>
@@ -1393,7 +1420,7 @@ function protoHTML(){
 function render(){
   const a = document.activeElement, fid = a && a.id, ss = a && a.selectionStart, se = a && a.selectionEnd;
   $('#app').innerHTML = (V[S.screen]||V.tokens)();
-  $('#layer').innerHTML = modalHTML() + notifHTML();
+  $('#layer').innerHTML = modalHTML() + notifHTML() + popHTML();
   const p = $('#proto'); p.innerHTML = protoHTML();
   $('#unread').hidden = !S.notes.some(n=>n.to===S.persona && !n.seen);
   $('#ini').textContent = me().ini; $('#pname').textContent = me().name; $('#pmail').textContent = me().mail;
@@ -1401,6 +1428,7 @@ function render(){
   const navOn = S.screen==='home' ? 'home' : S.screen==='tasks' ? 'tasks' : 'tokens';
   document.querySelectorAll('.side .nav').forEach(b=>b.classList.toggle('on', b.dataset.nav===navOn));
   if (window.lucide) lucide.createIcons();
+  placePops();
   if (fid){ const el = document.getElementById(fid); if (el){ el.focus(); try{ el.setSelectionRange(ss,se); }catch(_){} } }
 }
 
@@ -1592,16 +1620,17 @@ const A = {
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-a]');
   if (!t){
+    if (e.target.closest('.pop')) return; // clicks on a dropdown's header or padding keep it open
     let dirty = false;
     if (S.menu){ S.menu=null; dirty=true; }
     if (S.tip){ S.tip=false; dirty=true; }
-    if (S.xOpen && !e.target.closest('.xsearch')){ S.xOpen=false; dirty=true; }
+    if (S.xOpen && !e.target.closest('.xsearch, .pop')){ S.xOpen=false; dirty=true; }
     if (S.notifOpen && !e.target.closest('.notif')){ A.bell(null,null,{stopPropagation(){}}); return; }
     if (dirty) render();
     return;
   }
   if (t.getAttribute('aria-disabled')==='true' && t.dataset.a!=='tip') return;
-  if (S.xOpen && !t.closest('.xsearch')) S.xOpen = false;
+  if (S.xOpen && !t.closest('.xsearch, .pop')) S.xOpen = false;
   (A[t.dataset.a] || A.soon)(t.dataset.v, t, e);
 });
 
