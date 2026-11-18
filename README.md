@@ -10,6 +10,7 @@
 - [Deposit Confirmation · DS2](https://hyunalee0509-ui.github.io/universal-mint-prototype/ds2/)
 - [Bar Serial Numbers · DS4g](https://hyunalee0509-ui.github.io/universal-mint-prototype/ds4g/)
 - [Issue and Redeem · IS0–D2, RD2–RC1x, RC0](https://hyunalee0509-ui.github.io/universal-mint-prototype/issue-flow/)
+- [Menu](https://hyunalee0509-ui.github.io/universal-mint-prototype/menu/) (main에 합친 뒤 열림)
 
 로그인이나 저장소 초대 없이 웹 링크로 열 수 있습니다. 저장소와 배포된 웹사이트는 공개입니다.
 
@@ -20,6 +21,7 @@
 - `add-token.html`: 제공된 `Add token.html` 원본
 - `ds2/`: DS2 입고 확인 프로토타입 원본과 `deposit.png`
 - `ds4g/`: DS4g 바 시리얼 번호 검토 프로토타입 원본과 `serialization.png`
+- `menu/`: 메뉴 쪽 프로토타입(Home, 알림, 워크스페이스 전환 등). 화면 이름은 Figma 화면 코드, 원본은 따로 관리하고 완성 파일만 이 폴더에 넣음
 - `issue-flow/`: Issue 흐름(IS0–D2)과 Redeem 흐름(RD2–RD4, RC0–RC1x) 프로토타입과 문서 이미지 `transfer.png`, `deposit.png`, `serialization.png`
 
 외부 글꼴은 Google Fonts에서 불러옵니다. 별도 빌드나 설치가 필요하지 않습니다.
