@@ -178,13 +178,18 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 .menu button{display:flex;width:100%;gap:8px;align-items:center;border:0;background:none;border-radius:8px;padding:8px 10px;text-align:left;font-size:13px}
 .menu button:hover{background:var(--bg-subtle)}
 .menu small{display:block;color:var(--muted);font-size:12px}
+.menu.pop{position:fixed;z-index:55;overflow:auto;overscroll-behavior:contain}
+.menu .mgroup{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);padding:8px 10px 4px}
+.menu .mgroup:not(:first-child){border-top:1px solid var(--border);margin-top:4px}
+.menu .mmeta{font-size:12px;color:var(--muted);font-weight:400}
 
 .sum{display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:center;padding:14px 24px;border-top:1px solid var(--border)}
 .sum .k{color:var(--muted);font-size:13px}
 .sum .v{font-size:13px;font-weight:500}
 .sum .v.flag{color:var(--danger)}
 
-.thead,.trow{display:grid;grid-template-columns:2.2fr 1.3fr .8fr 2fr 1.2fr 24px;gap:12px;align-items:center;padding:0 24px}
+.thead,.trow{display:grid;grid-template-columns:2.2fr 1.1fr 2fr .8fr 1.2fr 24px;gap:12px;align-items:center;padding:0 24px}
+.thead.t2,.trow.t2{grid-template-columns:2.2fr 2fr .8fr 1.1fr 1.4fr 24px}
 .thead{height:36px;border-top:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase}
 .trow{height:58px;border-top:1px solid var(--border);cursor:pointer}
 .trow:hover{background:var(--bg-subtle)}
@@ -328,7 +333,7 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
   <div class="brand"><img src="assets/logo.png" alt="">Universal Mint</div>
   <button class="bell" data-a="bell" aria-label="Notifications"><i data-lucide="bell" style="width:18px;height:18px;color:#5a6472"></i><img class="dot" id="unread" src="assets/unread.svg" alt="" hidden></button>
   <div class="vdiv"></div>
-  <div class="acct"><div class="avatar" id="ini">JU</div><div class="who"><b id="pname">Juya Kim</b><span id="pmail">juya.k@bharvest.io</span></div><img src="assets/chevron-down.svg" width="14" alt=""></div>
+  <div class="acct"><div class="avatar" id="ini">JK</div><div class="who"><b id="pname">Juya Kim</b><span id="pmail">juya.k@bharvest.io</span></div><img src="assets/chevron-down.svg" width="14" alt=""></div>
 </header>
 <div class="body"><div class="panel">
   <aside class="side">
@@ -366,16 +371,24 @@ const mb = n => n >= 1048576 ? Math.round(n/1048576*10)/10 + ' MB' : Math.max(1,
 const clone = o => JSON.parse(JSON.stringify(o));
 
 const PEOPLE = {
-  juya: {name:'Juya Kim', ini:'JU', mail:'juya.k@bharvest.io'},
+  juya: {name:'Juya Kim', ini:'JK', mail:'juya.k@bharvest.io'},
   joe:  {name:'Joe Miller', ini:'JM', mail:'joe.m@ault.com'},
 };
 const GOVERNANCE = ['Juya Kim','Joe Miller','Jason Lee','David Park']; // 2 of 4
 const MEMBERS = [
-  {id:'gov', name:'Governance', meta:'2 of 4', sub:'Approval group'},
+  // Approval groups from Figma AR1 (Approval rules, Groups)
+  {id:'gov', name:'Governance', meta:'2 of 4', sub:'Admins. Approves every action without its own group', kind:'group'},
+  {id:'mintgrp', name:'Mint approvers', meta:'2 of 2', sub:'Approves new supply. Juya Kim, Joe Miller', kind:'group'},
+  {id:'treasury', name:'Treasury signers', meta:'1 of 2', sub:'Approves supply leaving and wallet changes. Jason Lee, David Park', kind:'group'},
+  // Dummy examples (not in Figma) to show a longer group list
+  {id:'compliance', name:'Compliance reviewers', meta:'1 of 2', sub:'Reviews KYC exceptions and excluded investors. Mina Cho, Jason Lee', kind:'group'},
+  {id:'opsdesk', name:'Operations desk', meta:'2 of 3', sub:'Handles settlement and delivery. Juya Kim, Jason Lee, Mina Cho', kind:'group'},
+  {id:'risk', name:'Risk committee', meta:'2 of 3', sub:'Signs off large mints and burns. Joe Miller, David Park, Mina Cho', kind:'group'},
   {id:'juya', name:'Juya Kim', sub:'Member'}, {id:'joe', name:'Joe Miller', sub:'Member'},
   {id:'jason', name:'Jason Lee', sub:'Member'}, {id:'david', name:'David Park', sub:'Member'},
-  {id:'colossus', name:'Colossus', sub:'Another organization'},
+  {id:'colossus', name:'Colossus', sub:'Another organization', kind:'org'},
 ];
+const MEMBER_GROUPS = [['group','Approval groups'],[undefined,'Members'],['org','Other organizations']];
 const TOKENS = {
   agp:  {sym:'AGP', name:'Ault Platinum', vault:'Ault Treasury, Vault 1', addr:'0x8f3a…c21b', dec:6, color:'#b3bac4', kind:'commodity', asset:'Platinum', unit:'oz', desc:'Allocated platinum bars in segregated storage. 1 token = 1 oz.'},
   apd:  {sym:'APD', name:'Ault Palladium', vault:'Ault Operations, Vault 2', addr:'0x41c0…9e07', dec:6, color:'#c9b48f', kind:'commodity', asset:'Palladium', unit:'oz', desc:'Allocated palladium bars in segregated storage. 1 token = 1 oz.'},
@@ -489,7 +502,7 @@ function banner(tone, title, body, extra=''){
 }
 function sel(bind, opts, val, extra=''){ return `<select class="select ${bad(bind)}" data-bind="${bind}" ${extra}>${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${v===val?'selected':''}>${esc(l)}</option>`}).join('')}</select>`; }
 function go(screen, extra){
-  Object.assign(S, {screen, menu:null, tip:false, errs:{}, resumed:false, xOpen:false}, extra||{});
+  Object.assign(S, {screen, menu:null, tip:false, errs:{}, resumed:false, xOpen:false, justSaved:false}, extra||{});
   if (STEP_OF[screen]!=null) S.d.reached = Math.max(S.d.reached, STEP_OF[screen]);
   if (screen==='ad6') S.fromReview = false;
   render(); window.scrollTo(0,0);
@@ -586,13 +599,34 @@ function reviewBlocked(){
 /* ================= screens ================= */
 const V = {};
 
+// Static Tokens data from Figma TK1 and TK2
+const OWN_LISTED = [
+  {name:'Ault Silver', s:'ASLV', coin:'#b3bac4', st:['pos','Active'], res:100, sup:'5,000', prog:'6 requests', pub:true},
+  {name:'BMAX', s:'Bitcoin', coin:'#f0a23b', st:['pos','Active'], res:98, sup:'1,200', prog:'2 requests', pub:true, tk:'bmax'},
+  {name:'Ault Gold', s:'AGLD', coin:'#d9b44a', st:['att','Suspended'], res:100, sup:'900', prog:'—'},
+];
+const OTHER_LISTED = [
+  {name:'Meridian Gold', s:'MGLD', res:100, sup:'8,400', hold:'120', issuer:'Meridian Metals'},
+  {name:'Meridian Platinum', s:'MPLT', res:100, sup:'2,150', hold:'—', issuer:'Meridian Metals'},
+  {name:'Harbor Gold', s:'HGLD', res:100, sup:'3,100', hold:'40', issuer:'Harbor Trust'},
+  {name:'Harbor Silver', s:'HSLV', res:100, sup:'9,800', hold:'250', issuer:'Harbor Trust'},
+];
+const resBar = res => `<div style="display:flex;align-items:center;gap:10px"><span class="bar"><i style="width:${res}%;background:${res<100?'#d97706':'#1d7a48'}"></i></span><span class="small" style="width:36px;${res<100?'color:#b45309;font-weight:500':''}">${res}%</span></div>`;
+const coinTile = c => `<span class="tile" style="border-radius:8px"><span class="coin" style="background:${c||'#b3bac4'}"></span></span>`;
+function ownListed(){
+  const live = S.reqs.filter(r=>r.status==='live').map(r=>({name:r.d.name, s:sym(r.d), img:tokenImg(r.d,32), st:['pos','Active'], res:100, sup:'0', prog:'—', pub:true, id:r.id}));
+  // the Figma examples reuse BMAX for the custom-token flow; hide the sample row once a real BMAX request exists
+  const hasBmax = S.reqs.some(r=>r.d.token==='bmax');
+  return [...live, ...OWN_LISTED.filter(x=>!(x.tk==='bmax' && hasBmax))];
+}
+
 V.tokens = () => {
-  const d = S.d, rows = [];
+  const d = S.d, rows = [], tab = S.tokTab||'yours';
   const draftStep = STEP_SCREEN[Math.min(d.reached,5)];
-  if (S.draftSaved) rows.push(`<div class="lrow" data-a="resume" data-v="${draftStep}"><div class="idn"><span class="tile">DFT</span><div><b>${esc(d.name||'Untitled token')}</b><span>Draft saved in this browser only</span></div></div><div>${badge('neu','Draft')}</div><div style="display:flex;gap:8px;justify-content:flex-end;align-items:center"><button class="btn" data-a="resume" data-v="${draftStep}">Continue</button><button class="link" style="color:var(--muted)" aria-label="Delete draft" data-a="deleteDraft"><i data-lucide="trash-2" style="width:16px"></i></button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
+  if (S.draftSaved) rows.push(`<div class="lrow" data-a="resume" data-v="${draftStep}"><div class="idn"><span class="tile" style="background:#fff;border:1.5px dashed var(--border-strong)"></span><div><b>${esc(d.name||'Untitled token')}</b><span>Draft saved in this browser only</span></div></div><div>${badge('neu','Draft')}</div><div style="display:flex;gap:8px;justify-content:flex-end;align-items:center"><button class="btn" data-a="resume" data-v="${draftStep}">Continue</button><button class="link" style="color:var(--muted)" aria-label="Delete draft" data-a="deleteDraft"><i data-lucide="trash-2" style="width:16px"></i></button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
   [...S.reqs].reverse().filter(r=>r.status!=='live').forEach(r=>{
     const m = {
-      org:['prog','Org approval',`Waiting on Governance, ${r.approvals.length} of ${need(r)}`],
+      org:['prog','In vote',`Organization vote, ${r.approvals.length} of ${need(r)}`],
       review:['prog','In platform review',`Submitted ${fmt(r.at.submitted)}`],
       rejected:['crit','Rejected','Custody statement flagged'],
       withdrawn:['neu','Withdrawn',`Withdrawn ${fmt(r.at.withdrawn)} by ${r.by}`],
@@ -602,26 +636,35 @@ V.tokens = () => {
     const act = r.status==='rejected' ? `<button class="btn" data-a="restart" data-v="${r.id}">Start a new draft</button>` : '';
     rows.push(`<div class="lrow ${r.id===S.cur&&r.fresh?'hl':''}" data-a="openReq" data-v="${r.id}"><div class="idn"><span class="tile">${esc(sym(r.d))}</span><div><b>${esc(r.d.name)}</b><span>${esc(m[2])}</span></div></div><div>${badge(m[0],m[1])}</div><div style="text-align:right">${act}</div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
   });
+  rows.push(`<div class="lrow" data-a="soon"><div class="idn"><span class="tile">ACU</span><div><b>Ault Copper</b><span>Organization vote, 1 of 2</span></div></div><div>${badge('prog','In vote')}</div><div></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
   rows.push(`<div class="lrow" data-a="soon"><div class="idn"><span class="tile">APD</span><div><b>Ault Palladium</b><span>Custody agreement expired</span></div></div><div>${badge('crit','Rejected')}</div><div style="text-align:right"><button class="btn" data-a="soon">Start a new draft</button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
-  const listed = [
-    ...S.reqs.filter(r=>r.status==='live').map(r=>({img:tokenImg(r.d,28), name:r.d.name, s:sym(r.d), st:['pos','Active'], sup:'0', res:100, pend:'0 / 0', id:r.id})),
-    {coin:'#b3bac4', name:'Ault Silver', s:'ASLV', st:['pos','Active'], sup:'5,000', res:100, pend:'+3,200 / −600'},
-    {coin:'#d9b44a', name:'Ault Gold', s:'AGLD', st:['att','Suspended'], sup:'800', res:100, pend:'0 / 0'},
-  ];
+  const own = ownListed();
+  const all = [...own.filter(x=>x.pub).map(x=>({...x, hold:'—', issuer:'You'})), ...OTHER_LISTED];
+  const q = (S.tq||'').trim().toLowerCase();
+  const allShown = q ? all.filter(x=>(x.name+' '+x.s+' '+x.issuer).toLowerCase().includes(q)) : all;
   const locked = scen('noRights');
   const addBtn = locked
     ? `<div class="tipwrap"><button class="btn primary" aria-disabled="true" aria-describedby="addtip" data-a="tip"><i data-lucide="lock"></i>Add token</button>${S.tip?`<div class="tip" id="addtip" role="tooltip"><b>You can’t add tokens</b>Listing a token needs listing rights for Ault Global Commodities. Ask Joe Miller.</div>`:''}</div>`
     : `<button class="btn primary" data-a="addToken">Add token</button>`;
-  return `
-  <div style="display:flex;align-items:flex-start;gap:16px"><div class="grow"><h1>Tokens</h1><div class="sub" style="margin-top:6px">Manage your tokens and follow listing requests.</div></div>${addBtn}</div>
-  ${scen('noKyc') ? banner('att','Confirm your identity before listing a token','You can see your organization’s tokens and requests. Listing needs your own KYC.','<button class="btn" data-a="soon">Verify identity</button>') : ''}
-  <div class="tabs"><button class="tab on">Your tokens <span class="n">${listed.length+rows.length}</span></button><button class="tab" data-a="soon">All listed <span class="n">12</span></button></div>
-  <div class="card"><div class="card-h" style="padding-bottom:12px"><h2 style="font-size:16px">Listed <span class="muted" style="font-weight:400">${listed.length}</span></h2></div>
-    <div class="thead"><span>Token</span><span>Status</span><span style="text-align:right">Supply</span><span>Reserve</span><span style="text-align:right">Pending</span><span></span></div>
-    ${listed.map(r=>`<div class="trow" ${r.id?`data-a="openToken" data-v="${r.id}"`:'data-a="soon"'}><div class="idn">${r.img||`<span class="tile" style="border-radius:999px"><span class="coin" style="background:${r.coin}"></span></span>`}<div><b>${esc(r.name)}</b><span>${esc(r.s)}</span></div></div>
-      <div>${badge(...r.st)}</div><div style="text-align:right;font-size:15px">${r.sup}</div><div style="display:flex;align-items:center;gap:10px"><span class="bar"><i style="width:${r.res}%"></i></span><span class="small">${r.res}%</span></div><div class="muted small" style="text-align:right">${r.pend}</div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`).join('')}
+  const yours = `
+  <div class="card"><div class="card-h" style="padding-bottom:12px"><h2 style="font-size:16px">Listed <span class="muted" style="font-weight:400">${own.length}</span></h2></div>
+    <div class="thead"><span>Token</span><span>Status</span><span>Reserve</span><span style="text-align:right">Supply</span><span style="text-align:right">In progress</span><span></span></div>
+    ${own.map(r=>`<div class="trow" ${r.id?`data-a="openToken" data-v="${r.id}"`:'data-a="soon"'}><div class="idn">${r.img||coinTile(r.coin)}<div><b>${esc(r.name)}</b><span>${esc(r.s)}</span></div></div>
+      <div>${badge(...r.st)}</div>${resBar(r.res)}<div style="text-align:right;font-size:15px">${r.sup}</div><div class="small" style="text-align:right">${r.prog}</div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`).join('')}
   </div>
   <div class="card"><div class="card-h" style="padding-bottom:12px"><h2 style="font-size:16px">Listing requests <span class="muted" style="font-weight:400">${rows.length}</span></h2></div>${rows.join('')}</div>`;
+  const allTab = `
+  <div style="position:relative;width:min(300px,100%)"><i data-lucide="search" class="muted" style="position:absolute;left:12px;top:11px;width:15px;height:15px"></i><input class="input" style="height:36px;padding-left:34px;font-size:13px" id="tq" data-tq placeholder="Search token, symbol or issuer" aria-label="Search token, symbol or issuer" value="${esc(S.tq||'')}"></div>
+  <div class="card"><div class="card-h" style="padding-bottom:12px"><h2 style="font-size:16px">All listed <span class="muted" style="font-weight:400">${allShown.length}</span></h2></div>
+    <div class="thead t2"><span>Token</span><span>Reserve</span><span style="text-align:right">Supply</span><span style="text-align:right">Your holdings</span><span style="text-align:right">Issuer</span><span></span></div>
+    ${allShown.map(r=>`<div class="trow t2" ${r.id?`data-a="openToken" data-v="${r.id}"`:'data-a="soon"'}><div class="idn">${r.img||coinTile(r.issuer==='You'?r.coin:'#b3bac4')}<div><b>${esc(r.name)}</b><span>${esc(r.s)}</span></div></div>
+      ${resBar(r.res)}<div style="text-align:right;font-size:15px">${r.sup}</div><div class="small" style="text-align:right">${r.hold}</div><div class="small muted" style="text-align:right">${esc(r.issuer)}</div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`).join('') || '<div class="hint" style="padding:16px 24px;border-top:1px solid var(--border)">No tokens match.</div>'}
+  </div>`;
+  return `
+  <div style="display:flex;align-items:flex-start;gap:16px"><div class="grow"><h1>Tokens</h1><div class="sub" style="margin-top:6px">Tokens you issue, and every token listed on Universal Mint.</div></div>${addBtn}</div>
+  ${scen('noKyc') ? banner('att','Confirm your identity before listing a token','You can see your organization’s tokens and requests. Listing needs your own KYC.','<button class="btn" data-a="soon">Verify identity</button>') : ''}
+  <div class="tabs" role="tablist"><button class="tab ${tab==='yours'?'on':''}" role="tab" aria-selected="${tab==='yours'}" data-a="tokTab" data-v="yours">Your tokens <span class="n">${own.length}</span></button><button class="tab ${tab==='all'?'on':''}" role="tab" aria-selected="${tab==='all'}" data-a="tokTab" data-v="all">All listed <span class="n">${all.length}</span></button></div>
+  ${tab==='all' ? allTab : yours}`;
 };
 
 V.ad0 = () => {
@@ -782,7 +825,7 @@ V.ad4 = () => {
     </div>
     <div class="field" style="max-width:calc(50% + 14px)"><label class="label" for="xq">Excluded investors <span class="opt">(optional)</span></label>
       <div class="xsearch" style="position:relative"><input class="input" id="xq" data-xq placeholder="Search investors by name or wallet" value="${esc(S.xq||'')}" autocomplete="off" role="combobox" aria-expanded="${!!S.xOpen}" aria-controls="xlist">
-      ${S.xOpen?`<div class="menu" id="xlist" role="listbox" style="top:48px;left:0;right:0">${cand.map(x=>`<button role="option" data-a="exAdd" data-v="${x.id}"><span class="grow">${esc(x.name)}<small>${esc(x.sub)}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">No investors match.</div>'}</div>`:''}</div>
+</div>
       ${ex.map(x=>`<div class="file"><span class="grow"><span style="display:block;font-weight:500;font-size:13px">${esc(x.name)}</span><span class="hint">${esc(x.sub)}</span></span><button class="link danger" data-a="exRm" data-v="${x.id}">Remove</button></div>`).join('')}
       <span class="hint">Excluded investors can’t request this token, even if they pass KYC.</span></div>
     <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Terms investors accept</span>
@@ -792,16 +835,50 @@ V.ad4 = () => {
 };
 const sizeHint = (v, verb, s) => v>0 ? `Investors ${verb} ${v.toLocaleString('en-US')}, ${(v*2).toLocaleString('en-US')}, ${(v*3).toLocaleString('en-US')} ${s}…` : '';
 
+function xMenu(){
+  const d = S.d, q = (S.xq||'').toLowerCase();
+  const cand = INVESTORS.filter(x=>!d.excluded.includes(x.id) && (!q || (x.name+' '+x.sub).toLowerCase().includes(q)));
+  return `<div class="menu pop" id="xlist" role="listbox" data-anchor="#xq" data-match="1">${cand.map(x=>`<button role="option" data-a="exAdd" data-v="${x.id}"><span class="grow">${esc(x.name)}<small>${esc(x.sub)}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">No investors match.</div>'}</div>`;
+}
+// Dropdowns render in the top layer (#layer), positioned against their trigger, so no card or panel can clip them
+function popHTML(){
+  if (S.modal) return '';
+  if (S.screen==='ad5' && S.menu) return roleMenu(S.menu);
+  if (S.screen==='ad4' && S.xOpen) return xMenu();
+  return '';
+}
+function placePops(){
+  document.querySelectorAll('#layer .pop').forEach(m=>{
+    const a = document.querySelector(m.dataset.anchor); if (!a){ m.hidden = true; return; }
+    const r = a.getBoundingClientRect(), gap = 6, pad = 12;
+    const w = m.dataset.match ? r.width : 300;
+    m.style.width = w + 'px';
+    m.style.left = Math.max(pad, Math.min(r.left, innerWidth - w - pad)) + 'px';
+    m.style.maxHeight = 'none';
+    const h = m.scrollHeight, below = innerHeight - r.bottom - gap - pad, above = r.top - gap - pad;
+    if (h <= below || below >= above){ m.style.top = (r.bottom + gap) + 'px'; m.style.maxHeight = Math.max(120, below) + 'px'; }
+    else { const mh = Math.min(h, above); m.style.top = (r.top - gap - mh) + 'px'; m.style.maxHeight = mh + 'px'; }
+  });
+}
+addEventListener('scroll', placePops, true);
+addEventListener('resize', placePops);
+function roleMenu(k){
+  const left = MEMBERS.filter(m=>!S.d.roles[k].includes(m.id));
+  const body = MEMBER_GROUPS.map(([kind,title])=>{
+    const items = left.filter(m=>m.kind===kind);
+    return items.length ? `<div class="mgroup">${title}</div>` + items.map(m=>`<button role="menuitem" data-a="pick" data-v="${k}:${m.id}"><span class="grow">${esc(m.name)}${m.meta?` <span class="mmeta">${m.meta}</span>`:''}<small>${esc(m.sub)}</small></span></button>`).join('') : '';
+  }).join('');
+  return `<div class="menu pop" role="menu" data-anchor='[data-a="addRole"][data-v="${k}"]'>${body||'<div class="hint" style="padding:8px">Everyone is already added.</div>'}</div>`;
+}
 V.ad5 = () => {
   const d = S.d, t = T();
   const fee = feeSet(d);
   return wrap(4, `
-  <div class="card"><div class="card-h"><h2>Request roles</h2><div class="hint" style="margin-top:12px">${t.roleSub}</div></div>
+  <div class="card" style="overflow:visible"><div class="card-h"><h2>Request roles</h2><div class="hint" style="margin-top:12px">${t.roleSub}</div></div>
    <div class="card-b">${ROLES.map(([k,n,req])=>`
     <div class="rolerow"><div><div class="label">${n}${req?' <span class="req">*</span>':''}</div><div class="hint">${t.roles[k]}</div></div>
      <div class="chips" style="position:relative">${d.roles[k].map(id=>{const m=MEMBERS.find(x=>x.id===id);return `<span class="chip">${esc(m.name)}${m.meta?` <small>${m.meta}</small>`:''}<button aria-label="Remove ${esc(m.name)}" data-a="rmRole" data-v="${k}:${id}">×</button></span>`}).join('')}
       <button class="addchip" data-a="addRole" data-v="${k}" aria-expanded="${S.menu===k}">+ Add</button>
-      ${S.menu===k?`<div class="menu" style="top:32px;left:0">${MEMBERS.filter(m=>!d.roles[k].includes(m.id)).map(m=>`<button data-a="pick" data-v="${k}:${m.id}"><span class="grow">${esc(m.name)}<small>${esc(m.sub)}${m.meta?', '+m.meta:''}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">Everyone is already added.</div>'}</div>`:''}
       ${S.errs[k] && !d.roles[k].length ? `<span class="err" style="width:100%">${S.errs[k]}</span>` : ''}</div></div>`).join('')}
    </div></div>
   <div class="card"><div class="card-h" style="padding-bottom:12px"><div class="eyebrow">Wallets and agreements</div></div>
@@ -1134,13 +1211,13 @@ const FIGMA = {
   'AD6c':'제출, 패스키 서명', 'AD6d':'제출, 조직 승인 제안', 'AD6e':'패스키 대기', 'AD6e2':'패스키 실패', 'AD6e3':'패스키, 다른 기기에만 있음',
   'E1':'My tasks, 상장 제안 승인 차례 (승인자)', 'PR1':'제안, 조직 승인 대기', 'PR2':'제안, 다른 멤버 차례', 'PR2s':'제안, 승인 서명 (승인자)', 'PR2r':'제안, 반려 사유 입력 (승인자)',
   'PR2z':'제안, 마지막 승인, 플랫폼이 거절 (승인자)', 'PR3':'제안, 반려됨 (제안한 사람)', 'PR3e':'다시 제안, 이전 값으로 채움', 'PR4':'제안, 철회 확인', 'PR4w':'제안, 철회됨 (제안한 사람)',
-  'PR5':'제안, 조직 승인 완료 (제안한 사람)', 'AD7b':'상장 요청 상세, 제출 직후', 'AD7 진입':'Tokens에서 심사 중 요청 열기', 'ADD2':'Your tokens, 초안 삭제 확인', 'ADD3':'Your tokens, 초안이 있는데 Add token',
+  'PR5':'제안, 조직 승인 완료 (제안한 사람)', 'AD7b':'상장 요청 상세, 제출 직후', 'AD7 진입':'Tokens에서 심사 중 요청 열기', 'TK1':'Tokens, Your tokens', 'TK2':'Tokens, All listed', 'ADD2':'Your tokens, 초안 삭제 확인', 'ADD3':'Your tokens, 초안이 있는데 Add token',
   'YT1c':'Your tokens, 상장 권한 없음 (잠금 + 말풍선)', 'YT2':'Your tokens, 내 인증(KYC) 미완료', 'YTw':'Your tokens, 철회된 상장 요청 행',
   'AD7':'상장 요청 상세', 'AD7-B':'상장 요청 상세, 심사 중 (BMAX)', 'AD7c':'상장 요청 철회 확인', 'AD7w':'상장 요청 상세, 철회됨', 'AD7x':'철회 실패, 이미 결정됨', 'AD7x2':'철회 실패, 이미 거절됨',
   'AD8':'상장 완료, 토큰 상세', 'AD8-B':'상장 완료, 토큰 상세 (BMAX)', 'AD8x':'거절, 이전 값으로 새 초안', 'AD8x2':'거절 뒤, 이전 값으로 새 초안', 'E2':'알림, 상장 승인됨', 'E3':'알림, 상장 거절됨',
 };
 // Figma node ids for each frame code, read from the Add Token section
-const FIGMA_NODES = {"AD0": "3179:106864", "AD1a": "3179:107444", "AD1b": "3179:107728", "AD2": "3179:109107", "AD2b": "3179:110464", "AD3": "3179:110636", "AD4": "3179:111765", "AD5": "3179:113343", "AD5b": "3179:114775", "AD6b": "3179:115848", "AD6c": "3179:116559", "AD7b": "3179:119379", "AD7 진입": "3179:119685", "AD7": "3179:120691", "AD8": "3179:121609", "E2": "3179:121738", "AD1c": "3179:107892", "AD2-B": "3179:109274", "AD3b": "3179:110967", "AD4a": "3179:112031", "AD5-B": "3179:113720", "AD6d": "3179:116935", "E1": "3179:119171", "PR5": "3179:119532", "AD7-B": "3179:120838", "AD8-B": "3179:122001", "AD3c": "3179:111124", "PR1": "3179:117723", "AD5d": "3179:115498", "AD2a": "3179:109441", "AD5a": "3179:113921", "AD4b": "3179:112242", "PR2": "3179:117876", "AD2r": "3179:109609", "AD5h": "3179:114372", "AD4c": "3179:112445", "PR2b": "3179:118030", "ADS1": "3179:110120", "AD4d": "3179:112636", "ADS2": "3179:110293", "AD4e": "3179:112829", "AD4e2": "3179:113078", "AD1f": "3179:108550", "AD3d": "3179:111280", "AD5f": "3179:114151", "AD6e": "3179:117132", "PR2r": "3179:118184", "ADD2": "3179:119854", "AD7c": "3179:120985", "ADD1": "3179:111601", "PR2s": "3179:118357", "AD1h": "3179:108763", "PR4": "3179:118859", "AD0a": "3179:106994", "AD1c2": "3179:108064", "AD3a": "3179:110806", "AD-C": "3179:113675", "AD6": "3179:116022", "AD6a": "3179:116756", "ADD3": "3179:120031", "AD0a2": "3179:107154", "YT1c": "3179:120208", "AD1g": "3179:108622", "AD6e3": "3179:117526", "AD0b": "3179:107315", "YT2": "3179:120365", "AD5k": "3185:94677", "PR2y": "3190:83283", "AD2x": "3179:109784", "AD3x": "3179:111444", "AD5x": "3179:114574", "AD2x2": "3179:109952", "AD1x": "3185:94084", "AD4x": "3185:94365", "AD1d": "3179:108236", "AD5c": "3179:115175", "ADE1": "3179:116382", "AD6e2": "3179:117329", "AD7x": "3179:121302", "AD7x2": "3179:121453", "AD5c2": "3179:115337", "AD1e": "3179:108408", "AD1i": "3179:108935", "AD5e2": "3179:115688", "AD3y": "3190:82979", "PR2z": "3190:83563", "PR3": "3179:118530", "YTw": "3179:120522", "AD7w": "3179:121151", "AD8x": "3179:122130", "PR3e": "3179:118681", "AD8x2": "3179:122281", "PR4w": "3179:119020", "E3": "3179:122459", "AD1a-B": "3179:107586", "AD5b-B": "3179:115015", "AD6b-B": "3179:116208"};
+const FIGMA_NODES = {"TK1":"2307:25169","TK2":"2312:30041","AD0": "3179:106864", "AD1a": "3179:107444", "AD1b": "3179:107728", "AD2": "3179:109107", "AD2b": "3179:110464", "AD3": "3179:110636", "AD4": "3179:111765", "AD5": "3179:113343", "AD5b": "3179:114775", "AD6b": "3179:115848", "AD6c": "3179:116559", "AD7b": "3179:119379", "AD7 진입": "3179:119685", "AD7": "3179:120691", "AD8": "3179:121609", "E2": "3179:121738", "AD1c": "3179:107892", "AD2-B": "3179:109274", "AD3b": "3179:110967", "AD4a": "3179:112031", "AD5-B": "3179:113720", "AD6d": "3179:116935", "E1": "3179:119171", "PR5": "3179:119532", "AD7-B": "3179:120838", "AD8-B": "3179:122001", "AD3c": "3179:111124", "PR1": "3179:117723", "AD5d": "3179:115498", "AD2a": "3179:109441", "AD5a": "3179:113921", "AD4b": "3179:112242", "PR2": "3179:117876", "AD2r": "3179:109609", "AD5h": "3179:114372", "AD4c": "3179:112445", "PR2b": "3179:118030", "ADS1": "3179:110120", "AD4d": "3179:112636", "ADS2": "3179:110293", "AD4e": "3179:112829", "AD4e2": "3179:113078", "AD1f": "3179:108550", "AD3d": "3179:111280", "AD5f": "3179:114151", "AD6e": "3179:117132", "PR2r": "3179:118184", "ADD2": "3179:119854", "AD7c": "3179:120985", "ADD1": "3179:111601", "PR2s": "3179:118357", "AD1h": "3179:108763", "PR4": "3179:118859", "AD0a": "3179:106994", "AD1c2": "3179:108064", "AD3a": "3179:110806", "AD-C": "3179:113675", "AD6": "3179:116022", "AD6a": "3179:116756", "ADD3": "3179:120031", "AD0a2": "3179:107154", "YT1c": "3179:120208", "AD1g": "3179:108622", "AD6e3": "3179:117526", "AD0b": "3179:107315", "YT2": "3179:120365", "AD5k": "3185:94677", "PR2y": "3190:83283", "AD2x": "3179:109784", "AD3x": "3179:111444", "AD5x": "3179:114574", "AD2x2": "3179:109952", "AD1x": "3185:94084", "AD4x": "3185:94365", "AD1d": "3179:108236", "AD5c": "3179:115175", "ADE1": "3179:116382", "AD6e2": "3179:117329", "AD7x": "3179:121302", "AD7x2": "3179:121453", "AD5c2": "3179:115337", "AD1e": "3179:108408", "AD1i": "3179:108935", "AD5e2": "3179:115688", "AD3y": "3190:82979", "PR2z": "3190:83563", "PR3": "3179:118530", "YTw": "3179:120522", "AD7w": "3179:121151", "AD8x": "3179:122130", "PR3e": "3179:118681", "AD8x2": "3179:122281", "PR4w": "3179:119020", "E3": "3179:122459", "AD1a-B": "3179:107586", "AD5b-B": "3179:115015", "AD6b-B": "3179:116208"};
 const figmaUrl = c => FIGMA_NODES[c] ? `https://www.figma.com/design/AnRP8zHPMcjHE7sJJORa0d/Universal-Mint-UXUI?node-id=${FIGMA_NODES[c].replace(':','-')}` : null;
 // Which Figma frame the current HTML state shows. Returns [code, note] — code null means no Figma frame exists.
 function figmaCode(){
@@ -1156,9 +1233,9 @@ function figmaCode(){
   }
   if (sc==='tokens'){
     if (scen('noRights')) return ['YT1c']; if (scen('noKyc')) return ['YT2'];
-    if (S.reqs.some(r=>r.status==='withdrawn')) return ['YTw']; if (S.draftSaved) return ['ADS1'];
-    if (S.reqs.some(r=>r.status==='review')) return ['AD7 진입'];
-    return [null, 'Tokens 목록, 요청 없음'];
+    if ((S.tokTab||'yours')==='all') return ['TK2'];
+    if (S.reqs.some(r=>r.status==='withdrawn')) return ['YTw']; if (S.justSaved) return ['ADS1'];
+    return ['TK1'];
   }
   if (sc==='ad0') return [scen('kybExpired') ? 'AD0b' : 'AD0'];
   if (sc==='ad1'){
@@ -1223,7 +1300,8 @@ function figmaCode(){
 }
 const lbl = c => `${c} ${FIGMA[c]}`;
 const SCENARIOS = [
-  ['정상 화면', [['st:start','Tokens 목록 (시작)'],['st:review',lbl('AD6b')],['st:inReview',lbl('AD7b')],['st:live',lbl('AD8')],['st:rejected',lbl('AD8x')],['st:withdrawn',lbl('AD7w')]]],
+  ['Tokens 진입', [['st:tk1',lbl('TK1')+' (초안, 투표 중, 심사 중 포함)'],['st:tk2',lbl('TK2')]]],
+  ['정상 화면', [['st:start','Tokens 목록, 요청 없이 시작'],['st:review',lbl('AD6b')],['st:inReview',lbl('AD7b')],['st:live',lbl('AD8')],['st:rejected',lbl('AD8x')],['st:withdrawn',lbl('AD7w')]]],
   ['작성 중 펼침, 편집', [['st:resume',lbl('ADS2')],['st:split',lbl('AD4a')],['st:excluded',lbl('AD4b')],['st:terms',lbl('AD4e')],['st:terms2',lbl('AD4e2')],['st:docusign',lbl('AD5h')]]],
   ['조직 승인 경로', [['st:orgWaiting',lbl('PR1')],['st:orgTurn',lbl('E1')],['st:prMid',lbl('PR2b')],['st:orgClosed',lbl('PR2y')],['st:orgApproved',lbl('PR5')],['st:orgRejected',lbl('PR3')],['st:propWithdrawn',lbl('PR4w')]]],
   ['시작 전 막힘', [['noRights',lbl('YT1c')],['noRightsPopup',lbl('AD0a')],['noKyc',lbl('YT2')],['kybExpired',lbl('AD0b')]]],
@@ -1265,13 +1343,15 @@ function applyProto(){
   const p = S.pend, f = FORCED[p.target] || {}, tgt = p.target;
   // start clean so every target opens the same way each time
   Object.assign(S, {reqs:[], cur:null, notes:[], d:fresh(p.kind), draftSaved:false, once:{}, refused:false, modal:null, mf:{}, signErr:false, signing:false,
-    notifOpen:false, menu:null, tip:false, errs:{}, fromReview:false, task:null, taskTab:'todo', backTo:null, done1:false, done2:false});
+    notifOpen:false, menu:null, tip:false, errs:{}, fromReview:false, task:null, taskTab:'todo', backTo:null, done1:false, done2:false, tokTab:'yours', tq:''});
   S.persona = f.persona || p.persona; S.rule = f.rule || p.rule;
   S.scenario = tgt.startsWith('st:') ? 'none' : tgt;
   const toReview = () => { S.d = fullDraft(p.kind); S.draftSaved = true; go('ad6'); };
   const atStep = (screen) => { S.d = fullDraft(p.kind); S.d.reached = STEP_OF[screen]; S.draftSaved = true; go(screen); };
   switch (tgt){
     case 'st:start': case 'noKyc': go('tokens'); break;
+    case 'st:tk1': { S.d = fresh(p.kind); S.d.name = ''; S.d.savedAt = Date.now(); S.draftSaved = true; const r = seedReq('review','direct'); r.fresh = false; S.d = Object.assign(fresh(p.kind), {name:'', savedAt:Date.now()}); go('tokens'); break; }
+    case 'st:tk2': go('tokens'); S.tokTab = 'all'; render(); break;
     case 'noRightsPopup': go('tokens'); S.modal = {type:'rights'}; render(); break;
     case 'st:resume': S.d = fullDraft(p.kind); S.d.reached = 1; S.d.savedAt = new Date().setHours(14,20,0,0); S.draftSaved = true; go('ad2', {resumed:true}); break;
     case 'st:split': atStep('ad4'); S.d.splitRules = true; render(); break;
@@ -1340,7 +1420,7 @@ function protoHTML(){
 function render(){
   const a = document.activeElement, fid = a && a.id, ss = a && a.selectionStart, se = a && a.selectionEnd;
   $('#app').innerHTML = (V[S.screen]||V.tokens)();
-  $('#layer').innerHTML = modalHTML() + notifHTML();
+  $('#layer').innerHTML = modalHTML() + notifHTML() + popHTML();
   const p = $('#proto'); p.innerHTML = protoHTML();
   $('#unread').hidden = !S.notes.some(n=>n.to===S.persona && !n.seen);
   $('#ini').textContent = me().ini; $('#pname').textContent = me().name; $('#pmail').textContent = me().mail;
@@ -1348,6 +1428,7 @@ function render(){
   const navOn = S.screen==='home' ? 'home' : S.screen==='tasks' ? 'tasks' : 'tokens';
   document.querySelectorAll('.side .nav').forEach(b=>b.classList.toggle('on', b.dataset.nav===navOn));
   if (window.lucide) lucide.createIcons();
+  placePops();
   if (fid){ const el = document.getElementById(fid); if (el){ el.focus(); try{ el.setSelectionRange(ss,se); }catch(_){} } }
 }
 
@@ -1416,7 +1497,7 @@ const A = {
     go(S.fromReview ? 'ad6' : v);
   },
   back(){ go(PREV[S.screen]||'tokens'); },
-  save(){ S.draftSaved=true; S.d.savedAt=Date.now(); go('tokens'); toast('Draft saved in this browser'); },
+  save(){ S.draftSaved=true; S.d.savedAt=Date.now(); S.tokTab='yours'; go('tokens',{justSaved:true}); toast('Draft saved in this browser'); },
   discard(){ S.modal={type:'discard'}; render(); },
   deleteDraft(){ S.modal={type:'deleteDraft'}; render(); },
   discardOk(){ closeModal(); S.draftSaved=false; S.d=fresh(); go('tokens'); toast('Draft deleted'); },
@@ -1434,6 +1515,7 @@ const A = {
   who(v){ S.d.who=v; render(); },
   size(v){ S.d.size=+v; delete S.errs.size; render(); },
   setv(v){ const i=v.indexOf(':'), k=v.slice(0,i), x=v.slice(i+1); S.d[k] = /^\d+$/.test(x) ? +x : x; delete S.errs[k]; render(); },
+  tokTab(v){ S.tokTab=v; render(); },
   split(v){ S.d.splitRules = v==='1'; render(); },
   exAdd(v){ S.d.excluded.push(v); S.xq=''; S.xOpen=false; render(); },
   exRm(v){ S.d.excluded = S.d.excluded.filter(x=>x!==v); render(); },
@@ -1538,16 +1620,17 @@ const A = {
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-a]');
   if (!t){
+    if (e.target.closest('.pop')) return; // clicks on a dropdown's header or padding keep it open
     let dirty = false;
     if (S.menu){ S.menu=null; dirty=true; }
     if (S.tip){ S.tip=false; dirty=true; }
-    if (S.xOpen && !e.target.closest('.xsearch')){ S.xOpen=false; dirty=true; }
+    if (S.xOpen && !e.target.closest('.xsearch, .pop')){ S.xOpen=false; dirty=true; }
     if (S.notifOpen && !e.target.closest('.notif')){ A.bell(null,null,{stopPropagation(){}}); return; }
     if (dirty) render();
     return;
   }
   if (t.getAttribute('aria-disabled')==='true' && t.dataset.a!=='tip') return;
-  if (S.xOpen && !t.closest('.xsearch')) S.xOpen = false;
+  if (S.xOpen && !t.closest('.xsearch, .pop')) S.xOpen = false;
   (A[t.dataset.a] || A.soon)(t.dataset.v, t, e);
 });
 
@@ -1555,6 +1638,7 @@ document.addEventListener('input', e => {
   const el = e.target;
   if (el.dataset.mf){ S.mf[el.dataset.mf] = el.value; if (S.errs[el.dataset.mf]){ delete S.errs[el.dataset.mf]; document.getElementById('err-'+el.dataset.mf)?.remove(); el.classList.remove('bad'); } return; }
   if (el.dataset.cl){ const [i,f]=el.dataset.cl.split(':'); S.mf.clauses[+i][f]=el.value; return; }
+  if (el.hasAttribute('data-tq')){ S.tq = el.value; if (!e.isComposing) render(); return; }
   if (el.hasAttribute('data-xq')){ S.xq = el.value; S.xOpen = true; if (!e.isComposing) render(); return; }
   const b = el.dataset.bind; if (!b || el.tagName==='SELECT') return;
   const d = S.d; d[b] = el.value;
