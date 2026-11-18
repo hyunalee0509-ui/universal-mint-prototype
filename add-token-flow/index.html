@@ -290,6 +290,10 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 .proto .btn{height:30px;font-size:11px;padding:0 10px;font-family:inherit}
 .proto .pnote{font-size:11px;color:var(--muted);line-height:1.45}
 .proto.min .pb{display:none}
+.proto .fig{flex:none;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:700;color:#fff;background:var(--brand);border-radius:6px;padding:1px 7px}
+.proto .fig.none{background:var(--muted)}
+.proto .fign{font-size:11px;color:var(--strong);line-height:1.45}
+.proto .fign em{font-style:normal;color:var(--muted)}
 
 @media (max-width:900px){
   .side{display:none}
@@ -1036,13 +1040,111 @@ function notifHTML(){
 }
 
 /* ================= prototype control panel (Korean, not product UI) ================= */
+/* Figma frame names (Add Token section 3179:105556). " · " in Figma names is shown as ", " here. */
+const FIGMA = {
+  'AD0':'준비 확인', 'AD0a':'상장 권한 없음, 안내 팝업', 'AD0a2':'내 인증(KYC) 미완료, 안내 팝업', 'AD0b':'준비 확인, 조직 KYB 만료',
+  'AD1a':'Token 타입', 'AD1b':'Token 고르기', 'AD1a-B':'Token, 타입 Custom 선택', 'AD1c':'Token 직접 등록', 'AD1c2':'Token 직접 등록, 이미 상장된 계약',
+  'AD1d':'Token 직접 등록, 주소 응답 없음', 'AD1e':'Token, Fireblocks 불러오기 실패', 'AD1g':'Token, Fireblocks에 상장할 토큰 없음', 'AD1h':'Token 직접 등록, 주소 읽는 중',
+  'AD1i':'Token 직접 등록, 주소 읽기 실패 (네트워크)', 'AD1x':'Token 직접 등록, 주소 형식 오류',
+  'AD2':'Details', 'AD2a':'Details, 이미지 올린 뒤', 'AD2b':'Details, 공개 문서 첨부 뒤', 'AD2-B':'Details, BMAX', 'AD2r':'Details, Review에서 Edit으로 들어옴',
+  'AD2x':'Details, 필수 입력 누락', 'AD2x2':'Details, 이미지 URL 불러오기 실패', 'ADS1':'Your tokens, 초안 저장 뒤', 'ADS2':'작성 중, 초안 이어 쓰기',
+  'AD3':'Backing', 'AD3a':'Backing, 이 자산을 보관하는 곳 없음', 'AD3b':'Backing, 증빙 올린 뒤', 'AD3c':'Backing, 커스텀 자산 (BMAX)', 'AD3d':'Backing, 함께 고를 수 없는 보관기관 펼침',
+  'AD3x':'Backing, 증빙 파일 용량·형식 오류', 'AD3y':'Backing, 보관기관 목록 불러오기 실패', 'ADD1':'작성 중, 초안 버리기 확인',
+  'AD4':'Investor terms', 'AD4c':'Investor terms, Mint/Burn (BMAX)', 'AD4d':'Investor terms, 수수료 입력', 'AD4x':'Investor terms, 수수료 소수점 초과',
+  'AD5':'Operations, 역할 (기본값 그대로)', 'AD5-B':'Operations, 역할 (BMAX)', 'AD5a':'Operations, 역할을 바꾼 뒤 (칩)', 'AD5f':'Operations, + Add 목록 펼침',
+  'AD5k':'Operations, DocuSign 미연결', 'AD5x':'Operations, Fee wallet 없음', 'AD5b':'Operations, 서명', 'AD5b-B':'Operations, 서명 (BMAX)',
+  'AD5c':'Operations, 서명, 자산 보유 vault 없음', 'AD5c2':'Operations, 계약에 연결된 Fireblocks 자산 없음', 'AD5d':'Operations, 서명, Burn을 다른 vault로', 'AD5e2':'Operations, 서명, Fireblocks 응답 없음',
+  'AD6':'Review, 내가 할 일 남음', 'AD6a':'Review, 인증 대기 (KYB·권한)', 'AD6b':'Review, 제출 가능', 'AD6b-B':'Review, 제출 가능 (BMAX)', 'ADE1':'제출, 서버가 거절',
+  'AD6c':'제출, 패스키 서명', 'AD6d':'제출, 조직 승인 제안', 'AD6e':'패스키 대기', 'AD6e2':'패스키 실패', 'AD6e3':'패스키, 다른 기기에만 있음',
+  'E1':'My tasks, 상장 제안 승인 차례 (승인자)', 'PR1':'제안, 조직 승인 대기', 'PR2':'제안, 다른 멤버 차례', 'PR2s':'제안, 승인 서명 (승인자)', 'PR2r':'제안, 반려 사유 입력 (승인자)',
+  'PR2z':'제안, 마지막 승인, 플랫폼이 거절 (승인자)', 'PR3':'제안, 반려됨 (제안한 사람)', 'PR3e':'다시 제안, 이전 값으로 채움', 'PR4':'제안, 철회 확인', 'PR4w':'제안, 철회됨 (제안한 사람)',
+  'PR5':'제안, 조직 승인 완료 (제안한 사람)', 'AD7b':'상장 요청 상세, 제출 직후', 'AD7 진입':'Tokens에서 심사 중 요청 열기', 'ADD2':'Your tokens, 초안 삭제 확인', 'ADD3':'Your tokens, 초안이 있는데 Add token',
+  'YT1c':'Your tokens, 상장 권한 없음 (잠금 + 말풍선)', 'YT2':'Your tokens, 내 인증(KYC) 미완료', 'YTw':'Your tokens, 철회된 상장 요청 행',
+  'AD7':'상장 요청 상세', 'AD7-B':'상장 요청 상세, 심사 중 (BMAX)', 'AD7c':'상장 요청 철회 확인', 'AD7w':'상장 요청 상세, 철회됨', 'AD7x':'철회 실패, 이미 결정됨', 'AD7x2':'철회 실패, 이미 거절됨',
+  'AD8':'상장 완료, 토큰 상세', 'AD8-B':'상장 완료, 토큰 상세 (BMAX)', 'AD8x':'거절, 이전 값으로 새 초안', 'AD8x2':'거절 뒤, 이전 값으로 새 초안', 'E2':'알림, 상장 승인됨', 'E3':'알림, 상장 거절됨',
+};
+// Which Figma frame the current HTML state shows. Returns [code, note] — code null means no Figma frame exists.
+function figmaCode(){
+  const d = S.d, m = S.modal?.type, custom = d.kind==='custom', sc = S.screen;
+  if (m==='newOverDraft') return ['ADD3']; if (m==='discard') return ['ADD1']; if (m==='deleteDraft') return ['ADD2']; if (m==='kyc') return ['AD0a2'];
+  if (m==='platformRefused') return ['PR2z']; if (m==='approve') return ['PR2s']; if (m==='reject') return ['PR2r'];
+  if (m==='withdrawReq') return ['AD7c']; if (m==='withdrawProp') return ['PR4'];
+  if (m==='submit'){
+    if (S.signErr) return ['AD6e2']; if (scen('passkeyOther') && !S.once.passkeyOther) return ['AD6e3']; if (S.signing) return ['AD6e'];
+    return [S.rule==='org' ? 'AD6d' : 'AD6c'];
+  }
+  if (sc==='tokens'){
+    if (scen('noRights')) return ['YT1c']; if (scen('noKyc')) return ['YT2'];
+    if (S.reqs.some(r=>r.status==='withdrawn')) return ['YTw']; if (S.draftSaved) return ['ADS1'];
+    if (S.reqs.some(r=>r.status==='review')) return ['AD7 진입'];
+    return [null, 'Tokens 목록, 요청 없음'];
+  }
+  if (sc==='ad0') return [scen('kybExpired') ? 'AD0b' : 'AD0'];
+  if (sc==='ad1'){
+    if (d.tokenSrc==='self'){
+      const st = d.read?.state;
+      if (S.errs.addr && !st) return ['AD1x']; if (st==='reading') return ['AD1h']; if (st==='noAnswer') return ['AD1d'];
+      if (st==='netFail') return ['AD1i']; if (st==='listed') return ['AD1c2']; return ['AD1c'];
+    }
+    if (scen('fbFail')) return ['AD1e']; if (scen('noFbTokens')) return ['AD1g'];
+    return [custom ? 'AD1a-B' : 'AD1b', custom ? '' : 'AD1a와 AD1b를 한 화면에'];
+  }
+  if (sc==='ad2'){
+    if (d.imgErr) return ['AD2x2']; if (S.errs.name) return ['AD2x']; if (S.fromReview) return ['AD2r'];
+    if (custom) return ['AD2-B']; if (d.docs.length) return ['AD2b']; if (d.img) return ['AD2a']; return ['AD2'];
+  }
+  if (sc==='ad3'){
+    if (scen('custFail')) return ['AD3y']; if (scen('noCustodian')) return ['AD3a']; if (d.porErr) return ['AD3x'];
+    if (d.showCombo) return ['AD3d']; if (custom) return ['AD3c']; if (d.por) return ['AD3b']; return ['AD3'];
+  }
+  if (sc==='ad4'){
+    if (!FEE_RE.test(d.issueFee) || !FEE_RE.test(d.redeemFee)) return ['AD4x']; if (feeSet(d)) return ['AD4d'];
+    return [custom ? 'AD4c' : 'AD4'];
+  }
+  if (sc==='ad5'){
+    if (S.errs.feeWallet) return ['AD5x']; if (scen('docusignOff')) return ['AD5k']; if (S.menu) return ['AD5f'];
+    if (JSON.stringify(d.roles) !== JSON.stringify(fresh().roles)) return ['AD5a'];
+    return [custom ? 'AD5-B' : 'AD5'];
+  }
+  if (sc==='ad5b'){
+    if (scen('noVault')) return ['AD5c']; if (scen('noAsset')) return ['AD5c2']; if (scen('fbNoAnswer')) return ['AD5e2'];
+    if (d.burnOther) return ['AD5d']; return [custom ? 'AD5b-B' : 'AD5b'];
+  }
+  if (sc==='ad6'){
+    if (S.refused) return ['ADE1']; if (scen('kycTodo')) return ['AD6']; if (scen('waitingPlatform')) return ['AD6a'];
+    if (scen('kybExpired')) return [null, 'Review, 조직 KYB 만료 (AD0b의 Review 쪽)'];
+    if (d.from?.type==='orgRejected') return ['PR3e']; if (d.from?.type==='rejected') return ['AD8x2'];
+    return [custom ? 'AD6b-B' : 'AD6b'];
+  }
+  if (sc==='ad7'){
+    const r = getR(); if (!r) return [null,''];
+    const mine = r.by===me().name, rc = r.d.kind==='custom';
+    switch (r.status){
+      case 'org': return [mine ? 'PR1' : 'PR2'];
+      case 'review': return r.path==='org' ? (mine ? ['PR5'] : [null,'상장 요청 상세, 승인자가 보는 심사 중']) : [r.fresh ? 'AD7b' : (rc ? 'AD7-B' : 'AD7')];
+      case 'live': return r.race ? ['AD7x'] : [null,'상장 요청 상세, 상장됨'];
+      case 'rejected': return [r.race ? 'AD7x2' : 'AD8x'];
+      case 'withdrawn': return ['AD7w'];
+      case 'orgRejected': return r.platformRefused ? [null,'제안한 사람이 보는 PR2z 결과'] : ['PR3'];
+      case 'propWithdrawn': return ['PR4w'];
+    }
+  }
+  if (sc==='ad8') return [getR()?.d.kind==='custom' ? 'AD8-B' : 'AD8'];
+  if (sc==='home'){
+    if (S.notifOpen){ const n = S.notes.find(x=>x.to===S.persona); if (n?.icon==='check' && n.go==='token') return ['E2']; if (n?.go==='req' && /rejected/.test(n.title) && !/proposal/.test(n.title)) return ['E3']; }
+    return [null,'Home'];
+  }
+  if (sc==='tasks') return ['E1'];
+  return [null,''];
+}
+const lbl = c => `${c} ${FIGMA[c]}`;
 const SCENARIOS = [
-  ['정상 화면', [['st:start','Tokens에서 시작'],['st:review','Review, 제출 직전 (AD6b)'],['st:inReview','제출 직후, 심사 중 (AD7b)'],['st:live','상장 완료, 토큰 상세 (AD8)'],['st:rejected','플랫폼 거절 (AD8x)'],['st:withdrawn','요청 철회됨 (AD7w)']]],
-  ['조직 승인 경로', [['st:orgWaiting','제안 뒤 승인 대기 (PR1)'],['st:orgTurn','승인자 차례, My tasks (E1)'],['st:orgApproved','조직 승인 완료 (PR5)'],['st:orgRejected','제안 반려됨 (PR3)'],['st:propWithdrawn','제안 철회됨 (PR4w)']]],
-  ['시작 전 막힘', [['noRights','상장 권한 없음 (YT1c, AD0a)'],['noKyc','내 인증(KYC) 미완료 (YT2, AD0a2)'],['kybExpired','조직 KYB 만료 (AD0b)']]],
-  ['단계에서 막힘', [['noFbTokens','Fireblocks에 상장할 토큰 없음 (AD1g)'],['addrListed','직접 등록: 이미 상장된 계약 (AD1c2)'],['noCustodian','이 자산의 보관기관 없음 (AD3a)'],['docusignOff','DocuSign 미연결 (AD5k)'],['kycTodo','Review: 내가 할 일 남음 (AD6)'],['waitingPlatform','Review: 플랫폼 인증 대기 (AD6a)'],['passkeyOther','패스키가 다른 기기에만 (AD6e3)']]],
-  ['외부, 서버 실패', [['fbFail','Fireblocks 토큰 불러오기 실패 (AD1e)'],['addrNoAnswer','직접 등록: 주소 응답 없음 (AD1d)'],['addrNetFail','직접 등록: 네트워크 실패 (AD1i)'],['custFail','보관기관 목록 실패 (AD3y)'],['noVault','자산 보유 vault 없음 (AD5c)'],['noAsset','계약에 연결된 자산 없음 (AD5c2)'],['fbNoAnswer','Fireblocks 응답 없음 (AD5e2)'],['serverRefused','제출: 서버가 거절 (ADE1)'],['passkeyFail','패스키 서명 실패 (AD6e2)'],['platformRefused','마지막 승인 뒤 플랫폼 거절 (PR2z)']]],
-  ['결과 경합', [['raceLive','철회 직전 플랫폼이 승인 (AD7x)'],['raceRejected','철회 직전 플랫폼이 거절 (AD7x2)']]],
+  ['정상 화면', [['st:start','Tokens 목록 (시작)'],['st:review',lbl('AD6b')],['st:inReview',lbl('AD7b')],['st:live',lbl('AD8')],['st:rejected',lbl('AD8x')],['st:withdrawn',lbl('AD7w')]]],
+  ['조직 승인 경로', [['st:orgWaiting',lbl('PR1')],['st:orgTurn',lbl('E1')],['st:orgApproved',lbl('PR5')],['st:orgRejected',lbl('PR3')],['st:propWithdrawn',lbl('PR4w')]]],
+  ['시작 전 막힘', [['noRights',lbl('YT1c')],['noKyc',lbl('YT2')],['kybExpired',lbl('AD0b')]]],
+  ['단계에서 막힘', [['noFbTokens',lbl('AD1g')],['addrListed',lbl('AD1c2')],['noCustodian',lbl('AD3a')],['docusignOff',lbl('AD5k')],['kycTodo',lbl('AD6')],['waitingPlatform',lbl('AD6a')],['passkeyOther',lbl('AD6e3')]]],
+  ['외부, 서버 실패', [['fbFail',lbl('AD1e')],['addrNoAnswer',lbl('AD1d')],['addrNetFail',lbl('AD1i')],['custFail',lbl('AD3y')],['noVault',lbl('AD5c')],['noAsset',lbl('AD5c2')],['fbNoAnswer',lbl('AD5e2')],['serverRefused',lbl('ADE1')],['passkeyFail',lbl('AD6e2')],['platformRefused',lbl('PR2z')]]],
+  ['결과 경합', [['raceLive',lbl('AD7x')],['raceRejected',lbl('AD7x2')]]],
 ];
 // Targets that only make sense for one viewer or one listing rule
 const FORCED = {
@@ -1087,17 +1189,24 @@ function applyProto(){
     case 'noRights': S.tip = true; go('tokens'); S.tip = true; render(); break;
     case 'kybExpired': go('ad0'); break;
     case 'st:review': case 'kycTodo': case 'waitingPlatform': toReview(); break;
-    case 'passkeyOther': case 'passkeyFail': case 'serverRefused': toReview(); S.modal = {type:'submit'}; render(); break;
+    case 'passkeyOther': toReview(); S.modal = {type:'submit'}; render(); break;
+    case 'passkeyFail': toReview(); S.once.passkeyFail = true; S.modal = {type:'submit'}; S.signErr = true; render(); break;
+    case 'serverRefused': toReview(); S.once.refused = true; S.refused = true; render(); break;
     case 'st:inReview': seedReq('review','direct'); go('ad7'); break;
     case 'st:live': { const r = seedReq('live','direct'); note('juya','check',`${r.d.name} is listed`,`Approved by the platform. ${T(r.d).firstAction}.`,'token',r.id); go('ad8'); break; }
     case 'st:rejected': { const r = seedReq('rejected','direct'); note('juya','x-circle',`${r.d.name} listing was rejected`,'Custody statement flagged. See the decision.','req',r.id); go('ad7'); break; }
     case 'st:withdrawn': seedReq('withdrawn','direct'); go('ad7'); break;
     case 'st:orgWaiting': seedReq('org','org'); go('ad7'); break;
-    case 'st:orgTurn': case 'platformRefused': { const r = seedReq('org','org'); note('joe','users-round',`Juya Kim proposed listing ${r.d.name}`,'Your approval is needed. 1 of 2 approved','task',r.id); S.task = 'r'+r.id; go('tasks'); break; }
+    case 'platformRefused': {
+      const r = seedReq('orgRejected','org');
+      Object.assign(r, {platformRefused:true, rejBy:'Joe Miller', rejReason:'Reason from the platform: a contract address is 0x followed by 40 hex characters.'});
+      S.taskTab = 'done'; S.task = 'd'+r.id; go('tasks'); S.modal = {type:'platformRefused', rid:r.id}; render(); break;
+    }
+    case 'st:orgTurn': { const r = seedReq('org','org'); note('joe','users-round',`Juya Kim proposed listing ${r.d.name}`,'Your approval is needed. 1 of 2 approved','task',r.id); S.task = 'r'+r.id; go('tasks'); break; }
     case 'st:orgApproved': seedReq('review','org'); go('ad7'); break;
     case 'st:orgRejected': seedReq('orgRejected','org'); go('ad7'); break;
     case 'st:propWithdrawn': seedReq('propWithdrawn','org'); go('ad7'); break;
-    case 'raceLive': case 'raceRejected': { const r = seedReq('review','direct'); r.fresh = false; go('ad7'); S.modal = {type:'withdrawReq', rid:r.id}; render(); break; }
+    case 'raceLive': case 'raceRejected': { const r = seedReq(tgt==='raceLive' ? 'live' : 'rejected','direct'); r.race = true; go('ad7'); break; }
     case 'fbFail': case 'noFbTokens': atStep('ad1'); break;
     case 'addrListed': case 'addrNoAnswer': case 'addrNetFail':
       atStep('ad1'); S.d.tokenSrc = 'self'; S.d.addr = '0x8f3a2B07e1D94c5A0b6E31f9C4d2a8E7b591c21b'; startRead(); break;
@@ -1113,7 +1222,10 @@ function protoHTML(){
   const inReview = S.reqs.filter(r=>r.status==='review');
   const p = S.pend, seg = (key, opts) => `<div class="seg">${opts.map(([v,l])=>`<button class="${p[key]===v?'on':''}" data-a="pend" data-v="${key}:${v}">${l}</button>`).join('')}</div>`;
   const forced = FORCED[p.target];
-  return `<button class="ph" data-a="protoMin" aria-expanded="${!S.protoMin}"><b>프로토타입 설정</b><span class="grow"></span><i data-lucide="${S.protoMin?'chevron-up':'chevron-down'}" style="width:14px"></i></button>
+  const [fc, fnote] = figmaCode();
+  const fig = fc ? `<span class="fig" title="Figma 프레임">${esc(fc)}</span><span class="fign">${esc(FIGMA[fc])}${fnote?`<br><em>${esc(fnote)}</em>`:''}</span>`
+                 : `<span class="fig none" title="Figma 프레임 없음">Figma 없음</span><span class="fign">${esc(fnote||'')}</span>`;
+  return `<button class="ph" data-a="protoMin" aria-expanded="${!S.protoMin}"><span class="grow" style="display:flex;flex-direction:column;gap:4px"><b>프로토타입 설정</b><span style="display:flex;gap:6px;align-items:flex-start">${fig}</span></span><i data-lucide="${S.protoMin?'chevron-up':'chevron-down'}" style="width:14px;flex:none"></i></button>
   <div class="pb">
     <div><div class="pl">화면 또는 상황</div><select class="select" data-proto="target" aria-label="화면 또는 상황">${SCENARIOS.map(([g,items])=>`<optgroup label="${g}">${items.map(([v,l])=>`<option value="${v}" ${p.target===v?'selected':''}>${l}</option>`).join('')}</optgroup>`).join('')}</select></div>
     <div><div class="pl">토큰 종류</div>${seg('kind',[['commodity','Commodity (AGP)'],['custom','Custom (BMAX)']])}</div>
