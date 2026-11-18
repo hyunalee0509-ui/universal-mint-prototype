@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add Token</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --bg-muted:#ebedf0; --bg-subtle:#f7f8fa; --surface:#fff;
+  --border:#e6e8eb; --border-strong:#d9d9d9;
+  --brand:#004285; --brand-strong:#091d38; --brand-tint:#eef3fa;
+  --strong:#050d18; --muted:#5a6472; --faint:#b9bec4;
+  --danger:#b31942; --discard:#b3123a;
+  --pos-bg:#e3f4ea; --pos:#1d7a48; --prog-bg:#e6effb; --prog:#2a5db0;
+  --neu-bg:#eef0f2; --crit-bg:#fbe8ec; --att-bg:#fdf1dc; --att:#9a5b00;
+  --ok-banner:#e6f4ec;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg-muted);font-family:"DM Sans",system-ui,sans-serif;color:var(--strong);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+[hidden]{display:none!important}
+
+/* shell */
+.top{height:62px;display:flex;align-items:center;gap:16px;padding:12px 20px}
+.brand{flex:1;display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;color:var(--brand-strong)}
+.brand img{width:22px;height:22px}
+.bell{position:relative;width:36px;height:36px;border:0;background:none;border-radius:10px;display:grid;place-items:center}
+.bell:hover{background:var(--bg-subtle)}
+.bell .dot{position:absolute;left:24px;top:6px;width:7px;height:7px}
+.vdiv{width:1px;height:24px;background:var(--border-strong)}
+.acct{display:flex;align-items:center;gap:12px}
+.avatar{width:32px;height:32px;border-radius:999px;background:var(--bg-subtle);display:grid;place-items:center;font-size:12px;font-weight:500;color:var(--muted)}
+.who b{display:block;font-weight:600;font-size:14px;line-height:1.5}
+.who span{display:block;font-size:12px;color:var(--muted);line-height:1.45}
+.body{padding:0 20px 20px}
+.panel{display:flex;background:var(--bg-subtle);border:1px solid var(--border);border-radius:20px;overflow:hidden;min-height:calc(100vh - 82px)}
+.side{width:248px;flex:none;border-right:1px solid var(--border);display:flex;flex-direction:column}
+.side nav{flex:1;padding:12px 0;display:flex;flex-direction:column;gap:4px}
+.nav{margin:0 12px;height:37px;display:flex;align-items:center;gap:12px;padding:8px 16px;border-radius:10px;color:var(--muted);position:relative;border:0;background:none;text-align:left;width:calc(100% - 24px)}
+.nav:hover{background:var(--bg-muted)}
+.nav img{width:16px;height:16px}
+.nav.on{background:var(--bg-muted);color:var(--strong);font-weight:600}
+.nav.on::before{content:"";position:absolute;left:0;top:8px;width:3px;height:21px;border-radius:6px;background:var(--brand)}
+.nav .count{margin-left:auto;min-width:20px;height:20px;border-radius:999px;background:var(--danger);color:#fff;font-size:12px;font-weight:500;display:grid;place-items:center;padding:0 4px}
+.side .org{border-top:1px solid var(--border);padding:12px 0;display:flex;flex-direction:column;gap:4px}
+.glabel{padding:6px 28px 8px;font-size:11px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;color:var(--faint)}
+.switch{margin:8px 12px 12px;border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;gap:8px;align-items:center;font-size:12px;line-height:1.45}
+.mono{width:28px;height:28px;border-radius:10px;background:var(--brand);display:grid;place-items:center;flex:none}
+.switch b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.switch span{color:var(--muted)}
+main{flex:1;min-width:0;padding:32px 32px 64px;display:flex;flex-direction:column;gap:24px}
+
+/* type + bits */
+.back{height:32px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--brand);border:0;background:none;padding:0;align-self:flex-start}
+h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
+.sub{color:var(--muted);font-size:14px}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.req{color:var(--danger)}
+.opt{color:var(--muted);font-weight:500}
+.eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.2px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.card-h{padding:20px 24px 16px}
+.card-h h2{margin:0;font-size:20px;font-weight:600;line-height:1.3}
+.card-b{padding:0 24px 24px;display:flex;flex-direction:column;gap:16px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 24px;border-top:1px solid var(--border)}
+.grow{flex:1;min-width:0}
+.row .t{font-weight:500}
+.row .d{font-size:12px;color:var(--muted)}
+.ico{width:28px;height:28px;border-radius:8px;background:var(--bg-subtle);display:grid;place-items:center;flex:none;color:var(--muted)}
+.ico svg{width:16px;height:16px}
+.ico.ok{background:var(--pos-bg);color:var(--pos);border-radius:999px}
+
+.btn{height:36px;padding:0 16px;border-radius:10px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--strong);white-space:nowrap}
+.btn:hover{background:var(--bg-subtle)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:#00356b}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn svg{width:16px;height:16px}
+.link{border:0;background:none;padding:0;font-size:13px;font-weight:500;color:var(--brand)}
+.link.danger{color:var(--discard);font-weight:600}
+.link:hover{text-decoration:underline}
+
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.b-pos{background:var(--pos-bg);color:var(--pos)}
+.b-prog{background:var(--prog-bg);color:var(--prog)}
+.b-neu{background:var(--neu-bg);color:var(--muted)}
+.b-crit{background:var(--crit-bg);color:var(--danger)}
+.b-att{background:var(--att-bg);color:var(--att)}
+
+.field{display:flex;flex-direction:column;gap:8px}
+.label{font-size:13px;font-weight:500}
+.input{height:44px;width:100%;border:1px solid var(--border);border-radius:10px;padding:0 14px;background:var(--surface);font-size:14px}
+.input::placeholder{color:var(--muted)}
+.input:focus,.select:focus{outline:2px solid #9bb7d6;outline-offset:0;border-color:var(--brand)}
+.select{appearance:none;height:44px;width:100%;border:1px solid var(--border);border-radius:10px;padding:0 40px 0 14px;background:var(--surface) url(assets/chevron-down.svg) no-repeat right 14px center/16px;font-size:14px}
+.hint{font-size:12px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* steps */
+.steps{display:flex;align-items:center;gap:12px;padding:20px 24px}
+.step{display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;text-align:left;flex:none}
+.step[disabled]{cursor:default}
+.dotn{width:24px;height:24px;border-radius:12px;display:grid;place-items:center;font-size:12px;font-weight:600;background:#fff;border:1.5px solid var(--faint);color:var(--muted);flex:none}
+.dotn img{width:14px;height:14px}
+.step.done .dotn,.step.cur .dotn{background:var(--brand);border-color:var(--brand);color:#fff}
+.step .nm{font-size:14px;font-weight:500;color:var(--muted);line-height:1.25}
+.step.done .nm{color:var(--strong)}
+.step.cur .nm{color:var(--strong);font-weight:600}
+.step .meta{font-size:13px;color:var(--muted);line-height:1.25}
+.conn{flex:1;height:2px;background:var(--border);min-width:12px}
+.conn.on{background:var(--brand)}
+.step.done:hover .nm{text-decoration:underline}
+
+.rhead{display:flex;align-items:center;gap:16px}
+.rhead img.tk,.rhead .tk{width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none}
+.footer{display:flex;align-items:center;gap:12px;padding-top:8px}
+
+/* segmented */
+.seg{display:flex;background:var(--bg-subtle);border:1px solid var(--border);border-radius:10px;padding:3px}
+.seg button{flex:1;height:34px;border:0;border-radius:8px;background:none;font-size:12px;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--strong);font-weight:500;box-shadow:0 1px 2px rgba(5,13,24,.08)}
+
+/* options list */
+.opt-row{display:flex;align-items:center;gap:12px;padding:14px 24px;border-top:1px solid var(--border);cursor:pointer;width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left}
+.opt-row:hover{background:var(--bg-subtle)}
+.opt-row.sel{background:#f3f6fa}
+.opt-row.dis{cursor:default;color:var(--faint)}
+.opt-row.dis:hover{background:none}
+.radio{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--faint);flex:none;background:#fff}
+.sel .radio{border:4px solid var(--brand)}
+.chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--faint);flex:none;display:grid;place-items:center;background:#fff}
+.chk.on{background:var(--brand);border-color:var(--brand)}
+.chk.on::after{content:"";width:8px;height:4px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.tile{width:32px;height:32px;border-radius:8px;background:var(--bg-subtle);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--strong);flex:none}
+
+/* type cards */
+.typecards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.typecard{border:1px solid var(--border);border-radius:10px;padding:16px;background:#fff;text-align:left;display:flex;gap:12px}
+.typecard.sel{border-color:var(--brand);background:#f3f6fa;box-shadow:inset 0 0 0 1px var(--brand)}
+.typecard b{display:block;font-weight:600}
+
+/* upload */
+.thumb{width:64px;height:64px;border-radius:12px;border:1px dashed var(--border-strong);background:var(--bg-subtle) center/cover no-repeat;flex:none}
+.thumb.has{border-style:solid;border-color:var(--border)}
+.drop{border:1px dashed var(--border-strong);border-radius:10px;padding:14px;display:flex;justify-content:center;gap:6px;font-size:13px;background:#fff;cursor:pointer;width:100%}
+.drop.over{border-color:var(--brand);background:var(--brand-tint)}
+.file{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+
+/* chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{height:26px;border-radius:999px;background:var(--neu-bg);display:inline-flex;align-items:center;gap:6px;padding:0 6px 0 10px;font-size:12px;font-weight:500}
+.chip small{color:var(--muted);font-weight:400}
+.chip button{border:0;background:none;color:var(--muted);padding:0 2px;font-size:13px;line-height:1}
+.addchip{height:26px;border-radius:999px;border:1px dashed var(--border-strong);background:#fff;font-size:12px;font-weight:600;color:var(--brand);padding:0 10px}
+.rolerow{display:grid;grid-template-columns:1fr 1.15fr;gap:16px;padding:16px 0;border-top:1px solid var(--border);align-items:start}
+.rolerow:first-child{border-top:0;padding-top:0}
+.menu{position:absolute;z-index:20;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(5,13,24,.12);padding:6px;min-width:220px}
+.menu button{display:flex;width:100%;gap:8px;align-items:center;border:0;background:none;border-radius:8px;padding:8px 10px;text-align:left;font-size:13px}
+.menu button:hover{background:var(--bg-subtle)}
+.menu small{display:block;color:var(--muted);font-size:12px}
+
+/* summary list */
+.sum{display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:center;padding:14px 24px;border-top:1px solid var(--border)}
+.sum .k{color:var(--muted);font-size:13px}
+.sum .v{font-size:13px;font-weight:500}
+
+/* list table */
+.thead,.trow{display:grid;grid-template-columns:2.2fr 1.3fr .8fr 2fr 1.2fr 24px;gap:12px;align-items:center;padding:0 24px}
+.thead{height:36px;border-top:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase}
+.trow{height:58px;border-top:1px solid var(--border);cursor:pointer}
+.trow:hover{background:var(--bg-subtle)}
+.lrow{display:grid;grid-template-columns:2.6fr 1.4fr 1.6fr 24px;gap:12px;align-items:center;padding:0 24px;height:58px;border-top:1px solid var(--border);cursor:pointer}
+.lrow:hover{background:var(--bg-subtle)}
+.lrow.hl{background:#f3f6fa}
+.idn{display:flex;align-items:center;gap:12px}
+.idn b{display:block;font-weight:500;font-size:14px;line-height:1.3}
+.idn span{font-size:12px;color:var(--muted)}
+.bar{flex:1;height:4px;border-radius:2px;background:var(--border);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand)}
+.tabs{display:flex;gap:20px;border-bottom:1px solid var(--border)}
+.tab{border:0;background:none;padding:8px 2px 10px;font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:center;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--strong);font-weight:500;border-color:var(--brand)}
+.tab .n{font-size:11px;background:var(--neu-bg);border-radius:6px;padding:0 6px}
+
+/* banners */
+.banner{display:flex;gap:14px;align-items:center;background:var(--ok-banner);border-radius:10px;padding:16px 20px}
+.banner .c{width:28px;height:28px;border-radius:999px;background:#fff;display:grid;place-items:center;color:var(--pos)}
+.banner .c svg{width:16px;height:16px}
+.banner b{display:block;font-weight:600}
+.banner span{font-size:13px;color:var(--muted)}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(5,13,24,.35);display:grid;place-items:center;z-index:50;padding:16px}
+.modal{width:min(460px,100%);background:#fff;border-radius:14px;box-shadow:0 20px 48px rgba(5,13,24,.2);overflow:hidden}
+.modal .mh{padding:22px 24px 14px}
+.modal .mh h3{margin:0 0 4px;font-size:20px;font-weight:600}
+.modal .mh p{margin:0;font-size:13px;color:var(--muted)}
+.mrow{display:grid;grid-template-columns:136px 1fr;padding:11px 24px;border-top:1px solid var(--border);font-size:13px}
+.mrow .k{color:var(--muted)}
+.mrow .v{font-weight:500}
+.msign{display:flex;gap:12px;align-items:center;background:var(--bg-subtle);border-top:1px solid var(--border);padding:16px 24px}
+.mfoot{display:flex;justify-content:flex-end;gap:8px;padding:14px 24px;border-top:1px solid var(--border)}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(1turn)}}
+
+/* request progress */
+.rp{display:flex;align-items:center;gap:14px;padding:18px 24px}
+.rp .s{display:flex;gap:10px;align-items:center}
+.rp .s b{display:block;font-weight:500;font-size:14px;line-height:1.25}
+.rp .s span{font-size:12px;color:var(--muted)}
+.ring{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--faint);flex:none;display:grid;place-items:center;background:#fff}
+.ring.done{background:var(--brand);border-color:var(--brand)}
+.ring.done img{width:13px}
+.ring.cur{border:2px solid var(--brand)}
+.ring.cur::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.cols{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr)}
+.stats>div{padding:20px 16px;border-left:1px solid var(--border)}
+.stats>div:first-child{border-left:0}
+.stats .big{font-size:28px;font-weight:500;margin:6px 0 10px}
+
+/* notifications */
+.notif{position:fixed;top:56px;right:24px;width:360px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 16px 40px rgba(5,13,24,.16);z-index:40;overflow:hidden}
+.notif h4{margin:0;padding:16px 20px;font-size:16px;font-weight:600}
+.nitem{display:flex;gap:12px;padding:12px 20px;border-top:1px solid var(--border);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;align-items:flex-start}
+.nitem:hover{background:var(--bg-subtle)}
+.nitem.unread{background:#f3f6fa}
+.nitem b{display:block;font-weight:500;font-size:13px}
+.nitem span{font-size:12px;color:var(--muted)}
+.nitem time{margin-left:auto;font-size:12px;color:var(--muted)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--brand-strong);color:#fff;border-radius:10px;padding:12px 18px;font-size:13px;z-index:60;box-shadow:0 8px 24px rgba(5,13,24,.25)}
+
+/* prototype-only control */
+.proto{position:fixed;right:16px;bottom:16px;z-index:45;background:#fff;border:1px dashed var(--brand);border-radius:12px;padding:10px 12px;font-size:12px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 18px rgba(5,13,24,.1)}
+.proto b{color:var(--brand)}
+
+@media (max-width:900px){
+  .side{display:none}
+  .body{padding:0 8px 8px}
+  main{padding:20px 16px 48px}
+  .steps{overflow-x:auto}
+  .step .meta{display:none}
+  .grid2,.typecards,.cols,.rolerow{grid-template-columns:1fr}
+  .sum{grid-template-columns:1fr auto}
+  .sum .k{grid-column:1/-1}
+  .who{display:none}
+  .thead{display:none}
+  .trow,.lrow{grid-template-columns:1fr auto}
+  .trow>:nth-child(n+3):not(:last-child),.lrow>:nth-child(3){display:none}
+  .stats{grid-template-columns:1fr}
+  .stats>div{border-left:0;border-top:1px solid var(--border)}
+  .notif{right:8px;left:8px;width:auto}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img src="assets/logo.png" alt="">Universal Mint</div>
+  <button class="bell" data-act="bell" aria-label="Notifications"><i data-lucide="bell" style="width:18px;height:18px;color:#5a6472"></i><img class="dot" id="unread" src="assets/unread.svg" alt="" hidden></button>
+  <div class="vdiv"></div>
+  <div class="acct"><div class="avatar">JU</div><div class="who"><b>Juya Kim</b><span>juya.k@bharvest.io</span></div><img src="assets/chevron-down.svg" width="14" alt=""></div>
+</header>
+<div class="body"><div class="panel">
+  <aside class="side">
+    <nav>
+      <button class="nav" data-go="home"><img src="assets/nav-home.svg" alt="">Home</button>
+      <button class="nav" data-soon><img src="assets/nav-inbox.svg" alt="">My tasks<span class="count">5</span></button>
+      <button class="nav" data-soon><img src="assets/nav-inbox.svg" alt="">Requests</button>
+      <button class="nav" data-soon><img src="assets/nav-proposals.svg" alt="">Proposals</button>
+      <button class="nav" data-go="tokens"><img src="assets/nav-tokens.svg" alt="">Tokens</button>
+      <button class="nav" data-soon><img src="assets/nav-disclosures.svg" alt="">Disclosures</button>
+    </nav>
+    <div class="org">
+      <div class="glabel">Organization</div>
+      <button class="nav" data-soon><img src="assets/nav-members.svg" alt="">Members</button>
+      <button class="nav" data-soon><img src="assets/nav-rules.svg" alt="">Approval rules</button>
+      <button class="nav" data-soon><img src="assets/nav-custodians.svg" alt="">Custodians</button>
+      <button class="nav" data-soon><img src="assets/nav-credentials.svg" alt="">Credentials</button>
+      <button class="nav" data-soon><img src="assets/nav-audit.svg" alt="">Audit log</button>
+      <button class="nav" data-soon><img src="assets/nav-profile.svg" alt="">Profile &amp; wallets</button>
+    </div>
+    <div class="switch"><div class="mono"><img src="assets/org.svg" width="16" alt=""></div><div class="grow"><b>Ault Global Commodities</b><span>Issuer</span></div><img src="assets/chevron-down.svg" width="14" alt=""></div>
+  </aside>
+  <main id="app"></main>
+</div></div>
+<div id="layer"></div>
+<div class="proto" id="proto" hidden></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const today = new Date();
+const fmt = d => d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+const kb = n => n > 1e6 ? (n/1048576).toFixed(1)+' MB' : Math.max(1, Math.round(n/1024))+' KB';
+
+const MEMBERS = [
+  {id:'gov', name:'Governance', meta:'2 of 4', sub:'Approval group'},
+  {id:'juya', name:'Juya Kim', sub:'Member'},
+  {id:'joe', name:'Joe Miller', sub:'Member'},
+  {id:'jason', name:'Jason Lee', sub:'Member'},
+  {id:'david', name:'David Park', sub:'Member'},
+  {id:'colossus', name:'Colossus', sub:'Another organization'},
+];
+const ROLES = [
+  ['am','Account manager',false,'Confirms redemption amounts, delivery details, and fees with the investor.'],
+  ['mint','Mint approver',true,'Approves minting for issuance requests.'],
+  ['burn','Burn approver',true,'Approves burning for redemption requests.'],
+  ['op','Operator',false,'Arranges reserve transfers and asset release, and uploads proof of delivery.'],
+];
+const STEPS = ['Token','Details','Backing','Investor terms','Operations','Review'];
+const STEP_OF = {ad1:0, ad2:1, ad3:2, ad4:3, ad5:4, ad5b:4, ad6:5};
+
+const fresh = () => ({
+  kind:'commodity', tokenSrc:'fireblocks', token:'agp',
+  img:'', imgUrl:'', name:'Ault Platinum', desc:'Allocated platinum bars in segregated storage. 1 token = 1 oz.', docs:[],
+  custodians:{tw:true}, holder:'Ault Global Commodities', acct:'', por:null, showCombo:false,
+  who:'any', size:100,
+  issueVia:'Manual settlement', redeemVia:'FedEx delivery', issueFee:'No fee', redeemFee:'No fee', excluded:'none', terms:'2 required, 1 optional',
+  roles:{am:['gov'], mint:['gov'], burn:['gov'], op:['gov']},
+  treasury:'op', feeWallet:'', agreements:'Off',
+  executor:'Fireblocks', credential:'treasury', vault:'Vault 1', note:'', burnOther:false,
+  reached:0,
+});
+
+const S = {
+  screen:'tokens', d:fresh(), draftSaved:false,
+  listing:null,       // null | 'review' | 'live'
+  submittedAt:null, liveAt:null,
+  modal:null, signing:false, notifOpen:false, unread:false, menu:null, justSubmitted:false,
+};
+
+function go(screen, extra){ Object.assign(S, {screen, menu:null}, extra||{}); if (STEP_OF[screen]!=null) S.d.reached = Math.max(S.d.reached, STEP_OF[screen]); render(); window.scrollTo(0,0); }
+function toast(msg){ const t = document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 2600); }
+
+/* ---------- shared pieces ---------- */
+const badge = (tone, txt) => `<span class="badge b-${tone}">${esc(txt)}</span>`;
+const tokenImg = (size) => S.d.img ? `<img class="tk" src="${esc(S.d.img)}" alt="" style="width:${size}px;height:${size}px;border-radius:12px;object-fit:cover">` : `<img src="assets/token-sample-${size===44?44:56}.svg" width="${size}" height="${size}" alt="">`;
+const sym = () => S.d.token==='apd' ? 'APD' : 'AGP';
+
+function stepMeta(i){
+  const d = S.d;
+  return [ `${sym()}, Mainnet`, d.docs.length ? `${d.docs.length} document${d.docs.length>1?'s':''}` : 'No documents',
+    custNames()[0]?.replace(/^The /,'') || '', `${d.size} ${sym()} steps`, `${rolePeople().length} role${rolePeople().length>1?'s':''}`, '' ][i];
+}
+function steps(cur){
+  let h = '<div class="card"><div class="steps">';
+  STEPS.forEach((n,i)=>{
+    const done = i < cur, on = i===cur;
+    if (i) h += `<div class="conn ${i<=cur?'on':''}"></div>`;
+    h += `<button class="step ${done?'done':''} ${on?'cur':''}" ${done?`data-step="${i}"`:'disabled'}>
+      <span class="dotn">${done?'<img src="assets/check.svg" alt="">':i+1}</span>
+      <span><span class="nm">${n}</span>${done?`<span class="meta" style="display:block">${esc(stepMeta(i))}</span>`:''}</span></button>`;
+  });
+  return h + '</div></div>';
+}
+function rhead(title, sub, right=''){
+  return `<div class="rhead">${tokenImg(56)}<div class="grow"><h1>${esc(title)}</h1><div class="sub">${esc(sub)}</div></div>${right}</div>`;
+}
+function draftHead(){
+  return S.d.reached>=1 || S.screen!=='ad1' ? rhead(S.d.name||'New token', `${sym()}, draft saved in this browser`) : rhead('New token','Listing draft, saved in this browser');
+}
+function footer(next, {back=true, label='Continue', disabled=false}={}){
+  return `<div class="footer"><button class="link" data-act="save">Save and exit</button><button class="link danger" data-act="discard">Discard draft</button><span class="grow"></span>
+  ${back?'<button class="btn" data-act="back">Back</button>':''}<button class="btn primary" data-next="${next}" ${disabled?'disabled':''}>${label}</button></div>`;
+}
+const wrap = (cur, body, next, opts) => `<button class="back" data-go="tokens">← Your tokens</button>${draftHead()}${steps(cur)}${body}${footer(next, opts)}`;
+
+function custNames(){ const m={tw:'The Wyoming Reserve', sb:'Seoul Bullion Vault'}; return Object.keys(S.d.custodians).filter(k=>S.d.custodians[k]).map(k=>m[k]); }
+function rolePeople(){ const s=new Set(); Object.values(S.d.roles).flat().forEach(x=>s.add(x)); return [...s].map(id=>MEMBERS.find(m=>m.id===id).name); }
+function summaryRows(edit){
+  const d = S.d;
+  const rows = [
+    ['Token', `${d.name} (${sym()}) on Ault Mainnet`, 'ad1'],
+    ['Investors see', `${d.name}, ${d.docs.length ? d.docs.length+' public document'+(d.docs.length>1?'s':'') : 'no public documents'}`, 'ad2'],
+    ['Backed by', custNames().join(', '), 'ad3'],
+    ['Investor terms', `${d.who==='any'?'Any KYC-verified investor':'Only investors you approve'}, steps of ${d.size} ${sym()}`, 'ad4'],
+    ['Roles', rolePeople().join(', '), 'ad5'],
+    ['Signing', `${d.vault} by ${d.executor}`, 'ad5b'],
+    ['Wallets', d.feeWallet ? 'Treasury wallet, fee wallet' : 'Treasury wallet', 'ad5'],
+  ];
+  return rows.map(([k,v,s])=>`<div class="sum"><span class="k">${k}</span><span class="v">${esc(v)}</span>${edit?`<button class="link" data-go="${s}">Edit</button>`:'<span></span>'}</div>`).join('');
+}
+
+/* ---------- screens ---------- */
+const V = {};
+
+V.tokens = () => {
+  const reqRows = [];
+  if (S.draftSaved) reqRows.push(`<div class="lrow" data-go="ad1"><div class="idn"><span class="tile">DFT</span><div><b>${esc(S.d.name||'Untitled token')}</b><span>Draft saved in this browser only</span></div></div><div>${badge('neu','Draft')}</div><div style="text-align:right"><button class="btn" data-go="ad${S.d.reached>=5?6:[1,2,3,4,5][S.d.reached]}">Continue</button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
+  if (S.listing==='review') reqRows.push(`<div class="lrow ${S.justSubmitted?'hl':''}" data-go="ad7"><div class="idn"><span class="tile">${sym()}</span><div><b>${esc(S.d.name)}</b><span>Submitted ${fmt(S.submittedAt)}</span></div></div><div>${badge('prog','In platform review')}</div><div></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
+  reqRows.push(`<div class="lrow" data-soon><div class="idn"><span class="tile">APD</span><div><b>Ault Palladium</b><span>Custody agreement expired</span></div></div><div>${badge('crit','Rejected')}</div><div style="text-align:right"><button class="btn" data-soon>Start a new draft</button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
+  const listed = [
+    S.listing==='live' ? ['AGP', S.d.name, sym(), 'Active', '0', 100, '0 / 0', 'ad8'] : null,
+    ['ASLV','Ault Silver','ASLV','Active','5,000',100,'+3,200 / −600'],
+    ['BMAX','BMAX','Bitcoin','Active','1,200',100,'+500 / 0'],
+  ].filter(Boolean);
+  return `
+  <div style="display:flex;align-items:flex-start;gap:16px"><div class="grow"><h1>Tokens</h1><div class="sub" style="margin-top:6px">Manage your tokens and follow listing requests.</div></div>
+  <button class="btn primary" data-go="ad0">Add token</button></div>
+  <div class="tabs"><button class="tab on">Your tokens <span class="n">${listed.length+reqRows.length}</span></button><button class="tab" data-soon>All listed <span class="n">12</span></button></div>
+  <div class="card"><div class="card-h" style="padding-bottom:12px"><h2 style="font-size:16px">Listed <span class="muted" style="font-weight:400">${listed.length}</span></h2></div>
+    <div class="thead"><span>Token</span><span>Status</span><span style="text-align:right">Supply</span><span>Reserve</span><span style="text-align:right">Pending</span><span></span></div>
+    ${listed.map(r=>`<div class="trow" ${r[7]?`data-go="${r[7]}"`:'data-soon'}><div class="idn">${r[0]==='AGP'?tokenImg(28).replace(/width="56" height="56"/,'width="28" height="28"'):`<span class="tile" style="border-radius:999px">${r[0]==='BMAX'?'<span style="width:12px;height:12px;border-radius:50%;background:#f0a23b"></span>':'<span style="width:12px;height:12px;border-radius:50%;background:#b3bac4"></span>'}</span>`}<div><b>${esc(r[1])}</b><span>${esc(r[2])}</span></div></div>
+      <div>${badge('pos',r[3])}</div><div style="text-align:right;font-size:15px">${r[4]}</div><div style="display:flex;align-items:center;gap:10px"><span class="bar"><i style="width:${r[5]}%"></i></span><span class="small">${r[5]}%</span></div><div class="muted small" style="text-align:right">${r[6]}</div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`).join('')}
+  </div>
+  <div class="card"><div class="card-h" style="padding-bottom:12px"><h2 style="font-size:16px">Listing requests <span class="muted" style="font-weight:400">${reqRows.length}</span></h2></div>${reqRows.join('')}</div>`;
+};
+
+V.ad0 = () => `
+  <button class="back" data-go="tokens">← Your tokens</button>
+  <div><h1>Add a token</h1><div class="sub" style="margin-top:6px">You can start a draft now. It saves in this browser.</div></div>
+  <div class="card">
+    <div style="padding:16px 24px"><div class="eyebrow">Before you can submit</div><div style="display:flex;align-items:baseline;gap:12px;margin-top:6px"><span style="font-size:32px;font-weight:500;line-height:1">3</span><span class="small muted">Left before you can submit</span></div></div>
+    <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><div class="grow"><div class="t">Verify your identity</div><div class="d">You, about 5 minutes</div></div><button class="btn" data-soon>Verify</button></div>
+    <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><div class="grow"><div class="t">Verify your business (KYB)</div><div class="d">Usually 1 to 2 business days</div></div>${badge('prog','In review')}</div>
+    <div class="row"><span class="ico"><i data-lucide="key-round"></i></span><div class="grow"><div class="t">Issuer permission</div><div class="d">Granted after your business is verified</div></div>${badge('neu','Waiting')}</div>
+    <div class="row"><span class="ico ok"><i data-lucide="check"></i></span><div class="grow"><div class="t">2 already done</div><div class="d">Passkey, treasury wallet</div></div><button class="link" data-toggle="done1">${S.done1?'Hide':'Show'}</button></div>
+    ${S.done1?`<div class="row" style="padding-left:64px"><div class="grow"><div class="t">Passkey</div><div class="d">Added on this device</div></div>${badge('pos','Done')}</div><div class="row" style="padding-left:64px"><div class="grow"><div class="t">Treasury wallet</div><div class="d">Operation wallet, 0x25AB…297C</div></div>${badge('pos','Done')}</div>`:''}
+  </div>
+  <div class="card">
+    <div style="padding:16px 24px 12px"><div class="eyebrow">For this token</div></div>
+    <div class="row"><span class="ico"><i data-lucide="file-text"></i></span><div class="grow"><div class="t">Proof of reserve</div><div class="d">Some custodians require it</div></div></div>
+    <div class="row"><span class="ico ok"><i data-lucide="check"></i></span><div class="grow"><div class="t">3 ready</div><div class="d">Fireblocks, tokens and vaults, custodians</div></div><button class="link" data-toggle="done2">${S.done2?'Hide':'Show'}</button></div>
+    ${S.done2?['Fireblocks connected','2 tokens and vaults found','2 custodians hold platinum'].map(t=>`<div class="row" style="padding-left:64px"><div class="grow t">${t}</div>${badge('pos','Ready')}</div>`).join(''):''}
+  </div>
+  <div class="footer"><button class="btn" data-go="tokens">Cancel</button><span class="grow"></span><button class="btn primary" data-act="start">Start token draft</button></div>`;
+
+V.ad1 = () => {
+  const d = S.d;
+  const tok = [
+    ['agp','Ault Platinum (AGP)','Ault Treasury, Vault 1','0x8f3a…c21b on Ault Mainnet, 6 decimals','#b3bac4'],
+    ['apd','Ault Palladium (APD)','Ault Operations, Vault 2','0x41c0…9e07 on Ault Mainnet, 6 decimals','#c9b48f'],
+  ];
+  return wrap(0, `
+  <div class="card"><div class="card-h"><h2>What kind of token is it? <span class="req">*</span></h2></div>
+    <div class="card-b"><div class="typecards">
+      <button class="typecard ${d.kind==='commodity'?'sel':''}" data-kind="commodity"><span class="radio" style="${d.kind==='commodity'?'border:4px solid var(--brand)':''}"></span><span><b>Commodity</b><span class="small muted">Metal held at a custodian</span><br><span class="small muted">Requests are called Issue and Redeem</span></span></button>
+      <button class="typecard ${d.kind==='custom'?'sel':''}" data-kind="custom"><span class="radio" style="${d.kind==='custom'?'border:4px solid var(--brand)':''}"></span><span><b>Custom token</b><span class="small muted">Any other asset you back</span><br><span class="small muted">Requests are called Mint and Burn</span></span></button>
+    </div><div class="hint">This choice sets which custodians you can pick (only those that hold this type) and the words on requests (${d.kind==='custom'?'Mint and Burn':'Issue and Redeem'}).</div></div>
+  </div>
+  <div class="card"><div class="card-h"><h2>Which token are you listing? <span class="req">*</span></h2></div>
+    <div class="card-b" style="padding-bottom:16px"><div class="seg"><button class="${d.tokenSrc==='fireblocks'?'on':''}" data-src="fireblocks">From Fireblocks</button><button class="${d.tokenSrc==='self'?'on':''}" data-src="self">Register it yourself</button></div></div>
+    ${d.tokenSrc==='fireblocks' ? tok.map(t=>`<button class="opt-row ${d.token===t[0]?'sel':''}" data-token="${t[0]}"><span class="radio"></span><span class="tile"><span style="width:14px;height:14px;border-radius:50%;background:${t[4]}"></span></span><span class="grow"><b style="font-weight:500">${t[1]}</b><span class="small muted" style="display:block">${t[2]}</span>${d.token===t[0]?`<span class="small muted">${t[3]}</span>`:''}</span></button>`).join('')
+      + `<div class="opt-row dis"><span class="radio" style="border-color:#e6e8eb"></span><span class="tile"><span style="width:14px;height:14px;border-radius:50%;background:#dfe2e6"></span></span><span class="grow"><span style="display:block">Ault Silver (ASLV)</span><span class="small">Already listed</span></span>${badge('neu','Listed')}</div>`
+      : `<div class="card-b"><div class="field"><label class="label" for="addr">Contract address <span class="req">*</span></label><input class="input" id="addr" placeholder="0x…" data-bind="addr" value="${esc(d.addr||'')}"><span class="hint">This prototype covers the Fireblocks path. Switch back to continue.</span></div></div>`}
+  </div>`, 'ad2', {back:false, disabled: d.tokenSrc!=='fireblocks'});
+};
+
+V.ad2 = () => {
+  const d = S.d;
+  return wrap(1, `
+  <div class="card"><div class="card-h"><h2>What should investors see?</h2></div>
+   <div class="card-b">
+    <div class="field"><span class="label">Token image <span class="opt">(optional)</span></span>
+      <div style="display:flex;gap:16px;align-items:center">
+        <div class="thumb ${d.img?'has':''}" style="${d.img?`background-image:url('${esc(d.img)}')`:''}"></div>
+        <div class="grow" style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:12px"><label class="btn"><img src="assets/upload.svg" width="16" alt="">Upload image<input type="file" accept="image/png,image/jpeg" hidden data-file="img"></label>
+          <input class="input" style="height:36px" placeholder="Paste image URL" data-bind="imgUrl" value="${esc(d.imgUrl)}"></div>
+          <span class="hint">Square PNG or JPG, 256 × 256 recommended.${d.img?' <button class="link small" data-act="clearimg">Remove image</button>':''}</span>
+        </div></div></div>
+    <div class="field"><label class="label" for="pn">Public name <span class="req">*</span></label><input class="input" id="pn" data-bind="name" value="${esc(d.name)}" maxlength="40"></div>
+    <div class="field"><label class="label" for="ds">One-line description <span class="opt">(optional)</span></label><input class="input" id="ds" data-bind="desc" value="${esc(d.desc)}" maxlength="120"></div>
+    <div class="field"><span class="label">Public documents <span class="opt">(optional)</span></span>
+      <span class="hint">Upload a whitepaper, summary or terms. They become public once the token is listed.</span>
+      ${d.docs.map((f,i)=>`<div class="file"><span class="ico"><i data-lucide="file-text"></i></span><span class="grow"><span style="display:block;font-weight:500;font-size:13px">${esc(f.name)}</span><span class="hint">${kb(f.size)}</span></span><button class="link danger" data-rmdoc="${i}">Remove</button></div>`).join('')}
+      <label class="drop" data-drop="docs"><b style="font-weight:500">Add document</b><span class="muted">or drop here</span><input type="file" multiple accept=".pdf,.doc,.docx,.png,.jpg" hidden data-file="docs"></label>
+    </div>
+   </div></div>
+  <div class="card"><div class="card-h" style="padding-bottom:12px"><div class="eyebrow">How investors see it</div></div>
+    <div class="card-b" style="gap:12px;padding-bottom:20px"><div class="idn">${tokenImg(44)}<div><b style="font-size:16px;font-weight:600" id="pv-name">${esc(d.name||'Token name')}</b><span>${sym()} by Ault Global Commodities</span></div></div>
+    <div class="small muted" style="font-size:13px" id="pv-desc">${esc(d.desc)}</div></div></div>`, 'ad3', {disabled:!d.name.trim()});
+};
+
+V.ad3 = () => {
+  const d = S.d, tw = d.custodians.tw, sb = d.custodians.sb;
+  const any = tw || sb;
+  const ready = any && (!tw || d.por);
+  return wrap(2, `
+  <div class="card"><div class="card-h"><h2>Who holds the asset? <span class="req">*</span></h2><div class="hint" style="margin-top:2px">Select one or more.</div></div>
+    <button class="opt-row ${tw?'sel':''}" data-cust="tw"><span class="chk ${tw?'on':''}"></span><span class="tile">TW</span><span class="grow"><b style="font-weight:600">The Wyoming Reserve</b><span class="small muted" style="display:block">Platinum, Wyoming, manual check</span></span></button>
+    ${tw?`<div style="background:#f3f6fa;padding:0 24px 16px 68px"><div class="grid2">
+      <div class="field"><label class="label" for="ah">Account holder name <span class="opt">(optional)</span></label><input class="input" id="ah" data-bind="holder" value="${esc(d.holder)}"></div>
+      <div class="field"><label class="label" for="an">Account number <span class="opt">(optional)</span></label><input class="input" id="an" data-bind="acct" placeholder="As shown on the custody agreement" value="${esc(d.acct)}"></div></div></div>
+    <div style="background:#f3f6fa;border-top:1px solid var(--border);padding:14px 24px 14px 24px">
+      <div style="display:flex;gap:12px;align-items:center"><span class="ico" style="background:#fff"><i data-lucide="file-text"></i></span><span class="grow"><b style="font-weight:500">Proof of reserve <span class="req">*</span></b><span class="hint" style="display:block">${d.por?`${esc(d.por.name)}, ${kb(d.por.size)}. Public after listing`:'Public after listing'}</span></span>
+      ${d.por?'<button class="link danger" data-act="rmpor">Remove</button>':'<label class="btn">Upload<input type="file" hidden accept=".pdf,.png,.jpg" data-file="por"></label>'}</div>
+      <div class="hint" style="margin:8px 0 0 44px">Requests will use manual settlement to issue and FedEx delivery to redeem.</div></div>`:''}
+    <button class="opt-row ${sb?'sel':''}" data-cust="sb"><span class="chk ${sb?'on':''}"></span><span class="tile">SB</span><span class="grow"><b style="font-weight:600">Seoul Bullion Vault</b><span class="small muted" style="display:block">Platinum, Korea, API</span></span></button>
+    ${d.showCombo?`<div class="opt-row dis"><span class="chk" style="border-color:#e6e8eb"></span><span class="tile" style="color:var(--faint)">BS</span><span class="grow"><span style="display:block;font-weight:600">Brink’s Salt Lake</span><span class="small">Platinum, Utah. Settles differently, so it can’t be picked with The Wyoming Reserve</span></span></div>`:''}
+    <div class="row" style="padding:12px 24px"><span class="grow small muted">1 custodian can't be combined</span><button class="link" data-act="combo">${d.showCombo?'Hide':'Show'}</button></div>
+  </div>`, 'ad4', {disabled:!ready});
+};
+
+function sel(bind, opts, val){ return `<select class="select" data-bind="${bind}">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${v===val?'selected':''}>${esc(l)}</option>`}).join('')}</select>`; }
+
+V.ad4 = () => {
+  const d = S.d, s = sym();
+  const n = Number(d.size)||0;
+  return wrap(3, `
+  <div class="card"><div class="card-h"><h2>Who can request, and how much?</h2></div>
+   <div class="card-b">
+    <div class="field"><span class="label">Who can request <span class="req">*</span></span>
+      <div class="seg"><button class="${d.who==='any'?'on':''}" data-who="any">Any KYC-verified investor</button><button class="${d.who==='approved'?'on':''}" data-who="approved">Only investors I approve</button></div>
+      <button class="link small" style="align-self:flex-start;font-size:12px" data-soon>Use different rules for redemption</button></div>
+    <div class="field"><label class="label" for="rs">Request size <span class="req">*</span></label>
+      <div style="display:flex;gap:8px;align-items:center"><div style="position:relative;width:210px"><input class="input" id="rs" type="number" min="1" step="1" data-bind="size" value="${esc(d.size)}" style="height:36px;padding-right:48px"><span class="small muted" style="position:absolute;right:12px;top:8px">${s}</span></div>
+      ${[1,10,100].map(v=>`<button class="btn" style="padding:0 10px;${n===v?'background:var(--brand-tint);border-color:var(--brand);color:var(--brand)':''}" data-size="${v}">${v}</button>`).join('')}</div>
+      <span class="hint" id="size-hint">${n>0?`Investors request ${n}, ${n*2}, ${n*3} ${s}…`:'<span class="req">Enter a size above 0.</span>'}</span></div>
+   </div></div>
+  <div class="card"><div class="card-h" style="padding-bottom:8px"><div class="eyebrow">Filled in for you</div><div class="hint" style="margin-top:6px">We set these from your Backing choice. Change anything right here.</div></div>
+   <div class="card-b">
+    <div class="grid2">
+      <div class="field"><span class="label">Issue requests</span>${sel('issueVia',['Manual settlement'],d.issueVia)}</div>
+      <div class="field"><span class="label">Redeem requests</span>${sel('redeemVia',['FedEx delivery'],d.redeemVia)}</div>
+      <div class="field"><span class="label">Issue fee <span class="opt">(optional)</span></span>${sel('issueFee',['No fee','0.1%','0.25%','0.5%'],d.issueFee)}</div>
+      <div class="field"><span class="label">Redeem fee <span class="opt">(optional)</span></span>${sel('redeemFee',['No fee','0.1%','0.25%','0.5%'],d.redeemFee)}</div>
+    </div>
+    <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Excluded investors <span class="opt">(optional)</span></span>${sel('excluded',[['none','None. Add investors to exclude'],['jason','Jason Lee, Member'],['colossus','Colossus, Another organization']],d.excluded)}</div>
+    <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Terms investors accept</span>${sel('terms',['2 required, 1 optional'],d.terms)}<span class="hint">Backing &amp; custody acknowledgement, Redemption policy (required). Reserve attestation updates (optional).</span></div>
+   </div></div>`, 'ad5', {disabled:!(n>0)});
+};
+
+V.ad5 = () => {
+  const d = S.d;
+  const feeNeeded = d.issueFee!=='No fee' || d.redeemFee!=='No fee';
+  const okRoles = d.roles.mint.length && d.roles.burn.length;
+  return wrap(4, `
+  <div class="card"><div class="card-h"><h2>Request roles</h2><div class="hint" style="margin-top:12px">Who handles issuance and redemption requests for this token.</div></div>
+   <div class="card-b">${ROLES.map(([k,n,req,desc])=>`
+    <div class="rolerow"><div><div class="label">${n}${req?' <span class="req">*</span>':''}</div><div class="hint">${desc}</div></div>
+     <div class="chips" style="position:relative">${d.roles[k].map(id=>{const m=MEMBERS.find(x=>x.id===id);return `<span class="chip">${esc(m.name)}${m.meta?` <small>${m.meta}</small>`:''}<button aria-label="Remove ${esc(m.name)}" data-rmrole="${k}:${id}">×</button></span>`}).join('')}
+      <button class="addchip" data-addrole="${k}">+ Add</button>
+      ${S.menu===k?`<div class="menu" style="top:32px;left:0">${MEMBERS.filter(m=>!d.roles[k].includes(m.id)).map(m=>`<button data-pick="${k}:${m.id}"><span class="grow">${esc(m.name)}<small>${esc(m.sub)}${m.meta?', '+m.meta:''}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">Everyone is already added.</div>'}</div>`:''}
+      ${req&&!d.roles[k].length?'<span class="small req" style="width:100%">Add at least one.</span>':''}</div></div>`).join('')}
+   </div></div>
+  <div class="card"><div class="card-h" style="padding-bottom:12px"><div class="eyebrow">Wallets and agreements</div></div>
+   <div class="card-b" style="max-width:calc(50% + 48px)">
+    <div class="field"><span class="label">Treasury wallet <span class="req">*</span></span>${sel('treasury',[['op','Operation wallet, 0x25AB…297C (Default)'],['fee','Fee wallet, 0x9C1D…4E20']],d.treasury)}</div>
+    <div class="field"><span class="label">Fee wallet${feeNeeded?' <span class="req">*</span>':''}</span>${sel('feeWallet',[['',feeNeeded?'Select a wallet':'Select a wallet. Needed with a fee'],['op','Operation wallet, 0x25AB…297C'],['fee','Fee wallet, 0x9C1D…4E20']],d.feeWallet)}${feeNeeded&&!d.feeWallet?'<span class="small req">Choose a fee wallet. A fee is set.</span>':''}</div>
+    <div class="field"><span class="label">Signed agreements <span class="opt">(optional)</span></span>${sel('agreements',['Off','Issuance','Redemption','Issuance and redemption'],d.agreements)}</div>
+   </div></div>`, 'ad5b', {disabled: !okRoles || (feeNeeded && !d.feeWallet)});
+};
+
+V.ad5b = () => {
+  const d = S.d;
+  return wrap(4, `
+  <div class="card"><div class="card-h"><h2>Who signs on-chain?</h2><div class="hint" style="margin-top:12px">Set from the token you picked. Change them here if a different vault signs.</div></div>
+   <div class="card-b" style="max-width:calc(50% + 48px)">
+    <div class="field"><span class="label">Executor <span class="req">*</span></span>${sel('executor',['Fireblocks'],d.executor)}</div>
+    <div class="field"><span class="label">Credential <span class="req">*</span></span>${sel('credential',[['treasury','Ault Treasury, Mainnet signer'],['ops','Ault Ops, Testnet signer']],d.credential)}</div>
+    <div class="field"><span class="label">Vault account <span class="req">*</span></span>${sel('vault',[['Vault 1','Vault 1, Ault Treasury'],['Vault 2','Vault 2, Ault Operations']],d.vault)}</div>
+    <div class="field"><span class="label">Asset</span><div class="input" style="display:flex;align-items:center;background:var(--bg-subtle);color:var(--muted)">${sym()}_AULT</div></div>
+    <label style="display:flex;gap:10px;align-items:center;cursor:pointer"><span class="chk ${d.burnOther?'on':''}" data-act="burnother"></span><span class="label" data-act="burnother">Burn is signed by a different vault</span></label>
+    ${d.burnOther?`<div class="field" style="padding-left:26px"><span class="label">Burn vault account</span>${sel('burnVault',[['Vault 2','Vault 2, Ault Operations'],['Vault 1','Vault 1, Ault Treasury']],d.burnVault||'Vault 2')}</div>`:''}
+    <div class="field"><label class="label" for="tn">Transaction note <span class="opt">(optional)</span></label><input class="input" id="tn" data-bind="note" placeholder="e.g. ${sym()} listing" value="${esc(d.note)}"></div>
+   </div></div>`, 'ad6');
+};
+
+V.ad6 = () => `
+  <button class="back" data-go="tokens">← Your tokens</button>${draftHead()}${steps(5)}
+  <div class="card"><div style="padding:16px 24px 12px"><div class="eyebrow">Ready to submit</div></div>
+    <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><span class="grow t">KYB</span>${badge('pos','Verified')}</div>
+    <div class="row"><span class="ico"><i data-lucide="key-round"></i></span><span class="grow t">Issuer permission</span>${badge('pos','Granted')}</div></div>
+  <div class="card"><div class="card-h"><h2>What you're submitting</h2></div>${summaryRows(true)}
+    <div style="padding:14px 24px;border-top:1px solid var(--border)">${S.d.reviewFiles?.length?S.d.reviewFiles.map(f=>`<div class="small" style="margin-bottom:6px"><i data-lucide="paperclip" style="width:13px;height:13px;vertical-align:-2px"></i> ${esc(f.name)} <span class="muted">${kb(f.size)}, reviewers only</span></div>`).join(''):''}
+    <label class="link" style="cursor:pointer;font-size:12px">+ Add files for reviewers (optional)<input type="file" multiple hidden data-file="reviewFiles"></label></div></div>
+  ${footer('submit',{label:'Submit for review'})}`;
+
+V.ad7 = () => {
+  const live = S.listing==='live';
+  return `<button class="back" data-go="tokens">← Your tokens</button>
+  ${S.justSubmitted?`<div class="banner"><span class="c"><i data-lucide="check"></i></span><div><b>Submitted for review</b><span>We'll notify you when the platform decides. Usually 1 to 2 business days.</span></div></div>`:''}
+  ${rhead(S.d.name, `Listing request, submitted ${fmt(S.submittedAt)}`, live?badge('pos','Approved'):badge('prog','In review'))}
+  <div class="card"><div class="rp">
+    <div class="s"><span class="ring done"><img src="assets/check.svg" alt=""></span><div><b>Submitted</b><span>${fmt(S.submittedAt)} by Juya Kim</span></div></div><div class="conn on" style="flex:1"></div>
+    <div class="s"><span class="ring ${live?'done':'cur'}">${live?'<img src="assets/check.svg" alt="">':''}</span><div><b>Platform review</b><span>1 to 2 business days</span></div></div><div class="conn ${live?'on':''}" style="flex:1"></div>
+    <div class="s"><span class="ring ${live?'done':''}">${live?'<img src="assets/check.svg" alt="">':''}</span><div><b style="${live?'':'color:var(--muted)'}">Live</b><span>Opens in Your tokens</span></div></div>
+  </div></div>
+  <div class="cols">
+    <div class="card"><div class="card-h"><h2>What you submitted</h2></div>${summaryRows(false)}</div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card"><div style="padding:16px 16px 4px"><div class="eyebrow">Documents</div></div>
+        ${[...(S.d.por?[[S.d.por.name.replace(/\.[^.]+$/,'')||'Custody statement','Public after listing']]:[['Custody statement','Public after listing']]), ...S.d.docs.map(f=>[f.name,'Public after listing']), ...(S.d.reviewFiles||[]).map(f=>[f.name,'Reviewers only']), ['KYB pack','Reviewers only']].map(([n,s])=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 16px"><span class="ico" style="background:var(--brand-tint);color:var(--brand)"><i data-lucide="file-text"></i></span><div class="grow"><div style="font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n)}</div><div class="hint">${s}</div></div></div>`).join('')}
+        <div style="height:8px"></div></div>
+      ${live?`<div class="card" style="padding:16px"><div class="eyebrow">Listed</div><p class="small muted" style="margin:6px 0 12px">${esc(S.d.name)} is live in Your tokens.</p><button class="btn primary" style="width:100%;justify-content:center" data-go="ad8">Open token</button></div>`
+      :`<div class="card" style="padding:16px"><div class="eyebrow">Need a change?</div><p class="small muted" style="margin:6px 0 12px">Withdraw it, then submit a new request.</p><button class="btn" style="width:100%;justify-content:center" data-soon>Withdraw request</button></div>`}
+    </div>
+  </div>`;
+};
+
+V.ad8 = () => `
+  <button class="back" data-go="tokens">← Tokens</button>
+  <div class="banner"><span class="c"><i data-lucide="check"></i></span><div><b>${esc(S.d.name)} is live</b><span>Listed ${fmt(S.liveAt)}. Issue your first tokens to put ${sym()} in circulation.</span></div></div>
+  <div class="rhead">${tokenImg(56)}<div class="grow"><h1>${esc(S.d.name)}</h1><div class="chips" style="margin-top:8px">${badge('pos','Active')}${badge('neu','Platinum')}${badge('neu','Ault Mainnet')}${badge('neu','Permissioned ERC-20')}</div></div>
+    <button class="btn" data-soon><i data-lucide="upload"></i>Redeem</button><button class="btn primary" data-soon><i data-lucide="download"></i>Issue</button></div>
+  <div class="tabs">${['Overview','Investors','Reserve','Disclosures','Settings'].map((t,i)=>`<button class="tab ${i?'':'on'}" ${i?'data-soon':''}>${t}</button>`).join('')}</div>
+  <div class="card stats">
+    <div><div class="eyebrow">Supply</div><div class="big">0</div><div class="small muted">No ${sym()} issued yet</div></div>
+    <div><div class="eyebrow">Reserve</div><div class="big">0 oz</div><div class="small muted">Nothing deposited at ${esc(custNames()[0])} yet</div></div>
+    <div><div class="eyebrow">Investors</div><div class="big">0</div><div class="small muted">${S.d.who==='any'?'Open to KYC-verified investors':'Only investors you approve'}</div></div>
+  </div>
+  <div class="grid2" style="align-items:start">
+    <div class="card"><div class="card-h" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>Status</h2><div class="hint">What needs a look on this token.</div></div><button class="link small" data-soon>View as investor →</button></div>
+      ${[['Requests in progress','None yet'],['Waiting on you','0'],['Contract','0x8f3a…c21b'],['Last attestation','None yet']].map(([k,v])=>`<div class="sum" style="grid-template-columns:1fr auto"><span class="k">${k}</span><span class="v" style="font-weight:400">${v}</span></div>`).join('')}</div>
+    <div class="card"><div class="card-h"><h2>Recent disclosures</h2><div class="hint">No disclosures yet.</div></div></div>
+  </div>`;
+
+V.home = () => `
+  <div><h1>Home</h1><div class="sub" style="margin-top:6px">Your organization at a glance.</div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;padding:16px 24px"><span style="font-size:28px;font-weight:500">5</span><div class="grow"><b style="font-weight:500">waiting on you</b><div class="hint">Oldest 3 days</div></div><button class="btn" data-soon>Open My tasks</button></div>
+  <div class="card"><div class="card-h" style="display:flex;justify-content:space-between"><h2 style="font-size:16px">Your tokens <span class="muted" style="font-weight:400">${S.listing==='live'?4:3}</span></h2><button class="link small" data-go="tokens">All tokens</button></div>
+    ${[...(S.listing==='live'?[[S.d.name,sym(),'100%','0','ad8']]:[]),['Ault Silver','ASLV','100%','5,000'],['BMAX','Bitcoin','98%','1,200'],['Ault Gold','AGLD','100%','800']].map(r=>`<div class="row" ${r[4]?`data-go="${r[4]}" style="cursor:pointer"`:''}><div class="grow idn"><div><b>${esc(r[0])}</b><span>${r[1]}</span></div></div><span class="small muted" style="width:60px">${r[2]}</span><span style="width:60px;text-align:right">${r[3]}</span></div>`).join('')}</div>`;
+
+/* ---------- modal + notifications ---------- */
+function modalHTML(){
+  if (S.modal==='submit') return `<div class="scrim" data-act="closemodal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <div class="mh"><h3 id="mt">Submit ${esc(S.d.name)} for review?</h3><p>The platform checks your settings and documents before the token can take requests.</p></div>
+    <div class="mrow"><span class="k">Review</span><span class="v">Usually 1 to 2 business days</span></div>
+    <div class="mrow"><span class="k">Before a decision</span><span class="v">You can withdraw it</span></div>
+    <div class="mrow"><span class="k">After approval</span><span class="v">${esc(S.d.name)} opens for requests</span></div>
+    <div class="msign"><span class="ico" style="background:#fff"><i data-lucide="key-round"></i></span><div><b style="font-weight:600">${S.signing?'Waiting for your passkey…':'Sign with your passkey'}</b><div class="hint">Juya Kim, for Ault Global Commodities</div></div></div>
+    <div class="mfoot"><button class="btn" data-act="closemodal" ${S.signing?'disabled':''}>Cancel</button><button class="btn primary" data-act="sign" ${S.signing?'disabled':''}>${S.signing?'<span class="spin"></span>Signing':'Sign and submit'}</button></div>
+  </div></div>`;
+  if (S.modal==='discard') return `<div class="scrim" data-act="closemodal"><div class="modal" role="dialog" aria-modal="true">
+    <div class="mh"><h3>Discard this draft?</h3><p>Everything you entered for ${esc(S.d.name||'this token')} is removed from this browser.</p></div>
+    <div class="mfoot"><button class="btn" data-act="closemodal">Keep editing</button><button class="btn primary" style="background:var(--danger);border-color:var(--danger)" data-act="discardok">Discard draft</button></div></div></div>`;
+  return '';
+}
+function notifHTML(){
+  if (!S.notifOpen) return '';
+  const items = [
+    ...(S.listing==='live'?[['check',`${S.d.name} is listed`,'Approved by the platform. Issue your first tokens.','now','ad8',true]]:[]),
+    ...(S.listing==='review'?[['file-text',`${S.d.name} submitted`,'In platform review','now','ad7']]:[]),
+    ['users-round','Joe Miller approved ISS-0011','ISS-0011, 1 of 2 approved','40m'],
+    ['coins','800 BMAX minted','ISS-0010 for Juno Partners','2h'],
+    ['check','Proposal passed','PRP-0004, member role change','1d'],
+    ['truck','Redemption delivered','RED-0002, 150 ASLV to Minji Park','2d'],
+  ];
+  return `<div class="notif" role="dialog" aria-label="Notifications"><h4>Notifications</h4>${items.map(([ic,t,s,tm,go,un])=>`<button class="nitem ${un?'unread':''}" ${go?`data-go="${go}"`:'data-soon'}><span class="ico"><i data-lucide="${ic}"></i></span><span class="grow"><b>${esc(t)}</b><span>${esc(s)}</span></span><time>${tm}</time></button>`).join('')}</div>`;
+}
+
+/* ---------- render ---------- */
+function render(){
+  $('#app').innerHTML = V[S.screen]();
+  $('#layer').innerHTML = modalHTML() + notifHTML();
+  $('#unread').hidden = !S.unread;
+  document.querySelectorAll('.side .nav').forEach(b=>b.classList.toggle('on', b.dataset.go===(S.screen==='home'?'home':'tokens') && !b.hasAttribute('data-soon')));
+  const p = $('#proto');
+  p.hidden = !(S.listing==='review' && ['ad7','tokens'].includes(S.screen));
+  p.innerHTML = '<b>Prototype</b><span class="muted">Platform review is outside the portal.</span><button class="btn primary" data-act="approve">Approve listing</button>';
+  if (window.lucide) lucide.createIcons();
+}
+
+/* ---------- events ---------- */
+function next(to){
+  if (to==='submit'){ S.modal='submit'; render(); return; }
+  go(to);
+}
+const PREV = {ad2:'ad1', ad3:'ad2', ad4:'ad3', ad5:'ad4', ad5b:'ad5', ad6:'ad5b'};
+const STEP_SCREEN = ['ad1','ad2','ad3','ad4','ad5','ad6'];
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-go],[data-next],[data-act],[data-step],[data-kind],[data-src],[data-token],[data-cust],[data-who],[data-size],[data-addrole],[data-rmrole],[data-pick],[data-rmdoc],[data-toggle],[data-soon]');
+  if (!t) { if (S.menu){S.menu=null;render();} if (S.notifOpen && !e.target.closest('.notif')){S.notifOpen=false;render();} return; }
+  const ds = t.dataset, d = S.d;
+  if (t.tagName==='LABEL' || t.closest('label')) { /* file pickers handle themselves */ if (!ds.act) return; }
+  if (ds.go){ e.stopPropagation(); S.notifOpen=false; if (ds.go==='ad8' || ds.go==='ad7') S.justSubmitted = S.justSubmitted && ds.go==='ad7'; go(ds.go); return; }
+  if (ds.next){ next(ds.next); return; }
+  if (ds.step){ go(STEP_SCREEN[+ds.step]); return; }
+  if (ds.kind){ d.kind=ds.kind; render(); return; }
+  if (ds.src){ d.tokenSrc=ds.src; render(); return; }
+  if (ds.token){ d.token=ds.token; d.name = ds.token==='apd'?'Ault Palladium':'Ault Platinum'; render(); return; }
+  if (ds.cust){ d.custodians[ds.cust]=!d.custodians[ds.cust]; render(); return; }
+  if (ds.who){ d.who=ds.who; render(); return; }
+  if (ds.size){ d.size=+ds.size; render(); return; }
+  if (ds.addrole){ e.stopPropagation(); S.menu = S.menu===ds.addrole?null:ds.addrole; render(); return; }
+  if (ds.pick){ const [k,id]=ds.pick.split(':'); d.roles[k].push(id); S.menu=null; render(); return; }
+  if (ds.rmrole){ const [k,id]=ds.rmrole.split(':'); d.roles[k]=d.roles[k].filter(x=>x!==id); render(); return; }
+  if (ds.rmdoc){ d.docs.splice(+ds.rmdoc,1); render(); return; }
+  if (ds.toggle){ S[ds.toggle]=!S[ds.toggle]; render(); return; }
+  if (ds.soon!==undefined && !ds.act){ toast('Not part of this prototype'); return; }
+  switch (ds.act){
+    case 'start': S.d=fresh(); S.draftSaved=false; go('ad1'); break;
+    case 'back': go(PREV[S.screen]||'tokens'); break;
+    case 'save': S.draftSaved=true; go('tokens'); toast('Draft saved in this browser'); break;
+    case 'discard': S.modal='discard'; render(); break;
+    case 'discardok': S.modal=null; S.draftSaved=false; S.d=fresh(); go('tokens'); toast('Draft discarded'); break;
+    case 'closemodal': if (t.classList.contains('scrim') && e.target!==t) break; if (!S.signing){ S.modal=null; render(); } break;
+    case 'combo': d.showCombo=!d.showCombo; render(); break;
+    case 'rmpor': d.por=null; render(); break;
+    case 'clearimg': d.img=''; d.imgUrl=''; render(); break;
+    case 'burnother': d.burnOther=!d.burnOther; render(); break;
+    case 'bell': e.stopPropagation(); S.notifOpen=!S.notifOpen; if (S.notifOpen) S.unread=false; render(); break;
+    case 'sign':
+      S.signing=true; render();
+      setTimeout(()=>{ S.signing=false; S.modal=null; S.listing='review'; S.draftSaved=false; S.submittedAt=new Date(); S.justSubmitted=true; go('ad7'); }, 1600);
+      break;
+    case 'approve':
+      S.listing='live'; S.liveAt=new Date(); S.unread=true; S.justSubmitted=false;
+      go('home'); toast(`${d.name} was approved. Check notifications.`); break;
+  }
+});
+
+document.addEventListener('input', e => {
+  const b = e.target.dataset.bind; if (!b) return;
+  const d = S.d;
+  d[b] = e.target.type==='number' ? e.target.value : e.target.value;
+  if (b==='imgUrl'){ d.img = /^https?:\/\/\S+$/.test(d.imgUrl) ? d.imgUrl : (d.img.startsWith('blob:')?d.img:''); }
+  // live updates without full re-render (keeps focus)
+  if (b==='name'){ const pv=$('#pv-name'); if (pv) pv.textContent = d.name || 'Token name'; const h=$('.rhead h1'); if(h) h.textContent = d.name || 'New token'; document.querySelector('[data-next]').disabled = !d.name.trim(); }
+  if (b==='desc'){ const pv=$('#pv-desc'); if (pv) pv.textContent = d.desc; }
+  if (b==='size'){ const n=Number(d.size)||0; $('#size-hint').innerHTML = n>0?`Investors request ${n}, ${n*2}, ${n*3} ${sym()}…`:'<span class="req">Enter a size above 0.</span>'; document.querySelector('[data-next]').disabled = !(n>0); }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.bind && el.tagName==='SELECT'){ S.d[el.dataset.bind]=el.value; render(); return; }
+  if (el.dataset.bind==='size' || el.dataset.bind==='imgUrl'){ render(); return; }
+  const f = el.dataset.file; if (!f || !el.files.length) return;
+  const files = [...el.files];
+  takeFiles(f, files);
+});
+function takeFiles(kind, files){
+  const d = S.d, MAX = 20*1048576;
+  const ok = files.filter(x => x.size <= MAX);
+  if (ok.length < files.length) toast('Files must be 20 MB or smaller');
+  if (!ok.length) return;
+  if (kind==='img'){ if (!/^image\//.test(ok[0].type)) return toast('Use a PNG or JPG image'); d.img = URL.createObjectURL(ok[0]); d.imgUrl=''; }
+  if (kind==='docs') d.docs.push(...ok.map(x=>({name:x.name,size:x.size})));
+  if (kind==='por') d.por = {name:ok[0].name, size:ok[0].size};
+  if (kind==='reviewFiles') d.reviewFiles = [...(d.reviewFiles||[]), ...ok.map(x=>({name:x.name,size:x.size}))];
+  render();
+}
+// drag and drop on the document dropzone
+['dragover','dragleave','drop'].forEach(ev => document.addEventListener(ev, e => {
+  const z = e.target.closest?.('[data-drop]'); if (!z) return;
+  e.preventDefault();
+  z.classList.toggle('over', ev==='dragover');
+  if (ev==='drop') takeFiles(z.dataset.drop, [...e.dataTransfer.files]);
+}));
+document.addEventListener('keydown', e => { if (e.key==='Escape'){ if (S.modal && !S.signing){S.modal=null;render();} else if (S.notifOpen||S.menu){S.notifOpen=false;S.menu=null;render();} } });
+
+render();
+</script>
+</body>
+</html>
