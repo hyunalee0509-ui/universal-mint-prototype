@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Universal Mint 온보딩 리뷰 프로토타입</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+/* Figma 와이어 변수 그대로 (Universal Mint) */
+:root {
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f7f8fa;
+  --bg-surface-muted: #ebedf0;
+  --border-default: #e6e8eb;
+  --border-strong: #d9d9d9;
+  --brand-default: #004285;
+  --brand-strong: #091d38;
+  --brand-soft: #edf1f7;
+  --altus-brand-soft: #edf3fd;
+  --altus-brand-default: #073da8;
+  --content-strong: #050d18;
+  --content-muted: #5a6472;
+  --content-faint: #b9bec4;
+  --content-on-brand: #ffffff;
+  --status-danger: #b31942;
+  --status-danger-subtle: #fbe3e1;
+  --status-warning: #9a6212;
+  --status-warning-subtle: #fdf0d9;
+  --status-info: #366dd7;
+  --status-info-subtle: #e4eefb;
+  --data-good: #0e7a5f;
+  --data-warn: #cc780d;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-surface-muted); }
+body {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-variation-settings: "opsz" 14;
+  color: var(--content-strong);
+  -webkit-font-smoothing: antialiased;
+}
+a, button { color: inherit; font: inherit; background: none; border: 0; cursor: pointer; text-align: left; text-decoration: none; }
+img { display: block; }
+.nowrap { white-space: nowrap; }
+
+/* 틀: 헤더 + 패널(사이드바 + 본문) */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+.hdr { height: 62px; display: flex; align-items: center; gap: 16px; padding: 12px 20px; flex-shrink: 0; }
+.hdr .brand { flex: 1; display: flex; align-items: center; gap: 8px; }
+.hdr .brand img { width: 22px; height: 22px; }
+.hdr .brand p { font-weight: 700; font-size: 16px; color: var(--brand-strong); white-space: nowrap; }
+.hdr .tools { display: flex; align-items: center; gap: 12px; }
+.hdr .bell { position: relative; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.hdr .bell .unread { position: absolute; left: 24px; top: 6px; width: 7px; height: 7px; }
+.hdr .divider { width: 1px; height: 24px; background: var(--border-strong); }
+.hdr .account { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 32px; height: 32px; border-radius: 999px; background: var(--bg-surface-subtle); display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 12px; line-height: 1.45; color: var(--content-muted); }
+.hdr .who p:first-child { font-weight: 600; font-size: 14px; line-height: 1.5; }
+.hdr .who p:last-child { font-size: 12px; line-height: 1.45; color: var(--content-muted); }
+
+.body { flex: 1; min-width: 0; display: flex; padding: 0 20px 20px; }
+.panel { flex: 1; min-width: 0; min-height: calc(100vh - 82px); display: flex; align-items: stretch; background: var(--bg-surface-subtle); border: 1px solid var(--border-default); border-radius: 20px; overflow: hidden; }
+
+.sb { width: 248px; flex-shrink: 0; border-right: 1px solid var(--border-default); display: flex; flex-direction: column; }
+.sb .groups { flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 12px 0; }
+.sb .group { display: flex; flex-direction: column; gap: 4px; }
+.sb .group.org { border-top: 1px solid var(--border-default); padding: 12px 0; }
+.sb .glabel { padding: 6px 0 8px 28px; font-weight: 700; font-size: 11px; line-height: 1.3; letter-spacing: 0.55px; text-transform: uppercase; color: var(--content-faint); }
+.sb .inset { padding: 0 12px; }
+.nav { position: relative; display: flex; align-items: center; gap: 12px; height: 37px; padding: 8px 16px; border-radius: 10px; width: 100%; }
+.nav img { width: 16px; height: 16px; flex-shrink: 0; }
+.nav span { flex: 1; font-size: 14px; line-height: 1.5; color: var(--content-muted); }
+.nav:hover { background: var(--bg-surface-muted); }
+.nav.on { background: var(--bg-surface-muted); }
+.nav.on span { font-weight: 600; color: var(--content-strong); }
+.nav.on::before { content: ""; position: absolute; left: 0; top: 8px; width: 3px; height: 21px; border-radius: 6px; background: var(--brand-default); }
+.count { min-width: 20px; height: 20px; padding: 0 4px; border-radius: 999px; background: var(--status-danger); color: var(--content-on-brand); font-weight: 500; font-size: 12px; line-height: 1.45; display: flex; align-items: center; justify-content: center; }
+.sb .switch-wrap { padding: 8px 12px 12px; }
+.switcher { width: 100%; display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border-default); border-radius: 8px; }
+.monogram { width: 28px; height: 28px; border-radius: 10px; background: var(--brand-default); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.monogram img { width: 16px; height: 16px; }
+.switcher .org { flex: 1; min-width: 0; font-size: 12px; line-height: 1.45; }
+.switcher .org p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.switcher .org p:first-child { font-weight: 500; }
+.switcher .org p:last-child { color: var(--content-muted); }
+.chev14 { width: 14px; height: 14px; flex-shrink: 0; }
+.chev16 { width: 16px; height: 16px; flex-shrink: 0; }
+
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 24px; padding: 32px 32px 24px; }
+
+/* 공통 부품 */
+.page-head { display: flex; flex-direction: column; gap: 12px; white-space: nowrap; }
+.page-head h1 { font-weight: 700; font-size: 40px; line-height: 1.15; letter-spacing: -0.6px; }
+.page-head p { font-size: 14px; line-height: 1.5; color: var(--content-muted); }
+
+.card { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 10px; overflow: hidden; width: 100%; display: flex; flex-direction: column; }
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 24px 16px; }
+.card-head.tight { padding-bottom: 12px; }
+.eyebrow { font-weight: 600; font-size: 11px; letter-spacing: 0.44px; text-transform: uppercase; color: var(--content-muted); white-space: nowrap; }
+.stat { display: flex; flex-direction: column; gap: 6px; white-space: nowrap; }
+.stat .num { display: flex; align-items: baseline; gap: 10px; }
+.stat .num b { font-weight: 500; font-size: 36px; }
+.stat .num span { font-size: 13px; color: var(--content-muted); }
+.link { height: 32px; font-weight: 500; font-size: 12px; color: var(--brand-default); white-space: nowrap; }
+.link.auto { height: auto; }
+
+.row { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 24px; border-top: 1px solid var(--border-default); width: 100%; }
+a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
+.row .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; white-space: nowrap; }
+.row .txt p:first-child { font-weight: 500; font-size: 14px; }
+.row .txt p:last-child { font-size: 12px; color: var(--content-muted); }
+.row .big { font-weight: 500; font-size: 20px; white-space: nowrap; }
+
+.thead { display: flex; align-items: center; gap: 12px; height: 36px; padding: 0 24px; border-top: 1px solid var(--border-default); font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--content-muted); }
+
+.badge { height: 24px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 12px; line-height: 1.45; white-space: nowrap; flex-shrink: 0; }
+.badge.warn { background: var(--status-warning-subtle); color: var(--status-warning); }
+.badge.danger { background: var(--status-danger-subtle); color: var(--status-danger); }
+
+.btn { height: 36px; padding: 0 16px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; font-weight: 500; font-size: 12px; line-height: 1.45; white-space: nowrap; flex-shrink: 0; }
+.btn.secondary { background: var(--bg-surface); border: 1px solid var(--border-strong); color: var(--brand-default); }
+.btn.secondary.dark { color: var(--content-strong); }
+.btn.primary { background: var(--brand-default); color: var(--content-on-brand); }
+
+.bar { width: 117px; height: 4px; border-radius: 2px; background: var(--border-default); overflow: hidden; flex-shrink: 0; }
+.bar i { display: block; height: 4px; border-radius: 2px; }
+
+/* 리뷰용 도구 (Figma에 없는 리뷰 장치, 화면 밖) */
+.rv-tag { position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border-radius: 999px; background: #1f2937; color: #fff; font-size: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+.rv-tag b { font-weight: 700; }
+.rv-tag a, .rv-tag button { color: #fff; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.12); }
+.rv-toast { position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); z-index: 60; padding: 10px 16px; border-radius: 10px; background: #1f2937; color: #fff; font-size: 13px; max-width: 560px; display: none; }
+.rv-toast.show { display: block; }
+.rv-list { position: fixed; right: 16px; bottom: 60px; z-index: 55; width: 320px; max-height: 70vh; overflow: auto; background: #fff; border: 1px solid var(--border-default); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.16); padding: 8px; display: none; font-size: 13px; }
+.rv-list.show { display: block; }
+.rv-list h4 { font-size: 11px; text-transform: uppercase; color: var(--content-muted); padding: 8px 8px 4px; }
+.rv-list a { display: flex; gap: 8px; padding: 6px 8px; border-radius: 6px; }
+.rv-list a:hover { background: var(--bg-surface-subtle); }
+.rv-list a b { width: 56px; flex-shrink: 0; }
+.rv-list a.todo { color: var(--content-faint); }
+
+/* 반응형: 현아님 Add Token과 같은 기준(900px 이하에서 사이드바 숨김, 한 열) */
+@media (max-width: 900px) {
+  .sb { display: none; }
+  .body { padding: 0 8px 8px; }
+  .main { padding: 20px 16px 48px; }
+  .hdr .who { display: none; }
+  .thead { display: none; }
+  .page-head { white-space: normal; }
+  .rv-tag #rv-name { display: none; }
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <div class="brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAz1BMVEVMaXEICA1mZWiGhokICA0QEBBPBBgICBAHEicICRBRUFQ1NDkIBwwtJSxXDhsJGjQbFR0hDxt5eX0kJTBcFyxfXmFEDRwcL0p3IzwJCA05OD0QABAIBw3///+zGUIKMWGVACQyWYni4uK8vLwAHU1zEi8JIkUIBw0GDyQ9BhaVHiSQkJLg4OHLy8sNHTQLDxkuUn4nJitTUlZyAh+jo6UdChMhISY/PkPbQWrw7/AlQWR2dnmcFjvBwcMdMUyxsbKFFSHGO2EKK1acnJ2VLktgpsM3AAAAHXRSTlMAYP36PBC/IMCAwKNwgv7qj6Dhv/7f3uj2UN8Q33rRwzUAAAAJcEhZcwAACxMAAAsTAQCanBgAAAObSURBVHjapZfpdqJAEIUD4gAuuCYaE/coGgSEEdFoXJK8/zNNd3U3i9JEmfqRc6KnPvtW3dviw0Nq5Ysd+SF75cu5bXdVzIyQHhddXDk1W3vhs0trURfuP33VIM1b+Gveq6OUI42fvrMioLtGwcQv3LXru455pw65QcRvc2txvHNHxlqkvPrzTauj4leOexxjwGi0W+du1lGqM/G+MR5TwMh02SiMspy+OqJ3iz5zDOV2zBEgHP93HXIxFH+EdqMhy2UDCOEoCmm+hdM7/graVx2JcL8JYufkUgAvr+T03U/dhfajWGLvCY9Eh6Hn+ADZDbYFJxCr+dhszZEpkknyAIa5C1znuAXpcj6iQyVyAbCtIx2jynWnr/ABo6jrhKRo4gXxTiAG26LLCF0XRHNlI3fy1igzy7iXAQyj6X+j9SQCpOi2TN+J6JAK9B9xDeZmACmWv3YNf9hLeXfhukW9ceXOIrQoh5ocWLB93mzakBK5aMRcx+oI0UT1DfvNq63hcHgo54kFUTuqn9c8WdflKMJoMncKreUQ1we0yHOved6cm/pcjhvXXJMAomjuSDSJO6XGB7QvD/YMTj3pNb2mpw3+Mk3xAEajid+skfbhwbb6Uwro7fXTIASEAUTutmPRROLp6e3ZVz8E9PRBDBAJoE/Fl/Grz7R9ac2m/X4qgAQQASDbuwvxutWHstIAZKUYYJDVVSPioaYKuXB4AGww03BXj3AJBuItLB7VV4VejhyADGkUOg64Raow8faUfHxFZRdOIgC584dYFayiBJtnp69FVpYAKGFzb36qBKEehnR1cfF8QMkDd5+bcPko1pKKZ6ePf0kmANQJdnfb0/4AYGYfEsWnAHrI3d78NCCAt+nMDk9/vatEQG8yRy9RwNsbPf2XIiVcZbcDKqXEu/BmgMLES3I2gMr8+dFSswNIoJctISOA3WZLW8gCiAZavQJovwGqsUBfAebek5AO0GmgZxDoC4Dmaad3jWaMB4gF+gLgnd5xaRBAPiAS6PgQ9x4lnLAOLiAx0ABADSg8FCHxAOw2iwf6pUYIKIDaO9HxmgzgBlp42gNhP6cInZdGTqDxFUYRREcKIDHQ8I1HdcAo+IDkQBOEQg+BHMEDWNV82pN2OAoOQPn1WV9tUh2p90HqjxU2iqwAhKA6MgOCUWQHoIe9yf8ByCgQAKUC7uDKFAOmyj2/PZ+fmnMt/MFRsS2OA1NGEU2MXOM68B9UCxMrqQcbEQAAAABJRU5ErkJggg==" alt=""><p>Universal Mint</p></div>
+    <div class="tools">
+      <button class="bell" data-go="C1" aria-label="Notifications"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiB2aWV3Qm94PSIwIDAgMTggMTgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik05LjY0OTk3IDE1LjM3NTRDOS44NTcxIDE1LjAxNjcgMTAuMzE1MiAxNC44OTM2IDEwLjY3MzkgMTUuMTAwN0MxMS4wMzI1IDE1LjMwNzggMTEuMTU1NCAxNS43NjYgMTAuOTQ4NiAxNi4xMjQ2QzEwLjc1MTEgMTYuNDY2NiAxMC40NjY2IDE2Ljc1MTEgMTAuMTI0NiAxNi45NDg2QzkuNzgyNjMgMTcuMTQ2IDkuMzk0NCAxNy4yNDk2IDguOTk5NTggMTcuMjQ5NkM4LjYwNDc5IDE3LjI0OTYgOC4yMTY1IDE3LjE0NiA3Ljg3NDU4IDE2Ljk0ODZDNy41MzI2OSAxNi43NTEyIDcuMjQ5MTMgMTYuNDY2NSA3LjA1MTcxIDE2LjEyNDZDNi44NDQ3NSAxNS43NjYgNi45Njc3MyAxNS4zMDc4IDcuMzI2MzcgMTUuMTAwN0M3LjY4NTA0IDE0Ljg5MzggOC4xNDMyMSAxNS4wMTY3IDguMzUwMjkgMTUuMzc1NEM4LjQxNjA2IDE1LjQ4OTIgOC41MTExNCAxNS41ODMyIDguNjI0OTUgMTUuNjQ4OUM4LjczODg0IDE1LjcxNDcgOC44NjgwOCAxNS43NDk5IDguOTk5NTggMTUuNzVDOS4xMzEyMyAxNS43NSA5LjI2MTMxIDE1LjcxNDcgOS4zNzUzMiAxNS42NDg5QzkuNDg5MDggMTUuNTgzMSA5LjU4NDI0IDE1LjQ4OTIgOS42NDk5NyAxNS4zNzU0WiIgZmlsbD0iIzVBNjQ3MiIvPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik0xMi43NTAyIDZDMTIuNzUwMiA1LjAwNTQ0IDEyLjM1NDggNC4wNTExNiAxMS42NTE1IDMuMzQ3OUMxMC45NDg0IDIuNjQ0OTQgOS45OTQ3OCAyLjI1MDUxIDkuMDAwNTUgMi4yNTAzN0M4LjAwNjExIDIuMjUwMzcgNy4wNTE2OCAyLjY0NDgxIDYuMzQ4NDUgMy4zNDc5QzUuNjQ1MTkgNC4wNTExNiA1LjI0OTgyIDUuMDA1NDQgNS4yNDk4MiA2QzUuMjQ5ODIgNy43NjU1NCA0Ljk3MyA4Ljk5ODMyIDQuNTI0NzIgOS45NDczOUM0LjA4MTk4IDEwLjg4NDYgMy40OTQ1MSAxMS40OTAxIDMuMDAwOTEgMTEuOTk5NkgxNS4wMDAyQzE0LjUwNTUgMTEuNDg5NyAxMy45MTc5IDEwLjg4NDMgMTMuNDc1MyA5Ljk0NzM5QzEzLjAyNjkgOC45OTgxNiAxMi43NTAyIDcuNzY1NDEgMTIuNzUwMiA2Wk0xNC4yNDk4IDZDMTQuMjQ5OCA3LjYwODY0IDE0LjUwMjQgOC42MDkxNiAxNC44MzIxIDkuMzA2ODhDMTUuMDc5OCA5LjgzMTIyIDE1LjM4NDQgMTAuMjE2NSAxNS43MzE5IDEwLjU5MzRMMTYuMDkzMyAxMC45NzM1TDE2LjEwOTggMTAuOTlDMTYuMzA1NCAxMS4yMDUgMTYuNDM0NiAxMS40NzMyIDE2LjQ4MTEgMTEuNzYwMUMxNi41Mjc2IDEyLjA0NjkgMTYuNDg5OSAxMi4zNDE1IDE2LjM3MjQgMTIuNjA3MkMxNi4yNTQ4IDEyLjg3MjkgMTYuMDYyMiAxMy4wOTkgMTUuODE4NyAxMy4yNTc2QzE1LjU3NTIgMTMuNDE2IDE1LjI5MDcgMTMuNTAwNCAxNS4wMDAyIDEzLjUwMDRIMi45OTk4MkMyLjcwOTI3IDEzLjUwMDIgMi40MjQ3MSAxMy40MTUyIDIuMTgxMzMgMTMuMjU2NUMxLjkzNzg1IDEzLjA5NzYgMS43NDQ5IDEyLjg3MSAxLjYyNzYyIDEyLjYwNUMxLjUxMDQ1IDEyLjMzOTEgMS40NzMwNyAxMi4wNDQ3IDEuNTE5OTYgMTEuNzU3OUMxLjU2NjkgMTEuNDcxIDEuNjk2NDQgMTEuMjAzNyAxLjg5MjM5IDEwLjk4ODlMMS45MDc3NyAxMC45NzI0QzIuNDA2MDggMTAuNDU4IDIuODM3NTIgMTAuMDA2MiAzLjE2NzkxIDkuMzA2ODhDMy40OTc1IDguNjA5MTcgMy43NTAxOCA3LjYwODU2IDMuNzUwMTggNkMzLjc1MDE4IDQuNjA3NzQgNC4zMDI3OCAzLjI3MjI2IDUuMjg3MTcgMi4yODc3MkM2LjI3MTczIDEuMzAzMTUgNy42MDgxNiAwLjc0OTYzNCA5LjAwMDU1IDAuNzQ5NjM0QzEwLjM5MjcgMC43NDk3NzkgMTEuNzI4NCAxLjMwMzI4IDEyLjcxMjggMi4yODc3MkMxMy42OTcyIDMuMjcyMjYgMTQuMjQ5OCA0LjYwNzc0IDE0LjI0OTggNloiIGZpbGw9IiM1QTY0NzIiLz4KPC9nPgo8L3N2Zz4K" width="18" height="18" alt=""><img class="unread" src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjciIGhlaWdodD0iNyIgdmlld0JveD0iMCAwIDcgNyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBpZD0idW5yZWFkIiBjeD0iMy41IiBjeT0iMy41IiByPSIzLjUiIGZpbGw9IiNCMzE5NDIiLz4KPC9zdmc+Cg==" alt=""></button>
+      <div class="divider"></div>
+      <button class="account" data-go="PF1">
+        <div class="avatar">JK</div>
+        <div class="who"><p>Juya Kim</p><p>juya.k@bharvest.io</p></div>
+        <img class="chev14" src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xMS41MjgzIDUuNTI4MzJDMTEuNzg4NyA1LjI2Nzk3IDEyLjIxMTMgNS4yNjc5NyAxMi40NzE3IDUuNTI4MzJDMTIuNzMyIDUuNzg4NjcgMTIuNzMyIDYuMjExMzMgMTIuNDcxNyA2LjQ3MTY4TDguNDcxNjggMTAuNDcxN0M4LjIxMTMzIDEwLjczMiA3Ljc4ODY3IDEwLjczMiA3LjUyODMyIDEwLjQ3MTdMMy41MjgzMiA2LjQ3MTY4QzMuMjY3OTcgNi4yMTEzMyAzLjI2Nzk3IDUuNzg4NjcgMy41MjgzMiA1LjUyODMyQzMuNzg4NjcgNS4yNjc5NyA0LjIxMTMzIDUuMjY3OTcgNC40NzE2OCA1LjUyODMyTDggOS4wNTY2NEwxMS41MjgzIDUuNTI4MzJaIiBmaWxsPSIjQjlCRUM0Ii8+CjwvZz4KPC9zdmc+Cg==" alt="">
+      </button>
+    </div>
+  </header>
+  <div class="body">
+    <div class="panel">
+      <nav class="sb" id="sb">
+        <div class="groups">
+          <div class="group">
+            <div class="inset"><a class="nav" data-nav="home" data-go="H1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJpY29uIj4KPHBhdGggaWQ9Ikljb24iIGQ9Ik02IDE0VjkuNDM1MjJDNiA5LjAxNTA0IDYuMzU4MTcgOC42NzQ0MiA2LjggOC42NzQ0Mkg5LjJDOS42NDE4MyA4LjY3NDQyIDEwIDkuMDE1MDQgMTAgOS40MzUyMlYxNE03LjUzNjM4IDIuMTQwNzhMMi4zMzYzOCA1LjY1NzM1QzIuMTI1MzQgNS44MDAwNyAyIDYuMDMxMSAyIDYuMjc3MzdWMTIuODU4OEMyIDEzLjQ4OTEgMi41MzcyNiAxNCAzLjIgMTRIMTIuOEMxMy40NjI3IDE0IDE0IDEzLjQ4OTEgMTQgMTIuODU4OFY2LjI3NzM3QzE0IDYuMDMxMSAxMy44NzQ3IDUuODAwMDcgMTMuNjYzNiA1LjY1NzM1TDguNDYzNjIgMi4xNDA3OEM4LjE4NjA1IDEuOTUzMDcgNy44MTM5NSAxLjk1MzA3IDcuNTM2MzggMi4xNDA3OFoiIHN0cm9rZS13aWR0aD0iMS4zIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZT0iIzAwNDI4NSIvPgo8L2c+Cjwvc3ZnPgo=" alt=""><span>Home</span></a></div>
+            <div class="inset"><a class="nav" data-nav="tasks" data-go="IB1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik01LjMzMzMzIDcuMzMzMDFMNS40MTYzNCA3LjMzODg3QzUuNjA3IDcuMzYyNzkgNS43Nzk4OCA3LjQ2NzgxIDUuODg4MDIgNy42Mjk4OEw3LjAyMjc5IDkuMzMzMDFIOC45NzY4OUwxMC4xMTE3IDcuNjI5ODhMMTAuMTYyNCA3LjU2NDQ1QzEwLjI4ODEgNy40MTg5NiAxMC40NzE0IDcuMzMzMSAxMC42NjYzIDcuMzMzMDFIMTQuNjY2M0MxNS4wMzQ1IDcuMzMzMDEgMTUuMzMzMyA3LjYzMTgxIDE1LjMzMzMgOEMxNS4zMzMzIDguMzY4MTkgMTUuMDM0NSA4LjY2Njk5IDE0LjY2NjMgOC42NjY5OUgxMS4wMjI4TDkuODg4MDIgMTAuMzcwMUM5Ljc2NDM2IDEwLjU1NTQgOS41NTYxNCAxMC42NjcgOS4zMzMzMyAxMC42NjdINi42NjYzNEM2LjQ0MzU5IDEwLjY2NjkgNi4yMzUyNCAxMC41NTU0IDYuMTExNjUgMTAuMzcwMUw0Ljk3Njg5IDguNjY2OTlIMS4zMzMzM0MwLjk2NTE0MyA4LjY2Njk5IDAuNjY2MzQxIDguMzY4MTkgMC42NjYzNDEgOEMwLjY2NjM0MSA3LjYzMTgxIDAuOTY1MTQzIDcuMzMzMDEgMS4zMzMzMyA3LjMzMzAxSDUuMzMzMzNaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTE0LjAwMDMgOC4xNTc4OEwxMS43NzA4IDMuNzA0NzVMMTEuNzY5OSAzLjcwMzc4QzExLjcxNDcgMy41OTI3IDExLjYyOTIgMy40OTg2MyAxMS41MjM4IDMuNDMzMjdDMTEuNDQ0NyAzLjM4NDI1IDExLjM1NjUgMy4zNTIzMSAxMS4yNjUgMy4zMzk1MkwxMS4xNzMyIDMuMzMzNjZINC44Mjc0N0w0LjczNDcgMy4zMzk1MkM0LjY0MzIzIDMuMzUyMzUgNC41NTQ5OCAzLjM4NDIzIDQuNDc1OTEgMy40MzMyN0M0LjM3MDUxIDMuNDk4NjMgNC4yODU5OCAzLjU5MjcxIDQuMjMwNzkgMy43MDM3OEw0LjIyOTgyIDMuNzA0NzVMMi4wMDAzMyA4LjE1NTkyVjExLjk5OTdDMi4wMDAzMyAxMi4xNzY1IDIuMDcwNjEgMTIuMzQ2MyAyLjE5NTY0IDEyLjQ3MTRDMi4zMjA1NyAxMi41OTYyIDIuNDg5NzIgMTIuNjY2NiAyLjY2NjM0IDEyLjY2NjdIMTMuMzMzM0MxMy41MTAxIDEyLjY2NjcgMTMuNjggMTIuNTk2NCAxMy44MDUgMTIuNDcxNEMxMy45Mjk5IDEyLjM0NjMgMTQuMDAwMyAxMi4xNzY0IDE0LjAwMDMgMTEuOTk5N1Y4LjE1Nzg4Wk0xNS4zMzMzIDExLjk5OTdDMTUuMzMzMyAxMi41MyAxNS4xMjI0IDEzLjAzODcgMTQuNzQ3NCAxMy40MTM3QzE0LjM3MjMgMTMuNzg4OCAxMy44NjM4IDEzLjk5OTcgMTMuMzMzMyAxMy45OTk3SDIuNjY2MzRDMi4xMzYwMyAxMy45OTk2IDEuNjI3MjcgMTMuNzg4NyAxLjI1MjI4IDEzLjQxMzdDMC44Nzc0MDkgMTMuMDM4NyAwLjY2NjM0MSAxMi41MyAwLjY2NjM0MSAxMS45OTk3VjcuOTk5NjdDMC42NjYzOTEgNy44OTYxOSAwLjY5MTMwOSA3Ljc5NDM2IDAuNzM3NjMgNy43MDE4MkwzLjAzNzQzIDMuMTA4MDdDMy4yMDMwNCAyLjc3NTczIDMuNDU4MTcgMi40OTYxNiAzLjc3Mzc2IDIuMzAwNDZDNC4wODk5MyAyLjEwNDQ1IDQuNDU0NSAxLjk5OTg3IDQuODI2NSAxLjk5OTY3SDExLjE3NDJDMTEuNTQ2MSAxLjk5OTk2IDExLjkxMDggMi4xMDQ0NSAxMi4yMjY5IDIuMzAwNDZDMTIuNTQyMyAyLjQ5NjEyIDEyLjc5NjcgMi43NzU4OCAxMi45NjIyIDMuMTA4MDdMMTUuMjYzIDcuNzAxODJDMTUuMzA5MyA3Ljc5NDI5IDE1LjMzMzMgNy44OTYyOSAxNS4zMzMzIDcuOTk5NjdWMTEuOTk5N1oiIGZpbGw9IiNCOUJFQzQiLz4KPC9nPgo8L3N2Zz4K" alt=""><span>My tasks</span><b class="count">5</b></a></div>
+            <div class="inset"><a class="nav" data-nav="requests" data-go="RQ1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik01LjMzMzMzIDcuMzMzMDFMNS40MTYzNCA3LjMzODg3QzUuNjA3IDcuMzYyNzkgNS43Nzk4OCA3LjQ2NzgxIDUuODg4MDIgNy42Mjk4OEw3LjAyMjc5IDkuMzMzMDFIOC45NzY4OUwxMC4xMTE3IDcuNjI5ODhMMTAuMTYyNCA3LjU2NDQ1QzEwLjI4ODEgNy40MTg5NiAxMC40NzE0IDcuMzMzMSAxMC42NjYzIDcuMzMzMDFIMTQuNjY2M0MxNS4wMzQ1IDcuMzMzMDEgMTUuMzMzMyA3LjYzMTgxIDE1LjMzMzMgOEMxNS4zMzMzIDguMzY4MTkgMTUuMDM0NSA4LjY2Njk5IDE0LjY2NjMgOC42NjY5OUgxMS4wMjI4TDkuODg4MDIgMTAuMzcwMUM5Ljc2NDM2IDEwLjU1NTQgOS41NTYxNCAxMC42NjcgOS4zMzMzMyAxMC42NjdINi42NjYzNEM2LjQ0MzU5IDEwLjY2NjkgNi4yMzUyNCAxMC41NTU0IDYuMTExNjUgMTAuMzcwMUw0Ljk3Njg5IDguNjY2OTlIMS4zMzMzM0MwLjk2NTE0MyA4LjY2Njk5IDAuNjY2MzQxIDguMzY4MTkgMC42NjYzNDEgOEMwLjY2NjM0MSA3LjYzMTgxIDAuOTY1MTQzIDcuMzMzMDEgMS4zMzMzMyA3LjMzMzAxSDUuMzMzMzNaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTE0LjAwMDMgOC4xNTc4OEwxMS43NzA4IDMuNzA0NzVMMTEuNzY5OSAzLjcwMzc4QzExLjcxNDcgMy41OTI3IDExLjYyOTIgMy40OTg2MyAxMS41MjM4IDMuNDMzMjdDMTEuNDQ0NyAzLjM4NDI1IDExLjM1NjUgMy4zNTIzMSAxMS4yNjUgMy4zMzk1MkwxMS4xNzMyIDMuMzMzNjZINC44Mjc0N0w0LjczNDcgMy4zMzk1MkM0LjY0MzIzIDMuMzUyMzUgNC41NTQ5OCAzLjM4NDIzIDQuNDc1OTEgMy40MzMyN0M0LjM3MDUxIDMuNDk4NjMgNC4yODU5OCAzLjU5MjcxIDQuMjMwNzkgMy43MDM3OEw0LjIyOTgyIDMuNzA0NzVMMi4wMDAzMyA4LjE1NTkyVjExLjk5OTdDMi4wMDAzMyAxMi4xNzY1IDIuMDcwNjEgMTIuMzQ2MyAyLjE5NTY0IDEyLjQ3MTRDMi4zMjA1NyAxMi41OTYyIDIuNDg5NzIgMTIuNjY2NiAyLjY2NjM0IDEyLjY2NjdIMTMuMzMzM0MxMy41MTAxIDEyLjY2NjcgMTMuNjggMTIuNTk2NCAxMy44MDUgMTIuNDcxNEMxMy45Mjk5IDEyLjM0NjMgMTQuMDAwMyAxMi4xNzY0IDE0LjAwMDMgMTEuOTk5N1Y4LjE1Nzg4Wk0xNS4zMzMzIDExLjk5OTdDMTUuMzMzMyAxMi41MyAxNS4xMjI0IDEzLjAzODcgMTQuNzQ3NCAxMy40MTM3QzE0LjM3MjMgMTMuNzg4OCAxMy44NjM4IDEzLjk5OTcgMTMuMzMzMyAxMy45OTk3SDIuNjY2MzRDMi4xMzYwMyAxMy45OTk2IDEuNjI3MjcgMTMuNzg4NyAxLjI1MjI4IDEzLjQxMzdDMC44Nzc0MDkgMTMuMDM4NyAwLjY2NjM0MSAxMi41MyAwLjY2NjM0MSAxMS45OTk3VjcuOTk5NjdDMC42NjYzOTEgNy44OTYxOSAwLjY5MTMwOSA3Ljc5NDM2IDAuNzM3NjMgNy43MDE4MkwzLjAzNzQzIDMuMTA4MDdDMy4yMDMwNCAyLjc3NTczIDMuNDU4MTcgMi40OTYxNiAzLjc3Mzc2IDIuMzAwNDZDNC4wODk5MyAyLjEwNDQ1IDQuNDU0NSAxLjk5OTg3IDQuODI2NSAxLjk5OTY3SDExLjE3NDJDMTEuNTQ2MSAxLjk5OTk2IDExLjkxMDggMi4xMDQ0NSAxMi4yMjY5IDIuMzAwNDZDMTIuNTQyMyAyLjQ5NjEyIDEyLjc5NjcgMi43NzU4OCAxMi45NjIyIDMuMTA4MDdMMTUuMjYzIDcuNzAxODJDMTUuMzA5MyA3Ljc5NDI5IDE1LjMzMzMgNy44OTYyOSAxNS4zMzMzIDcuOTk5NjdWMTEuOTk5N1oiIGZpbGw9IiNCOUJFQzQiLz4KPC9nPgo8L3N2Zz4K" alt=""><span>Requests</span></a></div>
+            <div class="inset"><a class="nav" data-nav="proposals" data-go="PP1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xLjk5OTY3IDEzLjMzMzNWMi42NjYzNEMxLjk5OTc2IDIuMTM2MDIgMi4yMTA2MiAxLjYyNzI3IDIuNTg1NjEgMS4yNTIyOEMyLjk2MDYxIDAuODc3MjgxIDMuNDY5MzYgMC42NjY0MjUgMy45OTk2NyAwLjY2NjMzOUg5LjMzMzY2QzkuNjMyMTUgMC42NjYwNCA5LjkyODAxIDAuNzI0OTM1IDEwLjIwMzggMC44MzkxOUMxMC40Nzk2IDAuOTUzNDggMTAuNzMwMyAxLjEyMDk5IDEwLjk0MTEgMS4zMzIzNUwxMy4zMzA3IDMuNzIyOThDMTMuNTQzMSAzLjkzNDA3IDEzLjcxMjEgNC4xODU2OSAxMy44MjY4IDQuNDYyMjRDMTMuOTQxNCA0LjczODM4IDE0IDUuMDM0MzggMTMuOTk5NyA1LjMzMzMzVjEzLjMzMzNDMTMuOTk5NyAxMy44NjM4IDEzLjc4ODggMTQuMzcyMyAxMy40MTM3IDE0Ljc0NzRDMTMuMDM4NyAxNS4xMjI0IDEyLjUzIDE1LjMzMzMgMTEuOTk5NyAxNS4zMzMzSDMuOTk5NjdDMy40NjkzNiAxNS4zMzMyIDIuOTYwNjEgMTUuMTIyNCAyLjU4NTYxIDE0Ljc0NzRDMi4yMTA2NCAxNC4zNzIzIDEuOTk5NjcgMTMuODYzNyAxLjk5OTY3IDEzLjMzMzNaTTMuMzMzNjYgMTMuMzMzM0MzLjMzMzY2IDEzLjUxMDEgMy40MDM5NSAxMy42OCAzLjUyODk3IDEzLjgwNUMzLjY1Mzg5IDEzLjkyOTggMy44MjMxMyAxNC4wMDAyIDMuOTk5NjcgMTQuMDAwM0gxMS45OTk3QzEyLjE3NjQgMTQuMDAwMyAxMi4zNDYzIDEzLjkyOTkgMTIuNDcxNCAxMy44MDVDMTIuNTk2NCAxMy42OCAxMi42NjY3IDEzLjUxMDEgMTIuNjY2NyAxMy4zMzMzVjUuMzMyMzVDMTIuNjY2OSA1LjIwOTA2IDEyLjY0MjYgNS4wODY4NSAxMi41OTU0IDQuOTcyOThDMTIuNTQ4MiA0Ljg1OTE5IDEyLjQ3ODYgNC43NTYxNSAxMi4zOTEzIDQuNjY5MjdMMTIuMzkwMyA0LjY2NzMyTDkuOTk2NzQgMi4yNzQ3NEM5LjkwOTg3IDIuMTg3NTcgOS44MDY3MyAyLjExNzc0IDkuNjkzMDMgMi4wNzA2NEM5LjU3OTQ1IDIuMDIzNjIgOS40NTc1NiAyLjAwMDE1IDkuMzM0NjQgMi4wMDAzMkgzLjk5OTY3QzMuODIyOTggMi4wMDA0MSAzLjY1MzkyIDIuMDcwNjkgMy41Mjg5NyAyLjE5NTY0QzMuNDA0MDIgMi4zMjA1OCAzLjMzMzc1IDIuNDg5NjUgMy4zMzM2NiAyLjY2NjM0VjEzLjMzMzNaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTguNjY2MzQgNC42NjYzNFYxLjMzMzMzQzguNjY2MzQgMC45NjUxNDMgOC45NjUxNCAwLjY2NjM0MSA5LjMzMzMzIDAuNjY2MzQxQzkuNzAxNTIgMC42NjYzNDEgMTAuMDAwMyAwLjk2NTE0MyAxMC4wMDAzIDEuMzMzMzNWNC42NjYzNEgxMy4zMzMzQzEzLjcwMTUgNC42NjYzNCAxNC4wMDAzIDQuOTY1MTQgMTQuMDAwMyA1LjMzMzMzQzE0LjAwMDMgNS43MDE1MiAxMy43MDE1IDYuMDAwMzMgMTMuMzMzMyA2LjAwMDMzSDEwLjAwMDNDOS42NDY3IDYuMDAwMzMgOS4zMDcwMSA1Ljg1OTc1IDkuMDU2OTcgNS42MDk3QzguODA2OTIgNS4zNTk2NSA4LjY2NjM0IDUuMDE5OTYgOC42NjYzNCA0LjY2NjM0WiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzMiIGQ9Ik02LjY2NjM0IDUuMzMzMDFDNy4wMzQ1MyA1LjMzMzAxIDcuMzMzMzMgNS42MzE4MSA3LjMzMzMzIDZDNy4zMzMzMyA2LjM2ODE5IDcuMDM0NTMgNi42NjY5OSA2LjY2NjM0IDYuNjY2OTlINS4zMzMzM0M0Ljk2NTE0IDYuNjY2OTkgNC42NjYzNCA2LjM2ODE5IDQuNjY2MzQgNkM0LjY2NjM0IDUuNjMxODEgNC45NjUxNCA1LjMzMzAxIDUuMzMzMzMgNS4zMzMwMUg2LjY2NjM0WiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzQiIGQ9Ik0xMC42NjYzIDcuOTk5NjdDMTEuMDM0NSA3Ljk5OTY3IDExLjMzMzMgOC4yOTg0OCAxMS4zMzMzIDguNjY2NjdDMTEuMzMzMyA5LjAzNDg2IDExLjAzNDUgOS4zMzM2NiAxMC42NjYzIDkuMzMzNjZINS4zMzMzM0M0Ljk2NTE0IDkuMzMzNjYgNC42NjYzNCA5LjAzNDg2IDQuNjY2MzQgOC42NjY2N0M0LjY2NjM0IDguMjk4NDggNC45NjUxNCA3Ljk5OTY3IDUuMzMzMzMgNy45OTk2N0gxMC42NjYzWiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzUiIGQ9Ik0xMC42NjYzIDEwLjY2NjNDMTEuMDM0NSAxMC42NjYzIDExLjMzMzMgMTAuOTY1MSAxMS4zMzMzIDExLjMzMzNDMTEuMzMzMyAxMS43MDE1IDExLjAzNDUgMTIuMDAwMyAxMC42NjYzIDEyLjAwMDNINS4zMzMzM0M0Ljk2NTE0IDEyLjAwMDMgNC42NjYzNCAxMS43MDE1IDQuNjY2MzQgMTEuMzMzM0M0LjY2NjM0IDEwLjk2NTEgNC45NjUxNCAxMC42NjYzIDUuMzMzMzMgMTAuNjY2M0gxMC42NjYzWiIgZmlsbD0iI0I5QkVDNCIvPgo8L2c+Cjwvc3ZnPgo=" alt=""><span>Proposals</span></a></div>
+            <div class="inset"><a class="nav" data-nav="tokens" data-go="TK1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCIgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzBfMjU1KSI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0zLjk4MzM1IDYuMTk5NjRDNC4zMzU2MyA2LjA5MzIxIDQuNzA3NzMgNi4yOTE3OCA0LjgxNDQgNi42NDM5N0M0LjkyMDk3IDYuOTk2MzMgNC43MjEzOCA3LjM2ODM2IDQuMzY5MDkgNy40NzUwM0MzLjgxNzY2IDcuNjQxOCAzLjMxODM2IDcuOTQ4NjcgMi45MjA4NSA4LjM2NTY1QzIuNTIzMzMgOC43ODI2NSAyLjI0MDc1IDkuMjk2MTIgMi4xMDA1NCA5Ljg1NDkxQzEuOTYwNCAxMC40MTM1IDEuOTY3NjEgMTAuOTk5IDIuMTIxMDQgMTEuNTU0MUMyLjI3NDU1IDEyLjEwOTMgMi41NjkzIDEyLjYxNTYgMi45NzY1MSAxMy4wMjI5QzMuMzgzODUgMTMuNDMwMiAzLjg5MDA1IDEzLjcyNTggNC40NDUyNiAxMy44NzkzQzUuMDAwNTQgMTQuMDMyOSA1LjU4NjY3IDE0LjAzOTEgNi4xNDU0NiAxMy44OTg5QzYuNzA0MTMgMTMuNzU4NiA3LjIxNjgxIDEzLjQ3NiA3LjYzMzc0IDEzLjA3ODVDOC4wNTA2NSAxMi42ODExIDguMzU3NTcgMTIuMTgyNiA4LjUyNDM2IDExLjYzMTNDOC42MzA5MyAxMS4yNzg5IDkuMDAzMDUgMTEuMDc5NSA5LjM1NTQyIDExLjE4NkM5LjcwNzg0IDExLjI5MjYgOS45MDczMiAxMS42NjQ2IDkuODAwNzMgMTIuMDE3QzkuNTY3MjYgMTIuNzg5IDkuMTM3MzkgMTMuNDg2OSA4LjU1MzY2IDE0LjA0MzRDNy45Njk4NiAxNC41OTk5IDcuMjUxOTggMTQuOTk2NSA2LjQ2OTY4IDE1LjE5MjhDNS42ODc0MiAxNS4zODkxIDQuODY3MTMgMTUuMzc4NCA0LjA4OTc5IDE1LjE2MzVDMy4zMTI2OSAxNC45NDg1IDIuNjA0MyAxNC41MzYzIDIuMDM0MTMgMTMuOTY2MkMxLjQ2MzgxIDEzLjM5NTkgMS4wNTA4NCAxMi42ODcgMC44MzU4ODggMTEuOTA5NkMwLjYyMTAyNiAxMS4xMzI0IDAuNjExMzg3IDEwLjMxMjggMC44MDc1NjggOS41MzA2OUMxLjAwMzg3IDguNzQ4MzkgMS4zOTk0OCA4LjAyOTUzIDEuOTU2MDEgNy40NDU3M0MyLjUxMjUxIDYuODYyIDMuMjExMzggNi40MzMxMSAzLjk4MzM1IDYuMTk5NjRaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTEwIDYuNjY2OTlWNC42NjY5OUM5LjYzMTgxIDQuNjY2OTkgOS4zMzMwMSA0LjM2ODE5IDkuMzMzMDEgNEM5LjMzMzAxIDMuNjMxODEgOS42MzE4MSAzLjMzMzAxIDEwIDMuMzMzMDFIMTAuNjY3QzExLjAzNSAzLjMzMzE4IDExLjMzMyAzLjYzMTkyIDExLjMzMyA0VjYuNjY2OTlDMTEuMzMyOCA3LjAzNDkyIDExLjAzNDkgNy4zMzI4MyAxMC42NjcgNy4zMzMwMUMxMC4yOTg5IDcuMzMzMDEgMTAuMDAwMiA3LjAzNTAzIDEwIDYuNjY2OTlaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMyIgZD0iTTQuNDU2NTIgOC44NzkxOUM0Ljc1MDY3IDguNzgxMTYgNS4wODI1NiA4LjkwMDAxIDUuMjQzNjMgOS4xNzg5OUw2LjU3NzYxIDExLjQ4NzZDNi43NjE3IDExLjgwNjQgNi42NTIyNyAxMi4yMTQ2IDYuMzMzNDcgMTIuMzk4N0M2LjAxNDYxIDEyLjU4MjggNS42MDY0NCAxMi40NzM0IDUuNDIyMzQgMTIuMTU0Nkw0LjQyMjM0IDEwLjQyMzFDNC4xMDM2NiAxMC42MDY4IDMuNjk2MjkgMTAuNDk3NSAzLjUxMjE4IDEwLjE3OUMzLjMyODA5IDkuODYwMTMgMy40Mzc0NyA5LjQ1MTk2IDMuNzU2MzMgOS4yNjc4Nkw0LjMzMzQ3IDguOTM0ODVMNC40NTY1MiA4Ljg3OTE5WiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzQiIGQ9Ik0xMy45OTk3IDUuMzMzMzNDMTMuOTk5NyAzLjQ5MjM4IDEyLjUwNzYgMi4wMDAzMyAxMC42NjY3IDIuMDAwMzNDOC44MjU3MiAyLjAwMDMzIDcuMzMzNjYgMy40OTIzOCA3LjMzMzY2IDUuMzMzMzNDNy4zMzM2NiA3LjE3NDI4IDguODI1NzIgOC42NjYzNCAxMC42NjY3IDguNjY2MzRDMTIuNTA3NiA4LjY2NjM0IDEzLjk5OTcgNy4xNzQyOCAxMy45OTk3IDUuMzMzMzNaTTE1LjMzMzcgNS4zMzMzM0MxNS4zMzM3IDcuOTEwNjYgMTMuMjQ0IDEwLjAwMDMgMTAuNjY2NyAxMC4wMDAzQzguMDg5MzQgMTAuMDAwMyA1Ljk5OTY3IDcuOTEwNjYgNS45OTk2NyA1LjMzMzMzQzUuOTk5NjcgMi43NTYgOC4wODkzNCAwLjY2NjM0MSAxMC42NjY3IDAuNjY2MzQxQzEzLjI0NCAwLjY2NjM0MSAxNS4zMzM3IDIuNzU2IDE1LjMzMzcgNS4zMzMzM1oiIGZpbGw9IiNCOUJFQzQiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8wXzI1NSI+CjxyZWN0IHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0id2hpdGUiLz4KPC9jbGlwUGF0aD4KPC9kZWZzPgo8L3N2Zz4K" alt=""><span>Tokens</span></a></div>
+            <div class="inset"><a class="nav" data-nav="disclosures" data-go="DC1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xMy4zMzMgMi42NjY5OUwxMy4zMzIgMi42NjYwMkMxMS42MjU3IDQuMDEwNTEgOS41MDQ3NyA0LjcxODA1IDcuMzMzMDEgNC42NjYwMkwzLjMzMzAxIDQuNjY2OTlDMy4xNTYzMSA0LjY2NzA4IDIuOTg3MjUgNC43MzczNiAyLjg2MjMgNC44NjIzQzIuNzM3MzYgNC45ODcyNSAyLjY2NzA4IDUuMTU2MzEgMi42NjY5OSA1LjMzMzAxVjhDMi42NjY5OSA4LjE3NjgxIDIuNzM3MjggOC4zNDY2NiAyLjg2MjMgOC40NzE2OEMyLjk4NzIyIDguNTk2NDIgMy4xNTY0NyA4LjY2NjkxIDMuMzMzMDEgOC42NjY5OUg3LjMxNjQxQzkuNDkzOTQgOC42MTA5NSAxMS42MjI0IDkuMzE4MTEgMTMuMzMzIDEwLjY2NlYyLjY2Njk5Wk0xNC42NjcgMTAuNjY3QzE0LjY2NjkgMTAuOTE0MyAxNC41OTc3IDExLjE1NjcgMTQuNDY3OCAxMS4zNjcyQzE0LjMzNzYgMTEuNTc3OCAxNC4xNTEyIDExLjc0ODYgMTMuOTI5NyAxMS44NTk0QzEzLjcwODMgMTEuOTcwMSAxMy40NjA0IDEyLjAxNjMgMTMuMjEzOSAxMS45OTQxQzEyLjk2NzIgMTEuOTcxOSAxMi43MzEzIDExLjg4MiAxMi41MzMyIDExLjczMzRDMTIuNTI4NiAxMS43MyAxMi41MjQgMTEuNzI2MiAxMi41MTk1IDExLjcyMjdDMTEuMDUxMiAxMC41NjEyIDkuMjIyMDggOS45NTE4MSA3LjM1MDU5IDEwSDMuMzMzMDFDMi44MDI2OSA5Ljk5OTkxIDIuMjkzOTQgOS43ODkwNiAxLjkxODk1IDkuNDE0MDZDMS41NDM5NyA5LjAzOSAxLjMzMzAxIDguNTMwMzYgMS4zMzMwMSA4VjUuMzMzMDFDMS4zMzMwOSA0LjgwMjY5IDEuNTQzOTUgNC4yOTM5NCAxLjkxODk1IDMuOTE4OTRDMi4yOTM5NCAzLjU0Mzk1IDIuODAyNjkgMy4zMzMwOSAzLjMzMzAxIDMuMzMzMDFINy4zMzMwMUM3LjMzODczIDMuMzMzMDEgNy4zNDQ4NiAzLjMzMzg0IDcuMzUwNTkgMy4zMzM5OEM5LjIyMjE0IDMuMzgyMTcgMTEuMDUxMiAyLjc3MTg0IDEyLjUxOTUgMS42MTAzNUwxMi41MzMyIDEuNTk5NjFDMTIuNzMxMyAxLjQ1MTA5IDEyLjk2NzMgMS4zNjExIDEzLjIxMzkgMS4zMzg4N0MxMy40NjAzIDEuMzE2NjkgMTMuNzA4MyAxLjM2Mjk4IDEzLjkyOTcgMS40NzM2M0MxNC4xNTEyIDEuNTg0MzcgMTQuMzM3NiAxLjc1NTE5IDE0LjQ2NzggMS45NjU4MkMxNC41OTc5IDIuMTc2NDEgMTQuNjY3IDIuNDE5NDUgMTQuNjY3IDIuNjY2OTlWMTAuNjY3WiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik0zLjMzMzAxIDkuMzMzMzNDMy4zMzMwMSA4Ljk2NTE0IDMuNjMxODEgOC42NjYzNCA0IDguNjY2MzRDNC4zNjgxOSA4LjY2NjM0IDQuNjY2OTkgOC45NjUxNCA0LjY2Njk5IDkuMzMzMzNDNC42NjY5OSAxMC45MiA1LjE4MTc2IDEyLjQ2NDQgNi4xMzM3OSAxMy43MzM3QzYuMjM5ODUgMTMuODc0OSA2LjM5NzQ2IDEzLjk2ODUgNi41NzIyNyAxMy45OTM1QzYuNzQ3MjYgMTQuMDE4NSA2LjkyNDk3IDEzLjk3MjYgNy4wNjY0MSAxMy44NjY1QzcuMjA3NzIgMTMuNzYwNiA3LjMwMTA2IDEzLjYwMjkgNy4zMjYxNyAxMy40MjgxQzcuMzUxMTggMTMuMjUzIDcuMzA2MjggMTMuMDc0NCA3LjIwMDIgMTIuOTMyOUM2LjQyMTM0IDExLjg5NDQgNiAxMC42MzE1IDYgOS4zMzMzM0M2IDguOTY1MTQgNi4yOTg4IDguNjY2MzQgNi42NjY5OSA4LjY2NjM0QzcuMDM1MDMgOC42NjY1MiA3LjMzMzAxIDguOTY1MjUgNy4zMzMwMSA5LjMzMzMzQzcuMzMzMDEgMTAuMzQzIDcuNjYwODQgMTEuMzI1NCA4LjI2NjYgMTIuMTMzMUM4LjU4NDg2IDEyLjU1NzUgOC43MjE1IDEzLjA5MTQgOC42NDY0OCAxMy42MTY1QzguNTcxMzkgMTQuMTQxNSA4LjI5MDQ2IDE0LjYxNDggNy44NjYyMSAxNC45MzI5QzcuNDQxODggMTUuMjUxMSA2LjkwODg1IDE1LjM4NzggNi4zODM3OSAxNS4zMTI4QzUuODU4NzIgMTUuMjM3OCA1LjM4NDY1IDE0Ljk1NzkgNS4wNjY0MSAxNC41MzM1QzMuOTQxMjggMTMuMDMzNCAzLjMzMzAxIDExLjIwODUgMy4zMzMwMSA5LjMzMzMzWiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzMiIGQ9Ik00LjY2NjM0IDkuMzMzMDFWNEM0LjY2NjM0IDMuNjMxODEgNC45NjUxNCAzLjMzMzAxIDUuMzMzMzMgMy4zMzMwMUM1LjcwMTUyIDMuMzMzMDEgNi4wMDAzMyAzLjYzMTgxIDYuMDAwMzMgNFY5LjMzMzAxQzYuMDAwMzMgOS43MDEyIDUuNzAxNTIgMTAgNS4zMzMzMyAxMEM0Ljk2NTE0IDEwIDQuNjY2MzQgOS43MDEyIDQuNjY2MzQgOS4zMzMwMVoiIGZpbGw9IiNCOUJFQzQiLz4KPC9nPgo8L3N2Zz4K" alt=""><span>Disclosures</span></a></div>
+          </div>
+        </div>
+        <div class="group org">
+          <p class="glabel">Organization</p>
+          <div class="inset"><a class="nav" data-nav="members" data-go="MB1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xMS4zMzMzIDEzLjk5OTdDMTEuMzMzMiAxMi43NjIxIDEwLjg0MTIgMTEuNTc1IDkuOTY2MTUgMTAuNjk5OUM5LjA5MTAxIDkuODI0OSA3LjkwMzg2IDkuMzMzNjYgNi42NjYzNCA5LjMzMzY2QzUuNDI4NzggOS4zMzM3NSA0LjI0MTYzIDkuODI0NzggMy4zNjY1NCAxMC42OTk5QzIuNDkxNDQgMTEuNTc1IDIuMDAwNDEgMTIuNzYyMSAyLjAwMDMzIDEzLjk5OTdDMi4wMDAzMyAxNC4zNjc5IDEuNzAxNTIgMTQuNjY2NyAxLjMzMzMzIDE0LjY2NjdDMC45NjUxNDMgMTQuNjY2NyAwLjY2NjM0MSAxNC4zNjc5IDAuNjY2MzQxIDEzLjk5OTdDMC42NjY0MjcgMTIuNDA4NSAxLjI5OTAxIDEwLjg4MjYgMi40MjQxNSA5Ljc1NzQ5QzMuNTQ5MyA4LjYzMjM1IDUuMDc1MTYgNy45OTk3NiA2LjY2NjM0IDcuOTk5NjdDOC4yNTc2NCA3Ljk5OTY3IDkuNzg0MjkgOC42MzIyNyAxMC45MDk1IDkuNzU3NDlDMTIuMDM0NSAxMC44ODI2IDEyLjY2NjMgMTIuNDA4NiAxMi42NjYzIDEzLjk5OTdDMTIuNjY2MyAxNC4zNjc4IDEyLjM2ODQgMTQuNjY2NSAxMi4wMDAzIDE0LjY2NjdDMTEuNjMyMSAxNC42NjY3IDExLjMzMzMgMTQuMzY3OSAxMS4zMzMzIDEzLjk5OTdaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTkuMzMzMzMgNS4zMzMwMUM5LjMzMzE2IDMuODYwNCA4LjEzODk5IDIuNjY2OTkgNi42NjYzNCAyLjY2Njk5QzUuMTkzODQgMi42NjcxNyA0LjAwMDUgMy44NjA1MSA0LjAwMDMzIDUuMzMzMDFDNC4wMDAzMyA2LjgwNTY2IDUuMTkzNzMgNy45OTk4MiA2LjY2NjM0IDhDOC4xMzkxIDggOS4zMzMzMyA2LjgwNTc3IDkuMzMzMzMgNS4zMzMwMVpNMTAuNjY2MyA1LjMzMzAxQzEwLjY2NjMgNy41NDIxNSA4Ljg3NTQ4IDkuMzMzMDEgNi42NjYzNCA5LjMzMzAxQzQuNDU3MzUgOS4zMzI4MyAyLjY2NjM0IDcuNTQyMDQgMi42NjYzNCA1LjMzMzAxQzIuNjY2NTIgMy4xMjQxMyA0LjQ1NzQ2IDEuMzMzMTggNi42NjYzNCAxLjMzMzAxQzguODc1MzcgMS4zMzMwMSAxMC42NjYyIDMuMTI0MDIgMTAuNjY2MyA1LjMzMzAxWiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzMiIGQ9Ik0xMy45OTk4IDEzLjMzMjlDMTMuOTk5NiAxMS4zMjU5IDEyLjc5MDkgOS40MjYwNSAxMS42MDA0IDguNTMzMDdDMTEuNDMyNSA4LjQwNzE4IDExLjMzMzggOC4yMDk2OSAxMS4zMzM4IDcuOTk5ODdDMTEuMzMzOCA3Ljc5MDEyIDExLjQzMjYgNy41OTI1NSAxMS42MDA0IDcuNDY2NjdDMTEuOTUwOSA3LjIwMzY0IDEyLjIzMDYgNi44NTc5MiAxMi40MTU4IDYuNDYwODFDMTIuNjAxMSA2LjA2MzU4IDEyLjY4NTYgNS42MjcgMTIuNjYxOSA1LjE4OTMyQzEyLjYzODIgNC43NTE3MyAxMi41MDcyIDQuMzI2ODMgMTIuMjgwMSAzLjk1MjAyQzEyLjA1MjkgMy41NzcxOCAxMS43MzcxIDMuMjYzNTEgMTEuMzYwMiAzLjAzOTkxQzExLjA0MzUgMi44NTIxMSAxMC45MzkgMi40NDM0OSAxMS4xMjY4IDIuMTI2ODJDMTEuMzE0NiAxLjgxMDE4IDExLjcyMzIgMS43MDU2OSAxMi4wMzk4IDEuODkzNDJDMTIuNjA1NCAyLjIyODgzIDEzLjA3OTkgMi42OTgzIDEzLjQyMDcgMy4yNjA2MUMxMy43NjE0IDMuODIyODkgMTMuOTU4MyA0LjQ2MDU3IDEzLjk5MzkgNS4xMTcwNkMxNC4wMjk1IDUuNzczNDMgMTMuOTAyNiA2LjQyODU0IDEzLjYyNDggNy4wMjQyOEMxMy40NjIxIDcuMzcyOTggMTMuMjQ4OCA3LjY5NDA1IDEyLjk5NTkgNy45ODAzNEMxNC4yNDQxIDkuMTk1NSAxNS4zMzM2IDExLjE4NDQgMTUuMzMzOCAxMy4zMzI5QzE1LjMzMzggMTMuNzAxIDE1LjAzNDkgMTMuOTk5OCAxNC42NjY4IDEzLjk5OTlDMTQuMjk4NiAxMy45OTk5IDEzLjk5OTggMTMuNzAxMSAxMy45OTk4IDEzLjMzMjlaIiBmaWxsPSIjQjlCRUM0Ii8+CjwvZz4KPC9zdmc+Cg==" alt=""><span>Members</span></a></div>
+          <div class="inset"><a class="nav" data-nav="rules" data-go="AR1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxnIGlkPSJVbmlvbiI+CjxwYXRoIGQ9Ik04IDkuMzM0OTZDOC44ODM0MiA5LjMzNTA1IDkuNzMwNzUgOS42ODU5MiAxMC4zNTU1IDEwLjMxMDVDMTAuOTgwMyAxMC45MzU0IDExLjMzMTEgMTEuNzgzNCAxMS4zMzExIDEyLjY2N1YxNEMxMS4zMzExIDE0LjM2NzMgMTEuMDMzMyAxNC42NjUgMTAuNjY2IDE0LjY2NUMxMC4yOTg5IDE0LjY2NDkgMTAuMDAxIDE0LjM2NzIgMTAuMDAxIDE0VjEyLjY2N0MxMC4wMDEgMTIuMTM2MSA5Ljc5MDQyIDExLjYyNjQgOS40MTUwNCAxMS4yNTFDOS4wMzk3NSAxMC44NzU4IDguNTMwNjggMTAuNjY1MSA4IDEwLjY2NUg0QzMuNDY5MTMgMTAuNjY1IDIuOTU5MzcgMTAuODc1NiAyLjU4Mzk4IDExLjI1MUMyLjIwODYgMTEuNjI2NCAxLjk5ODA1IDEyLjEzNjEgMS45OTgwNSAxMi42NjdWMTRDMS45OTgwNSAxNC4zNjczIDEuNzAwMjggMTQuNjY1IDEuMzMzMDEgMTQuNjY1QzAuOTY1NzM4IDE0LjY2NSAwLjY2Nzk2OSAxNC4zNjczIDAuNjY3OTY5IDE0VjEyLjY2N0MwLjY2Nzk2OSAxMS43ODM0IDEuMDE4NzUgMTAuOTM1NCAxLjY0MzU1IDEwLjMxMDVDMi4yNjgzNiA5LjY4NTc0IDMuMTE2MzkgOS4zMzQ5NiA0IDkuMzM0OTZIOFoiIGZpbGw9IiNCOUJFQzQiLz4KPHBhdGggZD0iTTEyLjgzMyA5LjQ0MzM2QzEzLjU0NzcgOS42Mjc5MiAxNC4xODE1IDEwLjA0NDUgMTQuNjMzOCAxMC42Mjc5QzE1LjA4NTcgMTEuMjExMSAxNS4zMzE0IDExLjkyODIgMTUuMzMyIDEyLjY2NlYxNEMxNS4zMzE4IDE0LjM2NyAxNS4wMzQxIDE0LjY2NSAxNC42NjcgMTQuNjY1QzE0LjI5OTkgMTQuNjY1IDE0LjAwMjIgMTQuMzY3IDE0LjAwMiAxNFYxMi42NjdDMTQuMDAxNSAxMi4yMjM4IDEzLjg1MzUgMTEuNzkyNyAxMy41ODIgMTEuNDQyNEMxMy4zMTA0IDExLjA5MjEgMTIuOTMwMiAxMC44NDE0IDEyLjUwMSAxMC43MzA1QzEyLjE0NTYgMTAuNjM4NyAxMS45MzIgMTAuMjc2MyAxMi4wMjM0IDkuOTIwOUMxMi4xMTUyIDkuNTY1MzQgMTIuNDc3NCA5LjM1MTYzIDEyLjgzMyA5LjQ0MzM2WiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBkPSJNNiAxLjMzNDk2QzcuODM5ODggMS4zMzUxNCA5LjMzMTA1IDIuODI3MDcgOS4zMzEwNSA0LjY2Njk5QzkuMzMwODggNi41MDY3NiA3LjgzOTc3IDcuOTk3ODcgNiA3Ljk5ODA1QzQuMTYwMDggNy45OTgwNSAyLjY2ODE0IDYuNTA2ODcgMi42Njc5NyA0LjY2Njk5QzIuNjY3OTcgMi44MjY5NiA0LjE1OTk3IDEuMzM0OTYgNiAxLjMzNDk2Wk02IDIuNjY1MDRDNC44OTQ1MSAyLjY2NTA0IDMuOTk4MDUgMy41NjE1IDMuOTk4MDUgNC42NjY5OUMzLjk5ODIyIDUuNzcyMzMgNC44OTQ2MiA2LjY2Nzk3IDYgNi42Njc5N0M3LjEwNTIzIDYuNjY3NzkgOC4wMDA4IDUuNzcyMjIgOC4wMDA5OCA0LjY2Njk5QzguMDAwOTggMy41NjE2MSA3LjEwNTM0IDIuNjY1MjEgNiAyLjY2NTA0WiIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNCOUJFQzQiLz4KPHBhdGggZD0iTTEwLjgzMiAxLjQ0MjM4QzExLjU0ODYgMS42MjU4OCAxMi4xODQxIDIuMDQyNjcgMTIuNjM3NyAyLjYyNjk1QzEzLjA5MTEgMy4yMTExOSAxMy4zMzY4IDMuOTMwMzkgMTMuMzM2OSA0LjY2OTkyQzEzLjMzNjggNS40MDk0IDEzLjA5MTEgNi4xMjg2OSAxMi42Mzc3IDYuNzEyODlDMTIuMTg0MSA3LjI5NzA3IDExLjU0ODUgNy43MTM5OCAxMC44MzIgNy44OTc0NkMxMC40NzY1IDcuOTg4NDIgMTAuMTEzOSA3Ljc3NDIzIDEwLjAyMjUgNy40MTg5NUM5LjkzMTM4IDcuMDYzMjIgMTAuMTQ2MyA2LjcwMDU2IDEwLjUwMiA2LjYwOTM4QzEwLjkzMjQgNi40OTkxNiAxMS4zMTQ0IDYuMjQ4NCAxMS41ODY5IDUuODk3NDZDMTEuODU5MyA1LjU0NjUyIDEyLjAwNjcgNS4xMTQxMyAxMi4wMDY4IDQuNjY5OTJDMTIuMDA2OCA0LjIyNTg3IDExLjg1OSAzLjc5NDI1IDExLjU4NjkgMy40NDMzNkMxMS4zMTQ0IDMuMDkyMjkgMTAuOTMyNSAyLjg0MTcgMTAuNTAyIDIuNzMxNDVDMTAuMTQ2MyAyLjY0MDM4IDkuOTMxNjcgMi4yNzc1MiAxMC4wMjI1IDEuOTIxODhDMTAuMTEzNiAxLjU2NjA5IDEwLjQ3NjIgMS4zNTEyOSAxMC44MzIgMS40NDIzOFoiIGZpbGw9IiNCOUJFQzQiLz4KPC9nPgo8L2c+Cjwvc3ZnPgo=" alt=""><span>Approval rules</span></a></div>
+          <div class="inset"><a class="nav" data-nav="custodians" data-go="CU1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik05LjMzMzY2IDcuMzMzMDFDOS43MDE3IDcuMzMzMTggOS45OTk2NyA3LjYzMTkyIDkuOTk5NjcgOEM5Ljk5OTY3IDguMzY4MDggOS43MDE3IDguNjY2ODIgOS4zMzM2NiA4LjY2Njk5SDYuNjY2NjdDNi4yOTg0OCA4LjY2Njk5IDUuOTk5NjcgOC4zNjgxOSA1Ljk5OTY3IDhDNS45OTk2NyA3LjYzMTgxIDYuMjk4NDggNy4zMzMwMSA2LjY2NjY3IDcuMzMzMDFIOS4zMzM2NloiIGZpbGw9IiNCOUJFQzQiLz4KPHBhdGggaWQ9IlZlY3Rvcl8yIiBkPSJNOS4zMzM2NiA0LjY2NjM0QzkuNzAxNyA0LjY2NjUyIDkuOTk5NjcgNC45NjUyNSA5Ljk5OTY3IDUuMzMzMzNDOS45OTk2NyA1LjcwMTQxIDkuNzAxNyA2LjAwMDE1IDkuMzMzNjYgNi4wMDAzM0g2LjY2NjY3QzYuMjk4NDggNi4wMDAzMyA1Ljk5OTY3IDUuNzAxNTIgNS45OTk2NyA1LjMzMzMzQzUuOTk5NjcgNC45NjUxNCA2LjI5ODQ4IDQuNjY2MzQgNi42NjY2NyA0LjY2NjM0SDkuMzMzNjZaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMyIgZD0iTTguNjY2NjcgMTMuOTk5N1YxMS45OTk3QzguNjY2NTggMTEuODIzMSA4LjU5NjIgMTEuNjUzOSA4LjQ3MTM1IDExLjUyOUM4LjM0NjMzIDExLjQwMzkgOC4xNzY0OCAxMS4zMzM3IDcuOTk5NjcgMTEuMzMzN0M3LjgyMjk4IDExLjMzMzcgNy42NTM5MiAxMS40MDQgNy41Mjg5NyAxMS41MjlDNy40MDQwMiAxMS42NTM5IDcuMzMzNzQgMTEuODIzIDcuMzMzNjYgMTEuOTk5N1YxMy45OTk3QzcuMzMzNjYgMTQuMzY3OSA3LjAzNDg2IDE0LjY2NjcgNi42NjY2NyAxNC42NjY3QzYuMjk4NDggMTQuNjY2NyA1Ljk5OTY3IDE0LjM2NzkgNS45OTk2NyAxMy45OTk3VjExLjk5OTdDNS45OTk3NiAxMS40Njk0IDYuMjEwNjIgMTAuOTYwNiA2LjU4NTYxIDEwLjU4NTZDNi45NjA2MSAxMC4yMTA2IDcuNDY5MzYgOS45OTk3NiA3Ljk5OTY3IDkuOTk5NjdDOC41Mjk5NSA5Ljk5OTY3IDkuMDM4NyAxMC4yMTA3IDkuNDEzNzQgMTAuNTg1NkM5Ljc4ODczIDEwLjk2MDYgOS45OTk1OSAxMS40Njk0IDkuOTk5NjcgMTEuOTk5N1YxMy45OTk3QzkuOTk5NjcgMTQuMzY3OCA5LjcwMTcgMTQuNjY2NSA5LjMzMzY2IDE0LjY2NjdDOC45NjU0NyAxNC42NjY3IDguNjY2NjcgMTQuMzY3OSA4LjY2NjY3IDEzLjk5OTdaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfNCIgZD0iTTAuNjY2MzQxIDEyLjY2NjdWNy45OTk2N0MwLjY2NjQyNyA3LjQ2OTM2IDAuODc3MjgzIDYuOTYwNjEgMS4yNTIyOCA2LjU4NTYxQzEuNjI3MjcgNi4yMTA2MiAyLjEzNjAzIDUuOTk5NzYgMi42NjYzNCA1Ljk5OTY3SDQuMDAwMzNDNC4zNjgzNyA1Ljk5OTg1IDQuNjY2MzQgNi4yOTg1OSA0LjY2NjM0IDYuNjY2NjdDNC42NjYzNCA3LjAzNDc1IDQuMzY4MzcgNy4zMzM0OCA0LjAwMDMzIDcuMzMzNjZIMi42NjYzNEMyLjQ4OTY1IDcuMzMzNzUgMi4zMjA1OSA3LjQwNDAyIDIuMTk1NjQgNy41Mjg5N0MyLjA3MDY5IDcuNjUzOTIgMi4wMDA0MSA3LjgyMjk4IDIuMDAwMzMgNy45OTk2N1YxMi42NjY3QzIuMDAwMzMgMTIuODQzNSAyLjA3MDYxIDEzLjAxMzMgMi4xOTU2NCAxMy4xMzgzQzIuMzIwNTUgMTMuMjYzMSAyLjQ4OTggMTMuMzMzNiAyLjY2NjM0IDEzLjMzMzdIMTMuMzMzM0MxMy41MTAxIDEzLjMzMzcgMTMuNjggMTMuMjYzNCAxMy44MDUgMTMuMTM4M0MxMy45MyAxMy4wMTMzIDE0LjAwMDMgMTIuODQzNSAxNC4wMDAzIDEyLjY2NjdWNS45OTk2N0MxNC4wMDAyIDUuODIzMTMgMTMuOTI5OCA1LjY1Mzg5IDEzLjgwNSA1LjUyODk3QzEzLjY4IDUuNDAzOTUgMTMuNTEwMSA1LjMzMzY2IDEzLjMzMzMgNS4zMzM2NkgxMi4wMDAzQzExLjYzMjEgNS4zMzM2NiAxMS4zMzMzIDUuMDM0ODYgMTEuMzMzMyA0LjY2NjY3QzExLjMzMzMgNC4yOTg0OCAxMS42MzIxIDMuOTk5NjcgMTIuMDAwMyAzLjk5OTY3SDEzLjMzMzNDMTMuODYzNyAzLjk5OTY3IDE0LjM3MjMgNC4yMTA2NCAxNC43NDc0IDQuNTg1NjFDMTUuMTIyNCA0Ljk2MDYxIDE1LjMzMzIgNS40NjkzNiAxNS4zMzMzIDUuOTk5NjdWMTIuNjY2N0MxNS4zMzMzIDEzLjE5NzEgMTUuMTIyNSAxMy43MDU3IDE0Ljc0NzQgMTQuMDgwN0MxNC4zNzIzIDE0LjQ1NTggMTMuODYzOCAxNC42NjY3IDEzLjMzMzMgMTQuNjY2N0gyLjY2NjM0QzIuMTM2MDMgMTQuNjY2NiAxLjYyNzI3IDE0LjQ1NTcgMS4yNTIyOCAxNC4wODA3QzAuODc3MzA3IDEzLjcwNTcgMC42NjYzNDEgMTMuMTk3IDAuNjY2MzQxIDEyLjY2NjdaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfNSIgZD0iTTExLjMzMyAxNFYzLjMzMzAxQzExLjMzMjkgMy4xNTYzMSAxMS4yNjI2IDIuOTg3MjUgMTEuMTM3NyAyLjg2MjNDMTEuMDEyNyAyLjczNzM2IDEwLjg0MzcgMi42NjcwOCAxMC42NjcgMi42NjY5OUg1LjMzMzAxQzUuMTU2MzEgMi42NjcwOCA0Ljk4NzI1IDIuNzM3MzYgNC44NjIzIDIuODYyM0M0LjczNzM2IDIuOTg3MjUgNC42NjcwOCAzLjE1NjMxIDQuNjY2OTkgMy4zMzMwMVYxNEM0LjY2Njk5IDE0LjM2ODIgNC4zNjgxOSAxNC42NjcgNCAxNC42NjdDMy42MzE4MSAxNC42NjcgMy4zMzMwMSAxNC4zNjgyIDMuMzMzMDEgMTRWMy4zMzMwMUMzLjMzMzA5IDIuODAyNjkgMy41NDM5NSAyLjI5Mzk0IDMuOTE4OTUgMS45MTg5NUM0LjI5Mzk0IDEuNTQzOTUgNC44MDI2OSAxLjMzMzA5IDUuMzMzMDEgMS4zMzMwMUgxMC42NjdDMTEuMTk3MyAxLjMzMzA5IDExLjcwNjEgMS41NDM5NSAxMi4wODExIDEuOTE4OTVDMTIuNDU2MSAyLjI5Mzk0IDEyLjY2NjkgMi44MDI2OSAxMi42NjcgMy4zMzMwMVYxNEMxMi42NjcgMTQuMzY4MiAxMi4zNjgyIDE0LjY2NyAxMiAxNC42NjdDMTEuNjMxOCAxNC42NjcgMTEuMzMzIDE0LjM2ODIgMTEuMzMzIDE0WiIgZmlsbD0iI0I5QkVDNCIvPgo8L2c+Cjwvc3ZnPgo=" alt=""><span>Custodians</span></a></div>
+          <div class="inset"><a class="nav" data-nav="credentials" data-go="CR1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xMi42NjY3IDQuMDAwMDNDMTEuMTIwNCA0LjAwMDAzIDkuMzE0MDYgMy4xMDg1NiA4LjA3Mzg5IDIuMDI2MzlMOC4wMzk3MSAyLjAwNjg2QzguMDI3MTEgMi4wMDIxNSA4LjAxMzM0IDIuMDAwMDMgNy45OTk2NyAyLjAwMDAzQzcuOTc0MjggMi4wMDAxIDcuOTQ5MjQgMi4wMDc3OSA3LjkyOTM2IDIuMDIzNDZDNi42OTY0OCAzLjA5OTY3IDQuODgxNzYgMy45OTk5IDMuMzMzNjYgNC4wMDAwM1Y4LjY2NzAyQzMuMzMzNzQgMTAuMTU3NSAzLjg0NzMgMTEuMjQxMSA0LjY1Nzg4IDEyLjA3MTNDNS4zODMgMTIuODEzOSA2LjM2ODgxIDEzLjM3NjEgNy41MDI2IDEzLjgxNTVMNy45OTc3MiAxMy45OTYxTDguMDEyMzcgMTQuMDAyQzkuMzQ5MTUgMTMuNTM1NSAxMC41MTUyIDEyLjkyMSAxMS4zNDI0IDEyLjA3MjNDMTIuMTUyNiAxMS4yNDExIDEyLjY2NjYgMTAuMTU3NCAxMi42NjY3IDguNjY3MDJWNC4wMDAwM1pNMTMuOTk5NyA4LjY2NzAyQzEzLjk5OTYgMTAuNTA5NiAxMy4zNDcyIDExLjkyNiAxMi4yOTc1IDEzLjAwM0MxMS4yNjU5IDE0LjA2MTQgOS44ODAyOSAxNC43NjI4IDguNDQ1OTYgMTUuMjYyN0w4LjQ0MTA4IDE1LjI2NDdDOC4xNTU1MyAxNS4zNjE0IDcuODQ1NjIgMTUuMzU3NyA3LjU2MjE3IDE1LjI1NTlDNi4xMjQxMyAxNC43NTkyIDQuNzM2NTQgMTQuMDU5NyAzLjcwMzc4IDEzLjAwMkMyLjY1Mjk2IDExLjkyNTYgMS45OTk3NiAxMC41MDk0IDEuOTk5NjcgOC42NjcwMlY0LjAwMDAzQzEuOTk5NjcgMy42NDY1NiAyLjE0MDQ2IDMuMzA3NjYgMi4zOTAzIDMuMDU3NjRDMi42NDAzNSAyLjgwNzU5IDIuOTgwMDQgMi42NjcwMiAzLjMzMzY2IDIuNjY3MDJDNC40NTEyIDIuNjY2ODggNS45Njc0NyAxLjk2NzA1IDcuMDU0MzYgMS4wMTc2TDcuMDYwMjIgMS4wMTI3MkM3LjMyMjA3IDAuNzg5MDggNy42NTUzMyAwLjY2NjExOSA3Ljk5OTY3IDAuNjY2MDQxQzguMzAxMTUgMC42NjYwNDEgOC41OTQ1NiAwLjc2MDE0NSA4LjgzODU0IDAuOTMzNjE5TDguOTQwMSAxLjAxMjcyTDguOTQ1OTYgMS4wMTc2TDguOTQ0OTkgMS4wMTg1OEMxMC4wMzggMS45NzQxOSAxMS41NDg2IDIuNjY3MDIgMTIuNjY2NyAyLjY2NzAyQzEzLjAyMDMgMi42NjcwMiAxMy4zNTkgMi44MDc1OSAxMy42MDkgMy4wNTc2NEMxMy44NTkxIDMuMzA3NjkgMTMuOTk5NyAzLjY0NjQxIDEzLjk5OTcgNC4wMDAwM1Y4LjY2NzAyWiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik05LjUyODMyIDYuMTk0OTlDOS43ODg2NyA1LjkzNDY0IDEwLjIxMTMgNS45MzQ2NCAxMC40NzE3IDYuMTk0OTlDMTAuNzMyIDYuNDU1MzQgMTAuNzMyIDYuODc4IDEwLjQ3MTcgNy4xMzgzNUw3LjgwNDY5IDkuODA0MzZDNy41NDQzNCAxMC4wNjQ3IDcuMTIyNjUgMTAuMDY0NyA2Ljg2MjMgOS44MDQzNkw1LjUyODMyIDguNDcxMzVDNS4yNjgyNCA4LjIxMTEgNS4yNjgzNSA3Ljc4OTI5IDUuNTI4MzIgNy41Mjg5N0M1Ljc4ODY3IDcuMjY4NjIgNi4yMTEzMyA3LjI2ODYyIDYuNDcxNjggNy41Mjg5N0w3LjMzMzAxIDguMzkwM0w5LjUyODMyIDYuMTk0OTlaIiBmaWxsPSIjQjlCRUM0Ii8+CjwvZz4KPC9zdmc+Cg==" alt=""><span>Credentials</span></a></div>
+          <div class="inset"><a class="nav" data-nav="audit" data-go="AL1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xMy45OTk3IDIuNjY2MzRDMTQuMzY3OSAyLjY2NjM0IDE0LjY2NjcgMi45NjUxNCAxNC42NjY3IDMuMzMzMzNDMTQuNjY2NyAzLjcwMTUyIDE0LjM2NzkgNC4wMDAzMyAxMy45OTk3IDQuMDAwMzNIOC42NjY2N0M4LjI5ODQ4IDQuMDAwMzMgNy45OTk2NyAzLjcwMTUyIDcuOTk5NjcgMy4zMzMzM0M3Ljk5OTY3IDIuOTY1MTQgOC4yOTg0OCAyLjY2NjM0IDguNjY2NjcgMi42NjYzNEgxMy45OTk3WiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik0xMy45OTk3IDcuMzMzMDFDMTQuMzY3OSA3LjMzMzAxIDE0LjY2NjcgNy42MzE4MSAxNC42NjY3IDhDMTQuNjY2NyA4LjM2ODE5IDE0LjM2NzkgOC42NjY5OSAxMy45OTk3IDguNjY2OTlIOC42NjY2N0M4LjI5ODQ4IDguNjY2OTkgNy45OTk2NyA4LjM2ODE5IDcuOTk5NjcgOEM3Ljk5OTY3IDcuNjMxODEgOC4yOTg0OCA3LjMzMzAxIDguNjY2NjcgNy4zMzMwMUgxMy45OTk3WiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzMiIGQ9Ik0xMy45OTk3IDExLjk5OTdDMTQuMzY3OSAxMS45OTk3IDE0LjY2NjcgMTIuMjk4NSAxNC42NjY3IDEyLjY2NjdDMTQuNjY2NyAxMy4wMzQ5IDE0LjM2NzkgMTMuMzMzNyAxMy45OTk3IDEzLjMzMzdIOC42NjY2N0M4LjI5ODQ4IDEzLjMzMzcgNy45OTk2NyAxMy4wMzQ5IDcuOTk5NjcgMTIuNjY2N0M3Ljk5OTY3IDEyLjI5ODUgOC4yOTg0OCAxMS45OTk3IDguNjY2NjcgMTEuOTk5N0gxMy45OTk3WiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzQiIGQ9Ik01LjUyODMyIDkuNTI4MzJDNS43ODg2NyA5LjI2Nzk3IDYuMjExMzMgOS4yNjc5NyA2LjQ3MTY4IDkuNTI4MzJDNi43MzIwMyA5Ljc4ODY3IDYuNzMyMDMgMTAuMjExMyA2LjQ3MTY4IDEwLjQ3MTdMMy44MDQ2OSAxMy4xMzc3QzMuNTQ0MzQgMTMuMzk4IDMuMTIyNjUgMTMuMzk4IDIuODYyMyAxMy4xMzc3TDEuNTI4MzIgMTEuODA0N0MxLjI2ODI0IDExLjU0NDQgMS4yNjgzNSAxMS4xMjI2IDEuNTI4MzIgMTAuODYyM0MxLjc4ODY3IDEwLjYwMiAyLjIxMTMzIDEwLjYwMiAyLjQ3MTY4IDEwLjg2MjNMMy4zMzMwMSAxMS43MjM2TDUuNTI4MzIgOS41MjgzMloiIGZpbGw9IiNCOUJFQzQiLz4KPHBhdGggaWQ9IlZlY3Rvcl81IiBkPSJNNS41MjgzMiAyLjg2MTY1QzUuNzg4NjcgMi42MDEzIDYuMjExMzMgMi42MDEzIDYuNDcxNjggMi44NjE2NUM2LjczMjAzIDMuMTIyIDYuNzMyMDMgMy41NDQ2NiA2LjQ3MTY4IDMuODA1MDFMMy44MDQ2OSA2LjQ3MTAzQzMuNTQ0MzQgNi43MzEzOCAzLjEyMjY1IDYuNzMxMzggMi44NjIzIDYuNDcxMDNMMS41MjgzMiA1LjEzODAyQzEuMjY4MjQgNC44Nzc3NyAxLjI2ODM1IDQuNDU1OTYgMS41MjgzMiA0LjE5NTY0QzEuNzg4NjcgMy45MzUyOSAyLjIxMTMzIDMuOTM1MjkgMi40NzE2OCA0LjE5NTY0TDMuMzMzMDEgNS4wNTY5N0w1LjUyODMyIDIuODYxNjVaIiBmaWxsPSIjQjlCRUM0Ii8+CjwvZz4KPC9zdmc+Cg==" alt=""><span>Audit log</span></a></div>
+          <div class="inset"><a class="nav" data-nav="profile" data-go="PW1"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJVbmlvbiIgZD0iTTEyIDEuMzM0OTZDMTIuMzUzIDEuMzM0OTYgMTIuNjkxNyAxLjQ3NTA4IDEyLjk0MTQgMS43MjQ2MUMxMy4xOTExIDEuOTc0MzUgMTMuMzMyIDIuMzEzODEgMTMuMzMyIDIuNjY2OTlWNC4wMDE5NUMxMy42ODUyIDQuMDAxOTUgMTQuMDI1NyA0LjE0MTg3IDE0LjI3NTQgNC4zOTE2QzE0LjUyNDkgNC42NDEyNSAxNC42NjUgNC45ODAwMiAxNC42NjUgNS4zMzMwMVY3LjUxNDY1QzE0Ljc2NDkgNy41NzIyOCAxNC44NTg1IDcuNjQxNzIgMTQuOTQxNCA3LjcyNDYxQzE1LjE5MTEgNy45NzQzNSAxNS4zMzIgOC4zMTM4MSAxNS4zMzIgOC42NjY5OVYxMEMxNS4zMzIgMTAuMzUzMiAxNS4xOTExIDEwLjY5MTcgMTQuOTQxNCAxMC45NDE0QzE0Ljg1ODUgMTEuMDI0MyAxNC43NjQ4IDExLjA5MzYgMTQuNjY1IDExLjE1MTRWMTMuMzM0QzE0LjY2NDkgMTMuNjg2OCAxNC41MjQ4IDE0LjAyNTggMTQuMjc1NCAxNC4yNzU0QzE0LjAyNTcgMTQuNTI1IDEzLjY4NjEgMTQuNjY2IDEzLjMzMyAxNC42NjZIMy4zMzMwMUMyLjgwMzI1IDE0LjY2NTkgMi4yOTQ1OCAxNC40NTQ2IDEuOTE5OTIgMTQuMDgwMUMxLjU0NTQ4IDEzLjcwNTUgMS4zMzUwOSAxMy4xOTY3IDEuMzM0OTYgMTIuNjY3VjMuMzMzMDFDMS4zMzUwNSAyLjgwMzEzIDEuNTQ1MjQgMi4yOTQ2MSAxLjkxOTkyIDEuOTE5OTJDMi4yOTQ2MSAxLjU0NTI0IDIuODAzMTMgMS4zMzUwNSAzLjMzMzAxIDEuMzM0OTZIMTJaTTIuNjY1MDQgMTIuNjY3QzIuNjY1MTcgMTIuODQzOSAyLjczNTMzIDEzLjAxNDUgMi44NjAzNSAxMy4xMzk2QzIuOTg1NTkgMTMuMjY0OCAzLjE1NTk5IDEzLjMzNTkgMy4zMzMwMSAxMy4zMzU5SDEzLjMzM0wxMy4zMzUgMTMuMzM1VjExLjMzMkgxMkMxMS40NyAxMS4zMzIgMTAuOTYxNyAxMS4xMjA5IDEwLjU4NjkgMTAuNzQ2MUMxMC4yMTIzIDEwLjM3MTMgMTAuMDAyIDkuODYyOTIgMTAuMDAyIDkuMzMzMDFDMTAuMDAyIDguODAzMTMgMTAuMjEyMiA4LjI5NDYxIDEwLjU4NjkgNy45MTk5MkMxMC45NjE3IDcuNTQ1MjYgMTEuNDcwMSA3LjMzNDk2IDEyIDcuMzM0OTZIMTMuMzM1VjUuMzMyMDNIMy4zMzMwMUMzLjEwMjk1IDUuMzMxOTkgMi44Nzc4NCA1LjI4OTU5IDIuNjY1MDQgNS4yMTM4N1YxMi42NjdaTTEyIDguNjY1MDRDMTEuODIyOCA4LjY2NTA0IDExLjY1MjcgOC43MzUxMiAxMS41MjczIDguODYwMzVDMTEuNDAyMSA4Ljk4NTYxIDExLjMzMjEgOS4xNTU4NyAxMS4zMzIgOS4zMzMwMUMxMS4zMzIgOS41MTAxOCAxMS40MDIxIDkuNjgwMzQgMTEuNTI3MyA5LjgwNTY2QzExLjY1MjcgOS45MzEgMTEuODIyNyAxMC4wMDIgMTIgMTAuMDAySDE0TDE0LjAwMiAxMFY4LjY2Njk5TDE0LjAwMSA4LjY2NTA0SDEyWk0zLjMzMzAxIDIuNjY1MDRDMy4xNTU4NyAyLjY2NTEzIDIuOTg1NjEgMi43MzUwOSAyLjg2MDM1IDIuODYwMzVDMi43MzUwOSAyLjk4NTYxIDIuNjY1MTMgMy4xNTU4NyAyLjY2NTA0IDMuMzMzMDFDMi42NjUwNCAzLjUxMDExIDIuNzM1MjIgMy42ODAzNiAyLjg2MDM1IDMuODA1NjZDMi45ODU2MSAzLjkzMDkyIDMuMTU1ODcgNC4wMDE4NyAzLjMzMzAxIDQuMDAxOTVIMTIuMDAyVjIuNjY2OTlMMTIuMDAxIDIuNjY1MDRIMy4zMzMwMVoiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjQjlCRUM0Ii8+CjwvZz4KPC9zdmc+Cg==" alt=""><span>Profile &amp; wallets</span></a></div>
+        </div>
+        <div class="switch-wrap">
+          <button class="switcher" data-go="C2">
+            <div class="monogram"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik05LjMzMzY2IDcuMzMzMDFDOS43MDE3IDcuMzMzMTggOS45OTk2NyA3LjYzMTkyIDkuOTk5NjcgOEM5Ljk5OTY3IDguMzY4MDggOS43MDE3IDguNjY2ODIgOS4zMzM2NiA4LjY2Njk5SDYuNjY2NjdDNi4yOTg0OCA4LjY2Njk5IDUuOTk5NjcgOC4zNjgxOSA1Ljk5OTY3IDhDNS45OTk2NyA3LjYzMTgxIDYuMjk4NDggNy4zMzMwMSA2LjY2NjY3IDcuMzMzMDFIOS4zMzM2NloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTkuMzMzNjYgNC42NjYzNEM5LjcwMTcgNC42NjY1MiA5Ljk5OTY3IDQuOTY1MjUgOS45OTk2NyA1LjMzMzMzQzkuOTk5NjcgNS43MDE0MSA5LjcwMTcgNi4wMDAxNSA5LjMzMzY2IDYuMDAwMzNINi42NjY2N0M2LjI5ODQ4IDYuMDAwMzMgNS45OTk2NyA1LjcwMTUyIDUuOTk5NjcgNS4zMzMzM0M1Ljk5OTY3IDQuOTY1MTQgNi4yOTg0OCA0LjY2NjM0IDYuNjY2NjcgNC42NjYzNEg5LjMzMzY2WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggaWQ9IlZlY3Rvcl8zIiBkPSJNOC42NjY2NyAxMy45OTk3VjExLjk5OTdDOC42NjY1OCAxMS44MjMxIDguNTk2MiAxMS42NTM5IDguNDcxMzUgMTEuNTI5QzguMzQ2MzMgMTEuNDAzOSA4LjE3NjQ4IDExLjMzMzcgNy45OTk2NyAxMS4zMzM3QzcuODIyOTggMTEuMzMzNyA3LjY1MzkyIDExLjQwNCA3LjUyODk3IDExLjUyOUM3LjQwNDAyIDExLjY1MzkgNy4zMzM3NCAxMS44MjMgNy4zMzM2NiAxMS45OTk3VjEzLjk5OTdDNy4zMzM2NiAxNC4zNjc5IDcuMDM0ODYgMTQuNjY2NyA2LjY2NjY3IDE0LjY2NjdDNi4yOTg0OCAxNC42NjY3IDUuOTk5NjcgMTQuMzY3OSA1Ljk5OTY3IDEzLjk5OTdWMTEuOTk5N0M1Ljk5OTc2IDExLjQ2OTQgNi4yMTA2MiAxMC45NjA2IDYuNTg1NjEgMTAuNTg1NkM2Ljk2MDYxIDEwLjIxMDYgNy40NjkzNiA5Ljk5OTc2IDcuOTk5NjcgOS45OTk2N0M4LjUyOTk1IDkuOTk5NjcgOS4wMzg3IDEwLjIxMDcgOS40MTM3NCAxMC41ODU2QzkuNzg4NzMgMTAuOTYwNiA5Ljk5OTU5IDExLjQ2OTQgOS45OTk2NyAxMS45OTk3VjEzLjk5OTdDOS45OTk2NyAxNC4zNjc4IDkuNzAxNyAxNC42NjY1IDkuMzMzNjYgMTQuNjY2N0M4Ljk2NTQ3IDE0LjY2NjcgOC42NjY2NyAxNC4zNjc5IDguNjY2NjcgMTMuOTk5N1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGlkPSJWZWN0b3JfNCIgZD0iTTAuNjY2MzQxIDEyLjY2NjdWNy45OTk2N0MwLjY2NjQyNyA3LjQ2OTM2IDAuODc3MjgzIDYuOTYwNjEgMS4yNTIyOCA2LjU4NTYxQzEuNjI3MjcgNi4yMTA2MiAyLjEzNjAzIDUuOTk5NzYgMi42NjYzNCA1Ljk5OTY3SDQuMDAwMzNDNC4zNjgzNyA1Ljk5OTg1IDQuNjY2MzQgNi4yOTg1OSA0LjY2NjM0IDYuNjY2NjdDNC42NjYzNCA3LjAzNDc1IDQuMzY4MzcgNy4zMzM0OCA0LjAwMDMzIDcuMzMzNjZIMi42NjYzNEMyLjQ4OTY1IDcuMzMzNzUgMi4zMjA1OSA3LjQwNDAyIDIuMTk1NjQgNy41Mjg5N0MyLjA3MDY5IDcuNjUzOTIgMi4wMDA0MSA3LjgyMjk4IDIuMDAwMzMgNy45OTk2N1YxMi42NjY3QzIuMDAwMzMgMTIuODQzNSAyLjA3MDYxIDEzLjAxMzMgMi4xOTU2NCAxMy4xMzgzQzIuMzIwNTUgMTMuMjYzMSAyLjQ4OTggMTMuMzMzNiAyLjY2NjM0IDEzLjMzMzdIMTMuMzMzM0MxMy41MTAxIDEzLjMzMzcgMTMuNjggMTMuMjYzNCAxMy44MDUgMTMuMTM4M0MxMy45MyAxMy4wMTMzIDE0LjAwMDMgMTIuODQzNSAxNC4wMDAzIDEyLjY2NjdWNS45OTk2N0MxNC4wMDAyIDUuODIzMTMgMTMuOTI5OCA1LjY1Mzg5IDEzLjgwNSA1LjUyODk3QzEzLjY4IDUuNDAzOTUgMTMuNTEwMSA1LjMzMzY2IDEzLjMzMzMgNS4zMzM2NkgxMi4wMDAzQzExLjYzMjEgNS4zMzM2NiAxMS4zMzMzIDUuMDM0ODYgMTEuMzMzMyA0LjY2NjY3QzExLjMzMzMgNC4yOTg0OCAxMS42MzIxIDMuOTk5NjcgMTIuMDAwMyAzLjk5OTY3SDEzLjMzMzNDMTMuODYzNyAzLjk5OTY3IDE0LjM3MjMgNC4yMTA2NCAxNC43NDc0IDQuNTg1NjFDMTUuMTIyNCA0Ljk2MDYxIDE1LjMzMzIgNS40NjkzNiAxNS4zMzMzIDUuOTk5NjdWMTIuNjY2N0MxNS4zMzMzIDEzLjE5NzEgMTUuMTIyNSAxMy43MDU3IDE0Ljc0NzQgMTQuMDgwN0MxNC4zNzIzIDE0LjQ1NTggMTMuODYzOCAxNC42NjY3IDEzLjMzMzMgMTQuNjY2N0gyLjY2NjM0QzIuMTM2MDMgMTQuNjY2NiAxLjYyNzI3IDE0LjQ1NTcgMS4yNTIyOCAxNC4wODA3QzAuODc3MzA3IDEzLjcwNTcgMC42NjYzNDEgMTMuMTk3IDAuNjY2MzQxIDEyLjY2NjdaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBpZD0iVmVjdG9yXzUiIGQ9Ik0xMS4zMzMgMTRWMy4zMzMwMUMxMS4zMzI5IDMuMTU2MzEgMTEuMjYyNiAyLjk4NzI1IDExLjEzNzcgMi44NjIzQzExLjAxMjcgMi43MzczNiAxMC44NDM3IDIuNjY3MDggMTAuNjY3IDIuNjY2OTlINS4zMzMwMUM1LjE1NjMxIDIuNjY3MDggNC45ODcyNSAyLjczNzM2IDQuODYyMyAyLjg2MjNDNC43MzczNiAyLjk4NzI1IDQuNjY3MDggMy4xNTYzMSA0LjY2Njk5IDMuMzMzMDFWMTRDNC42NjY5OSAxNC4zNjgyIDQuMzY4MTkgMTQuNjY3IDQgMTQuNjY3QzMuNjMxODEgMTQuNjY3IDMuMzMzMDEgMTQuMzY4MiAzLjMzMzAxIDE0VjMuMzMzMDFDMy4zMzMwOSAyLjgwMjY5IDMuNTQzOTUgMi4yOTM5NCAzLjkxODk1IDEuOTE4OTVDNC4yOTM5NCAxLjU0Mzk1IDQuODAyNjkgMS4zMzMwOSA1LjMzMzAxIDEuMzMzMDFIMTAuNjY3QzExLjE5NzMgMS4zMzMwOSAxMS43MDYxIDEuNTQzOTUgMTIuMDgxMSAxLjkxODk1QzEyLjQ1NjEgMi4yOTM5NCAxMi42NjY5IDIuODAyNjkgMTIuNjY3IDMuMzMzMDFWMTRDMTIuNjY3IDE0LjM2ODIgMTIuMzY4MiAxNC42NjcgMTIgMTQuNjY3QzExLjYzMTggMTQuNjY3IDExLjMzMyAxNC4zNjgyIDExLjMzMyAxNFoiIGZpbGw9IndoaXRlIi8+CjwvZz4KPC9zdmc+Cg==" alt=""></div>
+            <div class="org"><p>Ault Global Commodities</p><p>Issuer</p></div>
+            <img class="chev14" src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xMS41MjgzIDUuNTI4MzJDMTEuNzg4NyA1LjI2Nzk3IDEyLjIxMTMgNS4yNjc5NyAxMi40NzE3IDUuNTI4MzJDMTIuNzMyIDUuNzg4NjcgMTIuNzMyIDYuMjExMzMgMTIuNDcxNyA2LjQ3MTY4TDguNDcxNjggMTAuNDcxN0M4LjIxMTMzIDEwLjczMiA3Ljc4ODY3IDEwLjczMiA3LjUyODMyIDEwLjQ3MTdMMy41MjgzMiA2LjQ3MTY4QzMuMjY3OTcgNi4yMTEzMyAzLjI2Nzk3IDUuNzg4NjcgMy41MjgzMiA1LjUyODMyQzMuNzg4NjcgNS4yNjc5NyA0LjIxMTMzIDUuMjY3OTcgNC40NzE2OCA1LjUyODMyTDggOS4wNTY2NEwxMS41MjgzIDUuNTI4MzJaIiBmaWxsPSIjQjlCRUM0Ii8+CjwvZz4KPC9zdmc+Cg==" alt="">
+          </button>
+        </div>
+      </nav>
+      <main class="main" id="main"></main>
+    </div>
+  </div>
+</div>
+
+<div id="bare"></div>
+<div id="ov"></div>
+
+<!-- 리뷰용 장치: Figma에 없음 -->
+<div class="rv-tag"><span>화면</span><b id="rv-code"></b><span id="rv-name"></span><a id="rv-figma" target="_blank" rel="noopener">Figma</a><button id="rv-open">목록</button></div>
+<div class="rv-list" id="rv-list"></div>
+<div class="rv-toast" id="rv-toast"></div>
+
+<!-- 생성 파일: gen_onboarding_1.py로 만듦. 고칠 때는 스크립트를 고친 뒤 다시 실행 -->
+<template id="s-SG1" data-name="로그인 · 소셜·이메일·패스키" data-node="2333:11386" data-layout="bare">
+<div class="ob">
+<div class="ob-stack">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p></div></div>
+
+  <div class="ob-box">
+    <div class="ob-head"><div class="ob-title"><h2>Sign in to Universal Mint</h2><p>Issue, hold and redeem tokens backed by real assets.</p></div></div>
+    <div class="ob-body">
+      <a class="btn secondary dark full" data-go="OB0b">Continue with Google</a>
+      <a class="btn secondary dark full" data-go="SG2">Continue with email</a>
+      <a class="btn secondary dark full" data-go="OB0b">Sign in with a passkey</a>
+    </div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">By continuing, you agree to the Terms and Privacy Policy.</div>
+</div>
+</div>
+</template>
+
+<template id="s-SG2" data-name="이메일 코드 입력" data-node="2438:26316" data-layout="bare">
+<div class="ob">
+<div class="ob-stack">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p></div></div>
+
+  <div class="ob-box">
+    <div class="ob-head"><div class="ob-title"><h2>Check your email</h2><p>We sent a 6-digit code to juya.k@bharvest.io. It expires in 10 minutes.</p></div></div>
+    <div class="ob-body">
+      <p class="ob-label">Code</p>
+      <div class="ob-code"><div class="ctl"><span>4 8 2 9 1 _</span></div><a class="btn primary" data-go="OB0b">Verify</a></div>
+    </div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">Didn't get it? Resend code · Use another email</div>
+</div>
+</div>
+</template>
+
+<template id="s-OB0b" data-name="초대 없음 · 새 조직 만들기" data-node="2333:11503" data-layout="bare">
+<div class="ob">
+<div class="ob-stack">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box">
+    <div class="ob-head"><div class="ob-title"><h2>Welcome to Universal Mint</h2><p>Signed in as juya.k@bharvest.io</p></div></div>
+    <div class="ob-body g16">
+      <div class="ob-noinv"><div><p>No invitations yet</p><p>To join your team, ask an admin to invite this email.</p></div></div>
+      <div class="ob-create"><div class="tx"><p>Setting up a new organization?</p><p>Create one for your company. It needs company details and a platform review.</p></div><a class="btn secondary dark sm" data-go="OB0c-0">Create an organization</a></div>
+    </div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">Don't see your organization? Sign in with another email</div>
+</div>
+</div>
+</template>
+
+<template id="s-OB0c-0" data-name="워크스페이스 고르기 · 아무것도 안 고름" data-node="2843:70721" data-layout="bare">
+<div class="ob">
+<div class="ob-stack">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box">
+    <div class="ob-head"><div class="ob-prog"><i class="cur"></i><i></i><i></i><span>  STEP 1</span></div><div class="ob-title"><h2>Which workspace would you like to create first?</h2><p>Start with the one you need now. You can create additional workspaces later.</p></div></div>
+    <div class="ob-opts"><a class="ob-opt" data-go="OB0c-P"><div class="ic"><img data-i="ob-users" alt=""></div><div class="t"><p>Personal</p><p>Hold tokens in your own name</p></div></a><a class="ob-opt" data-go="OB0c-S"><div class="ic"><img data-i="ob-building" alt=""></div><div class="t"><p>Standard organization</p><p>Hold tokens for your company</p></div></a><a class="ob-opt" data-go="OB0c"><div class="ic"><img data-i="ob-coins" alt=""></div><div class="t"><p>Issuer organization</p><p>Issue and list your own tokens</p></div></a></div>
+    <div class="ob-bfoot"><a class="btn primary big off">Continue</a></div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">Not you? Sign out</div>
+</div>
+</div>
+</template>
+
+<template id="s-OB0c" data-name="새 조직 · 워크스페이스 고르기" data-node="2333:11545" data-layout="bare">
+<div class="ob">
+<div class="ob-stack">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box">
+    <div class="ob-head"><div class="ob-prog"><i class="cur"></i><i></i><i></i><span>  STEP 1</span></div><div class="ob-title"><h2>Which workspace would you like to create first?</h2><p>Start with the one you need now. You can create additional workspaces later.</p></div></div>
+    <div class="ob-opts"><a class="ob-opt" data-go="OB0c-P"><div class="ic"><img data-i="ob-users" alt=""></div><div class="t"><p>Personal</p><p>Hold tokens in your own name</p></div></a><a class="ob-opt" data-go="OB0c-S"><div class="ic"><img data-i="ob-building" alt=""></div><div class="t"><p>Standard organization</p><p>Hold tokens for your company</p></div></a><a class="ob-opt on" data-go="OB0c"><div class="ic"><img data-i="ob-coins" alt=""></div><div class="t"><p>Issuer organization</p><p>Issue and list your own tokens</p></div></a></div>
+    <div class="ob-bfoot"><p>Issuer organization needs a platform review.</p><a class="btn primary big" data-go="OB0d-0">Continue with Issuer organization</a></div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">Not you? Sign out</div>
+</div>
+</div>
+</template>
+
+<template id="s-OB0c-S" data-name="새 조직 · Standard 고름" data-node="2466:26638" data-layout="bare">
+<div class="ob">
+<div class="ob-stack">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box">
+    <div class="ob-head"><div class="ob-prog"><i class="cur"></i><i></i><i></i><span>  STEP 1</span></div><div class="ob-title"><h2>Which workspace would you like to create first?</h2><p>Start with the one you need now. You can create additional workspaces later.</p></div></div>
+    <div class="ob-opts"><a class="ob-opt" data-go="OB0c-P"><div class="ic"><img data-i="ob-users" alt=""></div><div class="t"><p>Personal</p><p>Hold tokens in your own name</p></div></a><a class="ob-opt on" data-go="OB0c-S"><div class="ic"><img data-i="ob-building" alt=""></div><div class="t"><p>Standard organization</p><p>Hold tokens for your company</p></div></a><a class="ob-opt" data-go="OB0c"><div class="ic"><img data-i="ob-coins" alt=""></div><div class="t"><p>Issuer organization</p><p>Issue and list your own tokens</p></div></a></div>
+    <div class="ob-bfoot"><p>Standard organization needs a short platform review.</p><a class="btn primary big" data-go="OSd">Continue with Standard organization</a></div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">Not you? Sign out</div>
+</div>
+</div>
+</template>
+
+<template id="s-OB0c-P" data-name="새 조직 · Personal 고름" data-node="2466:26709" data-layout="bare">
+<div class="ob">
+<div class="ob-stack">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box">
+    <div class="ob-head"><div class="ob-prog"><i class="cur"></i><i></i><i></i><span>  STEP 1</span></div><div class="ob-title"><h2>Which workspace would you like to create first?</h2><p>Start with the one you need now. You can create additional workspaces later.</p></div></div>
+    <div class="ob-opts"><a class="ob-opt on" data-go="OB0c-P"><div class="ic"><img data-i="ob-users" alt=""></div><div class="t"><p>Personal</p><p>Hold tokens in your own name</p></div></a><a class="ob-opt" data-go="OB0c-S"><div class="ic"><img data-i="ob-building" alt=""></div><div class="t"><p>Standard organization</p><p>Hold tokens for your company</p></div></a><a class="ob-opt" data-go="OB0c"><div class="ic"><img data-i="ob-coins" alt=""></div><div class="t"><p>Issuer organization</p><p>Issue and list your own tokens</p></div></a></div>
+    <div class="ob-bfoot"><p>Personal opens after you verify your identity.</p><a class="btn primary big" data-go="OP1">Continue with Personal</a></div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">Not you? Sign out</div>
+</div>
+</div>
+</template>
+
+<template id="s-OB0d-0" data-name="회사 정보 · 입력 전" data-node="2843:70657" data-layout="bare">
+<div class="ob">
+<div class="ob-stack g24">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box sh">
+    <div class="ob-head"><div class="ob-prog"><i class="on"></i><i class="cur"></i><i></i><span>  STEP 2 OF 3 · BUSINESS</span></div><div class="ob-title"><h2>Tell us about your organization</h2><p>Start with your company details. Issuance plans and contact come next.</p></div></div>
+    <div class="ob-sec">
+      <div class="ob-type"><div class="v"><b>Issuer organization</b></div><a data-go="OB0c">Change type</a></div>
+      <div class="ob-row">
+        <div class="ob-f"><p class="ob-label">Legal entity name</p><div class="ctl sub" data-go="OB0d"><span class="ph">As on the registration certificate</span></div><p class="hint">Must match the registration certificate.</p></div>
+        <div class="ob-f"><p class="ob-label">Organization name</p><div class="ctl sub" data-go="OB0d"><span class="ph">Name shown in the app</span></div></div>
+      </div>
+      <div class="ob-row">
+        <div class="ob-f"><a class="ob-label" data-go="OB0d-j">Jurisdiction of incorporation</a><a class="ctl" data-go="OB0d-j"><span class="ph">Select country</span><img data-i="chevron-down" alt=""></a></div>
+        <div class="ob-f"><p class="ob-label">Registration number</p><div class="ctl" data-go="OB0d"><span class="ph">e.g. 202312345K</span></div></div>
+      </div>
+      <a class="ob-link" data-go="OB0d-w">+ Add website (optional)</a>
+    </div>
+    <div class="ob-ffoot"><div class="acts"><a class="btn secondary dark big" data-go="OB0c">Back</a><a class="btn primary big off">Continue to issuance plans</a></div><p>Next: issuance plans and contact. Your application has not been submitted.</p></div>
+  </div>
+  <a class="ob-foot" data-go="OB0a"><img data-i="nav-credentials" alt="">Already invited? Open your invite link to join a workspace.</a>
+</div>
+</div>
+</template>
+
+<template id="s-OB0d" data-name="새 조직 · 회사 정보" data-node="2333:11611" data-layout="bare">
+<div class="ob">
+<div class="ob-stack g24">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box sh">
+    <div class="ob-head"><div class="ob-prog"><i class="on"></i><i class="cur"></i><i></i><span>  STEP 2 OF 3 · BUSINESS</span></div><div class="ob-title"><h2>Tell us about your organization</h2><p>Start with your company details. Issuance plans and contact come next.</p></div></div>
+    <div class="ob-sec">
+      <div class="ob-type"><div class="v"><b>Issuer organization</b></div><a data-go="OB0c">Change type</a></div>
+      <div class="ob-row">
+        <div class="ob-f"><p class="ob-label">Legal entity name</p><div class="ctl sub"><span>Ault Global Commodities Pte. Ltd.</span></div><p class="hint">Must match the registration certificate.</p></div>
+        <div class="ob-f"><p class="ob-label">Organization name</p><div class="ctl sub"><span>Ault Global Commodities</span></div></div>
+      </div>
+      <div class="ob-row">
+        <div class="ob-f"><a class="ob-label" data-go="OB0d-j">Jurisdiction of incorporation</a><a class="ctl" data-go="OB0d-j"><span>Singapore</span><img data-i="chevron-down" alt=""></a></div>
+        <div class="ob-f"><p class="ob-label">Registration number</p><div class="ctl"><span>202312345K</span></div></div>
+      </div>
+      <a class="ob-link" data-go="OB0d-w">+ Add website (optional)</a>
+    </div>
+    <div class="ob-ffoot"><div class="acts"><a class="btn secondary dark big" data-go="OB0c">Back</a><a class="btn primary big" data-go="OB0e-0">Continue to issuance plans</a></div><p>Next: issuance plans and contact. Your application has not been submitted.</p></div>
+  </div>
+  <a class="ob-foot" data-go="OB0a"><img data-i="nav-credentials" alt="">Already invited? Open your invite link to join a workspace.</a>
+</div>
+</div>
+</template>
+
+<template id="s-OB0d-w" data-name="회사 정보 · 웹사이트 칸 추가" data-node="2843:70526" data-layout="bare">
+<div class="ob">
+<div class="ob-stack g24">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box sh">
+    <div class="ob-head"><div class="ob-prog"><i class="on"></i><i class="cur"></i><i></i><span>  STEP 2 OF 3 · BUSINESS</span></div><div class="ob-title"><h2>Tell us about your organization</h2><p>Start with your company details. Issuance plans and contact come next.</p></div></div>
+    <div class="ob-sec">
+      <div class="ob-type"><div class="v"><b>Issuer organization</b></div><a data-go="OB0c">Change type</a></div>
+      <div class="ob-row">
+        <div class="ob-f"><p class="ob-label">Legal entity name</p><div class="ctl sub"><span>Ault Global Commodities Pte. Ltd.</span></div><p class="hint">Must match the registration certificate.</p></div>
+        <div class="ob-f"><p class="ob-label">Organization name</p><div class="ctl sub"><span>Ault Global Commodities</span></div></div>
+      </div>
+      <div class="ob-row">
+        <div class="ob-f"><a class="ob-label" data-go="OB0d-j">Jurisdiction of incorporation</a><a class="ctl" data-go="OB0d-j"><span>Singapore</span><img data-i="chevron-down" alt=""></a></div>
+        <div class="ob-f"><p class="ob-label">Registration number</p><div class="ctl"><span>202312345K</span></div></div>
+      </div>
+      <div class="ob-f"><p class="ob-label">Website (optional)</p><div class="ctl"><span class="ph">https://</span></div></div>
+    </div>
+    <div class="ob-ffoot"><div class="acts"><a class="btn secondary dark big" data-go="OB0c">Back</a><a class="btn primary big" data-go="OB0e-0">Continue to issuance plans</a></div><p>Next: issuance plans and contact. Your application has not been submitted.</p></div>
+  </div>
+  <a class="ob-foot" data-go="OB0a"><img data-i="nav-credentials" alt="">Already invited? Open your invite link to join a workspace.</a>
+</div>
+</div>
+</template>
+
+<template id="s-OB0d-j" data-name="회사 정보 · 국가 목록 열림" data-node="2843:70587" data-layout="bare">
+<div class="ob">
+<div class="ob-stack g24">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box sh">
+    <div class="ob-head"><div class="ob-prog"><i class="on"></i><i class="cur"></i><i></i><span>  STEP 2 OF 3 · BUSINESS</span></div><div class="ob-title"><h2>Tell us about your organization</h2><p>Start with your company details. Issuance plans and contact come next.</p></div></div>
+    <div class="ob-sec">
+      <div class="ob-type"><div class="v"><b>Issuer organization</b></div><a data-go="OB0c">Change type</a></div>
+      <div class="ob-row">
+        <div class="ob-f"><p class="ob-label">Legal entity name</p><div class="ctl sub"><span>Ault Global Commodities Pte. Ltd.</span></div><p class="hint">Must match the registration certificate.</p></div>
+        <div class="ob-f"><p class="ob-label">Organization name</p><div class="ctl sub"><span>Ault Global Commodities</span></div></div>
+      </div>
+      <div class="ob-row">
+        <div class="ob-f"><a class="ob-label" data-go="OB0d-j">Jurisdiction of incorporation</a><a class="ctl" data-go="OB0d-j"><span>Singapore</span><img data-i="chevron-down" alt=""></a><div class="dd"><a class="sel" data-go="OB0d"><span>Singapore</span><em>SG</em></a><a data-go="OB0d"><span>Hong Kong</span><em>HK</em></a><a data-go="OB0d"><span>United Arab Emirates</span><em>AE</em></a><a class="mu" data-go="OB0d"><span>United Kingdom</span><em>GB</em></a><hr><p>Name or code · 249 countries</p></div></div>
+        <div class="ob-f"><p class="ob-label">Registration number</p><div class="ctl"><span>202312345K</span></div></div>
+      </div>
+      <a class="ob-link" data-go="OB0d-w">+ Add website (optional)</a>
+    </div>
+    <div class="ob-ffoot"><div class="acts"><a class="btn secondary dark big" data-go="OB0c">Back</a><a class="btn primary big" data-go="OB0e-0">Continue to issuance plans</a></div><p>Next: issuance plans and contact. Your application has not been submitted.</p></div>
+  </div>
+  <a class="ob-foot" data-go="OB0a"><img data-i="nav-credentials" alt="">Already invited? Open your invite link to join a workspace.</a>
+</div>
+</div>
+</template>
+
+<template id="s-OB0e-0" data-name="발행 계획 · 입력 전" data-node="2843:70413" data-layout="bare">
+<div class="ob">
+<div class="ob-stack g24">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box sh">
+    <div class="ob-head"><div class="ob-prog"><i class="on"></i><i class="on"></i><i class="cur"></i><span>  STEP 3 OF 3 · BUSINESS</span></div><div class="ob-title"><h2>Your issuance plans and contact</h2><p>Tell us what you plan to issue, then confirm who we can contact.</p></div></div>
+    <div class="ob-sec">
+      <div class="ob-type"><div class="v"><b>Ault Global Commodities Pte. Ltd.</b><small><span>Incorporated in Singapore · Registration no. 202312345K</span><span>Organization name: Ault Global Commodities</span></small></div><a data-go="OB0d">Edit details</a></div>
+      <div class="ob-chipf"><div class="lr"><b>What will you tokenize?</b><span>Select all that apply</span></div>
+        <div class="ob-chips"><span class="chip on"><img data-i="chip-check" alt="">Precious metals</span><span class="chip">Other commodities</span><span class="chip">Real estate</span><span class="chip">Funds or securities</span><span class="chip">Private credit</span><span class="chip mu">Other…</span></div></div>
+      <div class="ob-chipf"><div class="lr"><b>Who will hold the tokens?</b></div>
+        <div class="ob-chips"><span class="chip on"><img data-i="chip-check" alt="">Institutional investors</span><span class="chip">Professional investors</span><span class="chip">Retail investors</span><span class="chip mu">Not decided yet</span></div></div>
+      <p class="ob-link">+ Add details (optional)</p>
+      <div class="ob-contact">
+        <div class="hd"><b>Authorized contact for this application</b><span>We will contact this person about the application.</span></div>
+        <div class="ob-row">
+          <div class="ob-f"><p class="ob-label">Contact from your account</p><div class="ob-acct"><span>Juya Kim · juya.k@bharvest.io</span><a>Edit</a></div></div>
+          <div class="ob-f"><a class="ob-label" data-go="OB0e-r">Your role</a><a class="ctl" data-go="OB0e-r"><span class="ph">Select your role</span><img data-i="chevron-down" alt=""></a></div>
+        </div>
+        <p>By submitting, you confirm you’re authorized to apply for this organization.</p>
+      </div>
+    </div>
+    <div class="ob-ffoot"><div class="acts"><a class="btn secondary dark big" data-go="OB0d">Back</a><a class="btn primary big off">Submit application</a></div><p>Review usually takes 2–3 business days. We ask for documents only if needed.</p></div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">Already invited? Open your invite link to join a workspace.</div>
+</div>
+</div>
+</template>
+
+<template id="s-OB0e" data-name="새 조직 · 발행 계획·제출" data-node="2333:11663" data-layout="bare">
+<div class="ob">
+<div class="ob-stack g24">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box sh">
+    <div class="ob-head"><div class="ob-prog"><i class="on"></i><i class="on"></i><i class="cur"></i><span>  STEP 3 OF 3 · BUSINESS</span></div><div class="ob-title"><h2>Your issuance plans and contact</h2><p>Tell us what you plan to issue, then confirm who we can contact.</p></div></div>
+    <div class="ob-sec">
+      <div class="ob-type"><div class="v"><b>Ault Global Commodities Pte. Ltd.</b><small><span>Incorporated in Singapore · Registration no. 202312345K</span><span>Organization name: Ault Global Commodities</span></small></div><a data-go="OB0d">Edit details</a></div>
+      <div class="ob-chipf"><div class="lr"><b>What will you tokenize?</b><span>Select all that apply</span></div>
+        <div class="ob-chips"><span class="chip on"><img data-i="chip-check" alt="">Precious metals</span><span class="chip">Other commodities</span><span class="chip">Real estate</span><span class="chip">Funds or securities</span><span class="chip">Private credit</span><span class="chip mu">Other…</span></div></div>
+      <div class="ob-chipf"><div class="lr"><b>Who will hold the tokens?</b></div>
+        <div class="ob-chips"><span class="chip on"><img data-i="chip-check" alt="">Institutional investors</span><span class="chip">Professional investors</span><span class="chip">Retail investors</span><span class="chip mu">Not decided yet</span></div></div>
+      <p class="ob-link">+ Add details (optional)</p>
+      <div class="ob-contact">
+        <div class="hd"><b>Authorized contact for this application</b><span>We will contact this person about the application.</span></div>
+        <div class="ob-row">
+          <div class="ob-f"><p class="ob-label">Contact from your account</p><div class="ob-acct"><span>Juya Kim · juya.k@bharvest.io</span><a>Edit</a></div></div>
+          <div class="ob-f"><a class="ob-label" data-go="OB0e-r">Your role</a><a class="ctl" data-go="OB0e-r"><span>Head of Operations</span><img data-i="chevron-down" alt=""></a></div>
+        </div>
+        <p>By submitting, you confirm you’re authorized to apply for this organization.</p>
+      </div>
+    </div>
+    <div class="ob-ffoot"><div class="acts"><a class="btn secondary dark big" data-go="OB0d">Back</a><a class="btn primary big" data-go="OB1">Submit application</a></div><p>Review usually takes 2–3 business days. We ask for documents only if needed.</p></div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">Already invited? Open your invite link to join a workspace.</div>
+</div>
+</div>
+</template>
+
+<template id="s-OB0e-r" data-name="발행 계획 · 역할 목록 열림" data-node="2843:70294" data-layout="bare">
+<div class="ob">
+<div class="ob-stack g24">
+  <div class="ob-brand"><img data-i="logo" width="40" height="40" alt=""><div><p>Universal Mint</p><p>Account setup</p></div></div>
+
+  <div class="ob-box sh">
+    <div class="ob-head"><div class="ob-prog"><i class="on"></i><i class="on"></i><i class="cur"></i><span>  STEP 3 OF 3 · BUSINESS</span></div><div class="ob-title"><h2>Your issuance plans and contact</h2><p>Tell us what you plan to issue, then confirm who we can contact.</p></div></div>
+    <div class="ob-sec">
+      <div class="ob-type"><div class="v"><b>Ault Global Commodities Pte. Ltd.</b><small><span>Incorporated in Singapore · Registration no. 202312345K</span><span>Organization name: Ault Global Commodities</span></small></div><a data-go="OB0d">Edit details</a></div>
+      <div class="ob-chipf"><div class="lr"><b>What will you tokenize?</b><span>Select all that apply</span></div>
+        <div class="ob-chips"><span class="chip on"><img data-i="chip-check" alt="">Precious metals</span><span class="chip">Other commodities</span><span class="chip">Real estate</span><span class="chip">Funds or securities</span><span class="chip">Private credit</span><span class="chip mu">Other…</span></div></div>
+      <div class="ob-chipf"><div class="lr"><b>Who will hold the tokens?</b></div>
+        <div class="ob-chips"><span class="chip on"><img data-i="chip-check" alt="">Institutional investors</span><span class="chip">Professional investors</span><span class="chip">Retail investors</span><span class="chip mu">Not decided yet</span></div></div>
+      <p class="ob-link">+ Add details (optional)</p>
+      <div class="ob-contact">
+        <div class="hd"><b>Authorized contact for this application</b><span>We will contact this person about the application.</span></div>
+        <div class="ob-row">
+          <div class="ob-f"><p class="ob-label">Contact from your account</p><div class="ob-acct"><span>Juya Kim · juya.k@bharvest.io</span><a>Edit</a></div></div>
+          <div class="ob-f"><a class="ob-label" data-go="OB0e-r">Your role</a><a class="ctl" data-go="OB0e-r"><span>Head of Operations</span><img data-i="chevron-down" alt=""></a><div class="dd"><a class="sel" data-go="OB0e"><span>Head of Operations</span><em>✓</em></a><a data-go="OB0e"><span>CEO or founder</span></a><a data-go="OB0e"><span>Compliance</span></a><a class="mu" data-go="OB0e"><span>Finance</span></a><hr><p>Other…</p></div></div>
+        </div>
+        <p>By submitting, you confirm you’re authorized to apply for this organization.</p>
+      </div>
+    </div>
+    <div class="ob-ffoot"><div class="acts"><a class="btn secondary dark big" data-go="OB0d">Back</a><a class="btn primary big" data-go="OB1">Submit application</a></div><p>Review usually takes 2–3 business days. We ask for documents only if needed.</p></div>
+  </div>
+  <div class="ob-foot"><img data-i="nav-credentials" alt="">Already invited? Open your invite link to join a workspace.</div>
+</div>
+</div>
+</template>
+
+<style>
+/* 온보딩: 들어오기 전 화면(앱 틀 없음) */
+.ob { min-height: 100vh; background: var(--bg-surface-subtle); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 16px; }
+.ob-stack { width: 880px; max-width: 100%; display: flex; flex-direction: column; align-items: center; gap: 32px; }
+.ob-stack.g24 { width: auto; gap: 24px; }
+.ob-brand { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+.ob-brand div { display: flex; flex-direction: column; gap: 1px; }
+.ob-brand p:first-child { font-weight: 700; font-size: 16px; line-height: 1.2; letter-spacing: -0.48px; }
+.ob-brand p + p { font-size: 14px; line-height: 1.5; color: var(--content-muted); }
+.ob-box { width: 640px; max-width: 100%; background: #fff; border: 1px solid var(--border-default); border-radius: 16px; display: flex; flex-direction: column; }
+.ob-box.sh { box-shadow: 0 10px 30px rgba(5,13,23,.06); }
+.ob-head { display: flex; flex-direction: column; gap: 16px; padding: 24px 32px; }
+.ob-prog { display: flex; align-items: center; gap: 8px; }
+.ob-prog i { width: 8px; height: 8px; border-radius: 4px; background: var(--border-default); flex-shrink: 0; }
+.ob-prog i.on { background: var(--brand-default); }
+.ob-prog i.cur { width: 24px; background: var(--brand-default); }
+.ob-prog span { flex: 1; font-weight: 700; font-size: 11px; line-height: 1.3; letter-spacing: 0.55px; text-transform: uppercase; color: var(--content-faint); white-space: pre; }
+.ob-title { display: flex; flex-direction: column; gap: 6px; }
+.ob-title h2 { font-weight: 700; font-size: 24px; line-height: 1.3; letter-spacing: -0.24px; }
+.ob-title p { font-size: 12px; line-height: 1.45; color: var(--content-muted); }
+.ob-body { display: flex; flex-direction: column; gap: 12px; padding: 0 32px 32px; }
+.ob-body.g16 { gap: 16px; }
+.ob-foot { display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 1.45; color: var(--content-muted); white-space: nowrap; }
+.ob-foot img { width: 16px; height: 16px; }
+.btn.full { width: 100%; }
+.btn.big { height: 44px; padding: 0 32px; font-size: 14px; line-height: 1.5; }
+.btn.off { opacity: .4; pointer-events: none; }
+.btn.sm { height: 28px; padding: 0 12px; border-radius: 6px; gap: 8px; }
+.ob-label { font-weight: 500; font-size: 12px; line-height: 1.45; }
+.ob-code { display: flex; gap: 12px; }
+.ob-code .ctl { flex: 1; }
+.ob-code .btn { width: 160px; height: auto; }
+.ctl { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--border-default); border-radius: 10px; background: #fff; font-size: 14px; line-height: 1.5; width: 100%; }
+.ctl.sub { background: var(--bg-surface-subtle); }
+.ctl .ph { color: var(--content-faint); }
+.ctl span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ctl img { width: 16px; height: 16px; flex-shrink: 0; }
+a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
+
+.ob-noinv { border: 1px solid var(--border-default); border-radius: 12px; overflow: hidden; }
+.ob-noinv div { background: #f6f7f9; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 4px; white-space: nowrap; }
+.ob-noinv p:first-child { font-weight: 500; font-size: 15px; color: #000; }
+.ob-noinv p:last-child { font-size: 13px; color: #596373; }
+.ob-create { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 12px; background: var(--bg-surface-subtle); }
+.ob-create .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ob-create .tx p:first-child { font-weight: 500; font-size: 14px; line-height: 1.5; }
+.ob-create .tx p:last-child { font-size: 12px; line-height: 1.45; color: var(--content-muted); }
+
+.ob-opts { display: flex; gap: 16px; padding: 4px 32px 16px; }
+.ob-opt { flex: 1; min-width: 0; height: 200px; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 32px 24px; border: 1px solid var(--border-default); border-radius: 14px; background: #fff; }
+.ob-opt:hover { border-color: var(--border-strong); }
+.ob-opt .ic { flex: 1; display: flex; align-items: center; justify-content: center; }
+.ob-opt .ic img { width: 28px; height: 28px; }
+.ob-opt .t { display: flex; flex-direction: column; gap: 4px; text-align: center; }
+.ob-opt .t p:first-child { font-weight: 600; font-size: 18px; line-height: 1.35; letter-spacing: -0.09px; }
+.ob-opt .t p:last-child { font-size: 12px; line-height: 1.45; color: #8d949d; }
+.ob-opt.on { background: var(--brand-soft); border: 2px solid var(--brand-default); }
+.ob-opt.on .t p { color: var(--brand-default) !important; }
+.ob-bfoot { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 32px; text-align: center; }
+.ob-bfoot p { font-size: 12px; line-height: 1.45; color: var(--content-muted); }
+.ob-bfoot .btn { width: 320px; max-width: 100%; }
+
+.ob-sec { display: flex; flex-direction: column; gap: 24px; padding: 0 32px; }
+.ob-type { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--altus-brand-soft); border: 1px solid #d7e3f8; border-radius: 6px; }
+.ob-type .v { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; line-height: 1.45; }
+.ob-type .v b { font-weight: 700; font-size: 14px; }
+.ob-type .v span { font-size: 12px; color: var(--content-muted); }
+.ob-type .v small { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--content-muted); }
+.ob-type a { font-weight: 500; font-size: 12px; line-height: 1.45; color: var(--brand-default); white-space: nowrap; }
+.ob-row { display: flex; gap: 12px; align-items: flex-start; }
+.ob-f { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; position: relative; }
+.ob-f .hint { font-size: 12px; line-height: 1.45; color: var(--content-muted); }
+.ob-link { font-weight: 500; font-size: 12px; line-height: 1.45; color: var(--brand-default); }
+.ob-ffoot { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 32px; }
+.ob-ffoot .acts { display: flex; gap: 12px; width: 100%; }
+.ob-ffoot .acts .btn.primary { flex: 1; }
+.ob-ffoot > p { font-size: 12px; line-height: 1.45; color: var(--content-muted); text-align: center; }
+
+.ob-chipf { display: flex; flex-direction: column; gap: 4px; }
+.ob-chipf .lr { display: flex; gap: 6px; font-size: 12px; line-height: 1.45; }
+.ob-chipf .lr b { font-weight: 500; }
+.ob-chipf .lr span { color: var(--content-faint); }
+.ob-chips { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border: 1px solid var(--border-default); border-radius: 999px; background: #fff; font-weight: 500; font-size: 12px; line-height: 1.45; color: #1b2430; white-space: nowrap; }
+.chip.mu { color: var(--content-muted); }
+.chip.on { background: var(--altus-brand-soft); border: 1.5px solid var(--brand-default); color: var(--brand-default); }
+.chip img { width: 12px; height: 12px; }
+.ob-contact { display: flex; flex-direction: column; gap: 12px; }
+.ob-contact .hd { display: flex; flex-direction: column; gap: 2px; font-size: 12px; line-height: 1.45; }
+.ob-contact .hd b { font-weight: 500; }
+.ob-contact .hd span, .ob-contact > p { font-size: 12px; line-height: 1.45; color: var(--content-muted); }
+.ob-contact .ob-row { gap: 16px; align-items: flex-end; }
+.ob-acct { height: 43px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; background: var(--bg-surface-subtle); font-size: 12px; line-height: 1.45; }
+.ob-acct span { flex: 1; color: #1b2430; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ob-acct a { font-weight: 500; color: var(--brand-default); }
+
+.dd { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); display: flex; flex-direction: column; gap: 2px; padding: 6px; background: #fff; border: 1px solid var(--border-default); border-radius: 10px; box-shadow: 0 8px 24px rgba(5,13,26,.14); }
+.dd a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; line-height: 1.45; }
+.dd a:hover { background: var(--bg-surface-subtle); }
+.dd a.sel { background: #edf1f7; }
+.dd a span { flex: 1; font-size: 14px; color: #1b2430; }
+.dd a.mu span { color: var(--content-muted); }
+.dd a em { font-style: normal; font-size: 12px; color: var(--content-faint); white-space: nowrap; }
+.dd hr { border: 0; height: 1px; background: var(--border-default); }
+.dd p { font-size: 12px; line-height: 1.45; color: var(--content-faint); }
+
+@media (max-width: 700px) {
+  .ob { padding: 48px 16px; justify-content: flex-start; }
+  .ob-opts { flex-direction: column; padding: 4px 20px 16px; }
+  .ob-opt { height: auto; flex-direction: row; padding: 16px 20px; }
+  .ob-opt .ic { flex: none; }
+  .ob-opt .t { text-align: left; }
+  .ob-head, .ob-ffoot, .ob-bfoot { padding-left: 20px; padding-right: 20px; }
+  .ob-body, .ob-sec { padding-left: 20px; padding-right: 20px; }
+  .ob-row, .ob-contact .ob-row { flex-direction: column; align-items: stretch; }
+  .ob-foot { white-space: normal; text-align: center; }
+  .ob-code { flex-direction: column; }
+  .ob-code .btn { width: 100%; height: 36px; }
+}
+
+</style>
+
+
+<script>
+const BUNDLE = {"start": "SG1", "plan": [["로그인", ["SG1", "SG2"]], ["Issuer 조직 만들기", ["OB0b", "OB0c-0", "OB0c", "OB0c-S", "OB0c-P", "OB0d-0", "OB0d", "OB0d-w", "OB0d-j", "OB0e-0", "OB0e", "OB0e-r"]], ["심사와 인증", ["OB1", "OB1v", "OB1w", "OB1x", "OB1r", "OB2", "OBK1", "OB3a", "OB3"]], ["초대받아 합류", ["OB0a", "OBJ1", "OBJ2"]], ["Standard", ["OSd", "OSe", "OS1", "OS1v", "OS2", "OS4"]], ["Personal", ["OP1", "OP2", "OP4"]]]};
+const OTHER = {"C1": "../menu/#C1", "C2": "../menu/#C2", "C3": "../menu/#C3", "C11": "../menu/#C11", "H1": "../menu/#H1", "H1b": "../menu/#H1b", "H1n": "../menu/#H1n", "PM1": "../menu/#PM1", "H1-F": "../menu/#H1-F", "H2": "../menu/#H2", "OB4": "../menu/#OB4", "H3": "../menu/#H3"};
+const ICONS = {"chevron-down":"data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xMS41MjgzIDUuNTI4MzJDMTEuNzg4NyA1LjI2Nzk3IDEyLjIxMTMgNS4yNjc5NyAxMi40NzE3IDUuNTI4MzJDMTIuNzMyIDUuNzg4NjcgMTIuNzMyIDYuMjExMzMgMTIuNDcxNyA2LjQ3MTY4TDguNDcxNjggMTAuNDcxN0M4LjIxMTMzIDEwLjczMiA3Ljc4ODY3IDEwLjczMiA3LjUyODMyIDEwLjQ3MTdMMy41MjgzMiA2LjQ3MTY4QzMuMjY3OTcgNi4yMTEzMyAzLjI2Nzk3IDUuNzg4NjcgMy41MjgzMiA1LjUyODMyQzMuNzg4NjcgNS4yNjc5NyA0LjIxMTMzIDUuMjY3OTcgNC40NzE2OCA1LjUyODMyTDggOS4wNTY2NEwxMS41MjgzIDUuNTI4MzJaIiBmaWxsPSIjQjlCRUM0Ii8+CjwvZz4KPC9zdmc+Cg==","chip-check":"data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEyIiB2aWV3Qm94PSIwIDAgMTIgMTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik05LjY0NjQ4IDIuNjQ2MjRDOS44NDE2NyAyLjQ1MTE4IDEwLjE1OCAyLjQ1MTI2IDEwLjM1MzMgMi42NDYyNEMxMC41NDg1IDIuODQxNSAxMC41NDg1IDMuMTU4NSAxMC4zNTMzIDMuMzUzNzZMNC44NTM1MiA4Ljg1MzUyQzQuNjU4MjkgOS4wNDg3NCA0LjM0MiA5LjA0ODY2IDQuMTQ2NzMgOC44NTM1MkwxLjY0NjI0IDYuMzUzNzZDMS40NTA5OCA2LjE1ODUgMS40NTA5OCA1Ljg0MTUgMS42NDYyNCA1LjY0NjI0QzEuODQxNSA1LjQ1MDk4IDIuMTU4NSA1LjQ1MDk4IDIuMzUzNzYgNS42NDYyNEw0LjQ5OTc2IDcuNzkyOTdMOS42NDY0OCAyLjY0NjI0WiIgZmlsbD0iIzAwNDI4NSIvPgo8L2c+Cjwvc3ZnPgo=","logo":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAz1BMVEVMaXEICA1mZWiGhokICA0QEBBPBBgICBAHEicICRBRUFQ1NDkIBwwtJSxXDhsJGjQbFR0hDxt5eX0kJTBcFyxfXmFEDRwcL0p3IzwJCA05OD0QABAIBw3///+zGUIKMWGVACQyWYni4uK8vLwAHU1zEi8JIkUIBw0GDyQ9BhaVHiSQkJLg4OHLy8sNHTQLDxkuUn4nJitTUlZyAh+jo6UdChMhISY/PkPbQWrw7/AlQWR2dnmcFjvBwcMdMUyxsbKFFSHGO2EKK1acnJ2VLktgpsM3AAAAHXRSTlMAYP36PBC/IMCAwKNwgv7qj6Dhv/7f3uj2UN8Q33rRwzUAAAAJcEhZcwAACxMAAAsTAQCanBgAAAObSURBVHjapZfpdqJAEIUD4gAuuCYaE/coGgSEEdFoXJK8/zNNd3U3i9JEmfqRc6KnPvtW3dviw0Nq5Ysd+SF75cu5bXdVzIyQHhddXDk1W3vhs0trURfuP33VIM1b+Gveq6OUI42fvrMioLtGwcQv3LXru455pw65QcRvc2txvHNHxlqkvPrzTauj4leOexxjwGi0W+du1lGqM/G+MR5TwMh02SiMspy+OqJ3iz5zDOV2zBEgHP93HXIxFH+EdqMhy2UDCOEoCmm+hdM7/graVx2JcL8JYufkUgAvr+T03U/dhfajWGLvCY9Eh6Hn+ADZDbYFJxCr+dhszZEpkknyAIa5C1znuAXpcj6iQyVyAbCtIx2jynWnr/ABo6jrhKRo4gXxTiAG26LLCF0XRHNlI3fy1igzy7iXAQyj6X+j9SQCpOi2TN+J6JAK9B9xDeZmACmWv3YNf9hLeXfhukW9ceXOIrQoh5ocWLB93mzakBK5aMRcx+oI0UT1DfvNq63hcHgo54kFUTuqn9c8WdflKMJoMncKreUQ1we0yHOved6cm/pcjhvXXJMAomjuSDSJO6XGB7QvD/YMTj3pNb2mpw3+Mk3xAEajid+skfbhwbb6Uwro7fXTIASEAUTutmPRROLp6e3ZVz8E9PRBDBAJoE/Fl/Grz7R9ac2m/X4qgAQQASDbuwvxutWHstIAZKUYYJDVVSPioaYKuXB4AGww03BXj3AJBuItLB7VV4VejhyADGkUOg64Raow8faUfHxFZRdOIgC584dYFayiBJtnp69FVpYAKGFzb36qBKEehnR1cfF8QMkDd5+bcPko1pKKZ6ePf0kmANQJdnfb0/4AYGYfEsWnAHrI3d78NCCAt+nMDk9/vatEQG8yRy9RwNsbPf2XIiVcZbcDKqXEu/BmgMLES3I2gMr8+dFSswNIoJctISOA3WZLW8gCiAZavQJovwGqsUBfAebek5AO0GmgZxDoC4Dmaad3jWaMB4gF+gLgnd5xaRBAPiAS6PgQ9x4lnLAOLiAx0ABADSg8FCHxAOw2iwf6pUYIKIDaO9HxmgzgBlp42gNhP6cInZdGTqDxFUYRREcKIDHQ8I1HdcAo+IDkQBOEQg+BHMEDWNV82pN2OAoOQPn1WV9tUh2p90HqjxU2iqwAhKA6MgOCUWQHoIe9yf8ByCgQAKUC7uDKFAOmyj2/PZ+fmnMt/MFRsS2OA1NGEU2MXOM68B9UCxMrqQcbEQAAAABJRU5ErkJggg==","nav-credentials":"data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xMi42NjY3IDQuMDAwMDNDMTEuMTIwNCA0LjAwMDAzIDkuMzE0MDYgMy4xMDg1NiA4LjA3Mzg5IDIuMDI2MzlMOC4wMzk3MSAyLjAwNjg2QzguMDI3MTEgMi4wMDIxNSA4LjAxMzM0IDIuMDAwMDMgNy45OTk2NyAyLjAwMDAzQzcuOTc0MjggMi4wMDAxIDcuOTQ5MjQgMi4wMDc3OSA3LjkyOTM2IDIuMDIzNDZDNi42OTY0OCAzLjA5OTY3IDQuODgxNzYgMy45OTk5IDMuMzMzNjYgNC4wMDAwM1Y4LjY2NzAyQzMuMzMzNzQgMTAuMTU3NSAzLjg0NzMgMTEuMjQxMSA0LjY1Nzg4IDEyLjA3MTNDNS4zODMgMTIuODEzOSA2LjM2ODgxIDEzLjM3NjEgNy41MDI2IDEzLjgxNTVMNy45OTc3MiAxMy45OTYxTDguMDEyMzcgMTQuMDAyQzkuMzQ5MTUgMTMuNTM1NSAxMC41MTUyIDEyLjkyMSAxMS4zNDI0IDEyLjA3MjNDMTIuMTUyNiAxMS4yNDExIDEyLjY2NjYgMTAuMTU3NCAxMi42NjY3IDguNjY3MDJWNC4wMDAwM1pNMTMuOTk5NyA4LjY2NzAyQzEzLjk5OTYgMTAuNTA5NiAxMy4zNDcyIDExLjkyNiAxMi4yOTc1IDEzLjAwM0MxMS4yNjU5IDE0LjA2MTQgOS44ODAyOSAxNC43NjI4IDguNDQ1OTYgMTUuMjYyN0w4LjQ0MTA4IDE1LjI2NDdDOC4xNTU1MyAxNS4zNjE0IDcuODQ1NjIgMTUuMzU3NyA3LjU2MjE3IDE1LjI1NTlDNi4xMjQxMyAxNC43NTkyIDQuNzM2NTQgMTQuMDU5NyAzLjcwMzc4IDEzLjAwMkMyLjY1Mjk2IDExLjkyNTYgMS45OTk3NiAxMC41MDk0IDEuOTk5NjcgOC42NjcwMlY0LjAwMDAzQzEuOTk5NjcgMy42NDY1NiAyLjE0MDQ2IDMuMzA3NjYgMi4zOTAzIDMuMDU3NjRDMi42NDAzNSAyLjgwNzU5IDIuOTgwMDQgMi42NjcwMiAzLjMzMzY2IDIuNjY3MDJDNC40NTEyIDIuNjY2ODggNS45Njc0NyAxLjk2NzA1IDcuMDU0MzYgMS4wMTc2TDcuMDYwMjIgMS4wMTI3MkM3LjMyMjA3IDAuNzg5MDggNy42NTUzMyAwLjY2NjExOSA3Ljk5OTY3IDAuNjY2MDQxQzguMzAxMTUgMC42NjYwNDEgOC41OTQ1NiAwLjc2MDE0NSA4LjgzODU0IDAuOTMzNjE5TDguOTQwMSAxLjAxMjcyTDguOTQ1OTYgMS4wMTc2TDguOTQ0OTkgMS4wMTg1OEMxMC4wMzggMS45NzQxOSAxMS41NDg2IDIuNjY3MDIgMTIuNjY2NyAyLjY2NzAyQzEzLjAyMDMgMi42NjcwMiAxMy4zNTkgMi44MDc1OSAxMy42MDkgMy4wNTc2NEMxMy44NTkxIDMuMzA3NjkgMTMuOTk5NyAzLjY0NjQxIDEzLjk5OTcgNC4wMDAwM1Y4LjY2NzAyWiIgZmlsbD0iI0I5QkVDNCIvPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik05LjUyODMyIDYuMTk0OTlDOS43ODg2NyA1LjkzNDY0IDEwLjIxMTMgNS45MzQ2NCAxMC40NzE3IDYuMTk0OTlDMTAuNzMyIDYuNDU1MzQgMTAuNzMyIDYuODc4IDEwLjQ3MTcgNy4xMzgzNUw3LjgwNDY5IDkuODA0MzZDNy41NDQzNCAxMC4wNjQ3IDcuMTIyNjUgMTAuMDY0NyA2Ljg2MjMgOS44MDQzNkw1LjUyODMyIDguNDcxMzVDNS4yNjgyNCA4LjIxMTEgNS4yNjgzNSA3Ljc4OTI5IDUuNTI4MzIgNy41Mjg5N0M1Ljc4ODY3IDcuMjY4NjIgNi4yMTEzMyA3LjI2ODYyIDYuNDcxNjggNy41Mjg5N0w3LjMzMzAxIDguMzkwM0w5LjUyODMyIDYuMTk0OTlaIiBmaWxsPSIjQjlCRUM0Ii8+CjwvZz4KPC9zdmc+Cg==","nav-home-h3":"data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0yLjY2Njk5IDIuNjY2OTlWNy4zMzMwMUg2VjIuNjY2OTlIMi42NjY5OVpNNy4zMzMwMSA3LjMzMzAxQzcuMzMzMDEgOC4wNjkzOSA2LjczNjM4IDguNjY2OTkgNiA4LjY2Njk5SDIuNjY2OTlDMS45MzA2MSA4LjY2Njk5IDEuMzMzMDEgOC4wNjkzOSAxLjMzMzAxIDcuMzMzMDFWMi42NjY5OUMxLjMzMzAxIDEuOTMwNjEgMS45MzA2MSAxLjMzMzAxIDIuNjY2OTkgMS4zMzMwMUg2QzYuNzM2MzggMS4zMzMwMSA3LjMzMzAxIDEuOTMwNjEgNy4zMzMwMSAyLjY2Njk5VjcuMzMzMDFaIiBmaWxsPSIjMDA0Mjg1Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTEwLjAwMDMgMi42NjY5OVY0LjY2Njk5SDEzLjMzMzNWMi42NjY5OUgxMC4wMDAzWk0xNC42NjYzIDQuNjY2OTlDMTQuNjY2MiA1LjQwMzIyIDE0LjA2OTYgNiAxMy4zMzMzIDZIMTAuMDAwM0M5LjI2NDA1IDYgOC42NjY1MiA1LjQwMzIyIDguNjY2MzQgNC42NjY5OVYyLjY2Njk5QzguNjY2MzQgMS45MzA2MSA5LjI2Mzk1IDEuMzMzMDEgMTAuMDAwMyAxLjMzMzAxSDEzLjMzMzNDMTQuMDY5NyAxLjMzMzAxIDE0LjY2NjMgMS45MzA2MSAxNC42NjYzIDIuNjY2OTlWNC42NjY5OVoiIGZpbGw9IiMwMDQyODUiLz4KPHBhdGggaWQ9IlZlY3Rvcl8zIiBkPSJNMTAuMDAwMyA4LjY2Njk5VjEzLjMzM0gxMy4zMzMzVjguNjY2OTlIMTAuMDAwM1pNMTQuNjY2MyAxMy4zMzNDMTQuNjY2MyAxNC4wNjk0IDE0LjA2OTcgMTQuNjY3IDEzLjMzMzMgMTQuNjY3SDEwLjAwMDNDOS4yNjM5NSAxNC42NjcgOC42NjYzNCAxNC4wNjk0IDguNjY2MzQgMTMuMzMzVjguNjY2OTlDOC42NjYzNCA3LjkzMDYxIDkuMjYzOTUgNy4zMzMwMSAxMC4wMDAzIDcuMzMzMDFIMTMuMzMzM0MxNC4wNjk3IDcuMzMzMDEgMTQuNjY2MyA3LjkzMDYxIDE0LjY2NjMgOC42NjY5OVYxMy4zMzNaIiBmaWxsPSIjQjlCRUM0Ii8+CjxwYXRoIGlkPSJWZWN0b3JfNCIgZD0iTTIuNjY2OTkgMTEuMzMzN1YxMy4zMzM3SDZWMTEuMzMzN0gyLjY2Njk5Wk03LjMzMzAxIDEzLjMzMzdDNy4zMzI4MyAxNC4wNjk5IDYuNzM2MjcgMTQuNjY2NyA2IDE0LjY2NjdIMi42NjY5OUMxLjkzMDcyIDE0LjY2NjcgMS4zMzMxOCAxNC4wNjk5IDEuMzMzMDEgMTMuMzMzN1YxMS4zMzM3QzEuMzMzMDEgMTAuNTk3MyAxLjkzMDYxIDkuOTk5NjcgMi42NjY5OSA5Ljk5OTY3SDZDNi43MzYzOCA5Ljk5OTY3IDcuMzMzMDEgMTAuNTk3MyA3LjMzMzAxIDExLjMzMzdWMTMuMzMzN1oiIGZpbGw9IiNCOUJFQzQiLz4KPC9nPgo8L3N2Zz4K","nav-home-ob4":"data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJpY29uIj4KPHBhdGggaWQ9Ikljb24iIGQ9Ik02IDE0VjkuNDM1MjJDNiA5LjAxNTA0IDYuMzU4MTcgOC42NzQ0MiA2LjggOC42NzQ0Mkg5LjJDOS42NDE4MyA4LjY3NDQyIDEwIDkuMDE1MDQgMTAgOS40MzUyMlYxNE03LjUzNjM4IDIuMTQwNzhMMi4zMzYzOCA1LjY1NzM1QzIuMTI1MzQgNS44MDAwNyAyIDYuMDMxMSAyIDYuMjc3MzdWMTIuODU4OEMyIDEzLjQ4OTEgMi41MzcyNiAxNCAzLjIgMTRIMTIuOEMxMy40NjI3IDE0IDE0IDEzLjQ4OTEgMTQgMTIuODU4OFY2LjI3NzM3QzE0IDYuMDMxMSAxMy44NzQ3IDUuODAwMDcgMTMuNjYzNiA1LjY1NzM1TDguNDYzNjIgMi4xNDA3OEM4LjE4NjA1IDEuOTUzMDcgNy44MTM5NSAxLjk1MzA3IDcuNTM2MzggMi4xNDA3OFoiIHN0cm9rZS13aWR0aD0iMS4zIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZT0iI0I5QkVDNCIvPgo8L2c+Cjwvc3ZnPgo=","ob-building":"data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjI4IiB2aWV3Qm94PSIwIDAgMjggMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xNi4zMzM5IDEyLjgzMjhDMTYuOTc4IDEyLjgzMzEgMTcuNDk5NCAxMy4zNTU5IDE3LjQ5OTQgMTRDMTcuNDk5NCAxNC42NDQxIDE2Ljk3OCAxNS4xNjY5IDE2LjMzMzkgMTUuMTY3MkgxMS42NjY3QzExLjAyMjMgMTUuMTY3MiAxMC40OTk0IDE0LjY0NDMgMTAuNDk5NCAxNEMxMC40OTk0IDEzLjM1NTcgMTEuMDIyMyAxMi44MzI4IDExLjY2NjcgMTIuODMyOEgxNi4zMzM5WiIgZmlsbD0iIzVBNjQ3MiIvPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik0xNi4zMzM5IDguMTY2MUMxNi45NzggOC4xNjY0IDE3LjQ5OTQgOC42ODkxOSAxNy40OTk0IDkuMzMzMzNDMTcuNDk5NCA5Ljk3NzQ4IDE2Ljk3OCAxMC41MDAzIDE2LjMzMzkgMTAuNTAwNkgxMS42NjY3QzExLjAyMjMgMTAuNTAwNiAxMC40OTk0IDkuOTc3NjcgMTAuNDk5NCA5LjMzMzMzQzEwLjQ5OTQgOC42ODkgMTEuMDIyMyA4LjE2NjEgMTEuNjY2NyA4LjE2NjFIMTYuMzMzOVoiIGZpbGw9IiM1QTY0NzIiLz4KPHBhdGggaWQ9IlZlY3Rvcl8zIiBkPSJNMTUuMTY2NyAyNC40OTk0VjIwLjk5OTRDMTUuMTY2NSAyMC42OTA0IDE1LjA0MzQgMjAuMzk0MyAxNC44MjQ5IDIwLjE3NTdDMTQuNjA2MSAxOS45NTY5IDE0LjMwODggMTkuODMzOSAxMy45OTk0IDE5LjgzMzlDMTMuNjkwMiAxOS44MzQxIDEzLjM5NDQgMTkuOTU3IDEzLjE3NTcgMjAuMTc1N0MxMi45NTcgMjAuMzk0NCAxMi44MzQxIDIwLjY5MDIgMTIuODMzOSAyMC45OTk0VjI0LjQ5OTRDMTIuODMzOSAyNS4xNDM4IDEyLjMxMSAyNS42NjY3IDExLjY2NjcgMjUuNjY2N0MxMS4wMjIzIDI1LjY2NjcgMTAuNDk5NCAyNS4xNDM4IDEwLjQ5OTQgMjQuNDk5NFYyMC45OTk0QzEwLjQ5OTYgMjAuMDcxNCAxMC44Njg2IDE5LjE4MTEgMTEuNTI0OCAxOC41MjQ4QzEyLjE4MTEgMTcuODY4NiAxMy4wNzE0IDE3LjQ5OTYgMTMuOTk5NCAxNy40OTk0QzE0LjkyNzQgMTcuNDk5NCAxNS44MTc3IDE3Ljg2ODggMTYuNDc0IDE4LjUyNDhDMTcuMTMwMyAxOS4xODExIDE3LjQ5OTMgMjAuMDcxNCAxNy40OTk0IDIwLjk5OTRWMjQuNDk5NEMxNy40OTk0IDI1LjE0MzYgMTYuOTc4IDI1LjY2NjQgMTYuMzMzOSAyNS42NjY3QzE1LjY4OTYgMjUuNjY2NyAxNS4xNjY3IDI1LjE0MzggMTUuMTY2NyAyNC40OTk0WiIgZmlsbD0iIzVBNjQ3MiIvPgo8cGF0aCBpZD0iVmVjdG9yXzQiIGQ9Ik0xLjE2NjEgMjIuMTY2N1YxMy45OTk0QzEuMTY2MjUgMTMuMDcxNCAxLjUzNTI0IDEyLjE4MTEgMi4xOTE0OSAxMS41MjQ4QzIuODQ3NzMgMTAuODY4NiAzLjczODA0IDEwLjQ5OTYgNC42NjYxIDEwLjQ5OTRINy4wMDA1N0M3LjY0NDY0IDEwLjQ5OTcgOC4xNjYxIDExLjAyMjUgOC4xNjYxIDExLjY2NjdDOC4xNjYxIDEyLjMxMDggNy42NDQ2NCAxMi44MzM2IDcuMDAwNTcgMTIuODMzOUg0LjY2NjFDNC4zNTY4OCAxMi44MzQxIDQuMDYxMDIgMTIuOTU3IDMuODQyMzcgMTMuMTc1N0MzLjYyMzcxIDEzLjM5NDQgMy41MDA3MiAxMy42OTAyIDMuNTAwNTcgMTMuOTk5NFYyMi4xNjY3QzMuNTAwNTcgMjIuNDc2MSAzLjYyMzU3IDIyLjc3MzMgMy44NDIzNyAyMi45OTIxQzQuMDYwOTcgMjMuMjEwNCA0LjM1NzE1IDIzLjMzMzggNC42NjYxIDIzLjMzMzlIMjMuMzMzM0MyMy42NDI4IDIzLjMzMzkgMjMuOTQgMjMuMjEwOSAyNC4xNTg4IDIyLjk5MjFDMjQuMzc3NiAyMi43NzMzIDI0LjUwMDYgMjIuNDc2MSAyNC41MDA2IDIyLjE2NjdWMTAuNDk5NEMyNC41MDA0IDEwLjE5MDUgMjQuMzc3MSA5Ljg5NDMgMjQuMTU4OCA5LjY3NTdDMjMuOTQgOS40NTY5MSAyMy42NDI4IDkuMzMzOSAyMy4zMzMzIDkuMzMzOUgyMS4wMDA2QzIwLjM1NjIgOS4zMzM5IDE5LjgzMzMgOC44MTEgMTkuODMzMyA4LjE2NjY3QzE5LjgzMzMgNy41MjIzMyAyMC4zNTYyIDYuOTk5NDMgMjEuMDAwNiA2Ljk5OTQzSDIzLjMzMzNDMjQuMjYxNSA2Ljk5OTQzIDI1LjE1MTYgNy4zNjg2MiAyNS44MDc5IDguMDI0ODJDMjYuNDY0MiA4LjY4MTA2IDI2LjgzMzIgOS41NzEzOCAyNi44MzMzIDEwLjQ5OTRWMjIuMTY2N0MyNi44MzMzIDIzLjA5NDkgMjYuNDY0MyAyMy45ODQ5IDI1LjgwNzkgMjQuNjQxM0MyNS4xNTE2IDI1LjI5NzcgMjQuMjYxNiAyNS42NjY3IDIzLjMzMzMgMjUuNjY2N0g0LjY2NjFDMy43MzgwNCAyNS42NjY1IDIuODQ3NzMgMjUuMjk3NSAyLjE5MTQ5IDI0LjY0MTNDMS41MzUyOSAyMy45ODQ5IDEuMTY2MSAyMy4wOTQ4IDEuMTY2MSAyMi4xNjY3WiIgZmlsbD0iIzVBNjQ3MiIvPgo8cGF0aCBpZD0iVmVjdG9yXzUiIGQ9Ik0xOS44MzI4IDI0LjVWNS44MzI3NkMxOS44MzI2IDUuNTIzNTUgMTkuNzA5NiA1LjIyNzY5IDE5LjQ5MSA1LjAwOTAzQzE5LjI3MjMgNC43OTAzNyAxOC45NzY1IDQuNjY3MzkgMTguNjY3MiA0LjY2NzI0SDkuMzMyNzZDOS4wMjM1NSA0LjY2NzM5IDguNzI3NjkgNC43OTAzOCA4LjUwOTAzIDUuMDA5MDNDOC4yOTAzOCA1LjIyNzY5IDguMTY3MzkgNS41MjM1NSA4LjE2NzI0IDUuODMyNzZWMjQuNUM4LjE2NzI0IDI1LjE0NDMgNy42NDQzMyAyNS42NjcyIDcgMjUuNjY3MkM2LjM1NTY3IDI1LjY2NzIgNS44MzI3NiAyNS4xNDQzIDUuODMyNzYgMjQuNVY1LjgzMjc2QzUuODMyOTEgNC45MDQ3MSA2LjIwMTkxIDQuMDE0NCA2Ljg1ODE1IDMuMzU4MTVDNy41MTQ0IDIuNzAxOTEgOC40MDQ3MSAyLjMzMjkxIDkuMzMyNzYgMi4zMzI3NkgxOC42NjcyQzE5LjU5NTMgMi4zMzI5MSAyMC40ODU2IDIuNzAxOTEgMjEuMTQxOCAzLjM1ODE1QzIxLjc5ODEgNC4wMTQ0IDIyLjE2NzEgNC45MDQ3MSAyMi4xNjcyIDUuODMyNzZWMjQuNUMyMi4xNjcyIDI1LjE0NDMgMjEuNjQ0MyAyNS42NjcyIDIxIDI1LjY2NzJDMjAuMzU1NyAyNS42NjcyIDE5LjgzMjggMjUuMTQ0MyAxOS44MzI4IDI0LjVaIiBmaWxsPSIjNUE2NDcyIi8+CjwvZz4KPC9zdmc+Cg==","ob-coins":"data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjI4IiB2aWV3Qm94PSIwIDAgMjggMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik02Ljk3MDg2IDEwLjg0OTRDNy41ODczNSAxMC42NjMxIDguMjM4NTMgMTEuMDEwNiA4LjQyNTIxIDExLjYyN0M4LjYxMTY5IDEyLjI0MzYgOC4yNjI0MiAxMi44OTQ2IDcuNjQ1OTEgMTMuMDgxM0M2LjY4MDkxIDEzLjM3MzEgNS44MDcxMyAxMy45MTAyIDUuMTExNDkgMTQuNjM5OUM0LjQxNTgzIDE1LjM2OTYgMy45MjEzMiAxNi4yNjgyIDMuNjc1OTQgMTcuMjQ2MUMzLjQzMDY5IDE4LjIyMzcgMy40NDMzMSAxOS4yNDgzIDMuNzExODMgMjAuMjE5N0MzLjk4MDQ2IDIxLjE5MTIgNC40OTYyNyAyMi4wNzcyIDUuMjA4OSAyMi43OUM1LjkyMTc0IDIzLjUwMjkgNi44MDc1OCAyNC4wMjAxIDcuNzc5MjEgMjQuMjg4OEM4Ljc1MDk0IDI0LjU1NzUgOS43NzY2NyAyNC41Njg0IDEwLjc1NDYgMjQuMzIzQzExLjczMjIgMjQuMDc3NiAxMi42Mjk0IDIzLjU4MyAxMy4zNTkgMjIuODg3NUMxNC4wODg2IDIyLjE5MTkgMTQuNjI1OCAyMS4zMTk1IDE0LjkxNzYgMjAuMzU0N0MxNS4xMDQxIDE5LjczODEgMTUuNzU1MyAxOS4zODkxIDE2LjM3MiAxOS41NzU0QzE2Ljk4ODcgMTkuNzYyIDE3LjMzNzggMjAuNDEzIDE3LjE1MTMgMjEuMDI5OEMxNi43NDI3IDIyLjM4MDcgMTUuOTkwNCAyMy42MDIxIDE0Ljk2ODkgMjQuNTc1OUMxMy45NDczIDI1LjU0OTggMTIuNjkxIDI2LjI0MzkgMTEuMzIxOSAyNi41ODc0QzkuOTUyOTggMjYuOTMwOSA4LjUxNzQ4IDI2LjkxMjMgNy4xNTcxNCAyNi41MzYxQzUuNzk3MjEgMjYuMTU5OSA0LjU1NzUyIDI1LjQzODYgMy41NTk3MyAyNC40NDA5QzIuNTYxNjYgMjMuNDQyOSAxLjgzODk4IDIyLjIwMjIgMS40NjI4IDIwLjg0MThDMS4wODY4IDE5LjQ4MTcgMS4wNjk5MyAxOC4wNDc0IDEuNDEzMjQgMTYuNjc4N0MxLjc1Njc4IDE1LjMwOTcgMi40NDkxIDE0LjA1MTcgMy40MjMwMSAxMy4wM0M0LjM5Njg5IDEyLjAwODUgNS42MTk5MSAxMS4yNTc5IDYuOTcwODYgMTAuODQ5NFoiIGZpbGw9IiMwMDQyODUiLz4KPHBhdGggaWQ9IlZlY3Rvcl8yIiBkPSJNMTcuNSAxMS42NjcyVjguMTY3MjRDMTYuODU1NyA4LjE2NzI0IDE2LjMzMjggNy42NDQzMyAxNi4zMzI4IDdDMTYuMzMyOCA2LjM1NTY3IDE2Ljg1NTcgNS44MzI3NiAxNy41IDUuODMyNzZIMTguNjY3MkMxOS4zMTEzIDUuODMzMDcgMTkuODMyOCA2LjM1NTg2IDE5LjgzMjggN1YxMS42NjcyQzE5LjgzMjUgMTIuMzExMSAxOS4zMTExIDEyLjgzMjUgMTguNjY3MiAxMi44MzI4QzE4LjAyMzEgMTIuODMyOCAxNy41MDAzIDEyLjMxMTMgMTcuNSAxMS42NjcyWiIgZmlsbD0iIzAwNDI4NSIvPgo8cGF0aCBpZD0iVmVjdG9yXzMiIGQ9Ik03Ljc5ODkxIDE1LjUzODZDOC4zMTM2OCAxNS4zNjcgOC44OTQ0NyAxNS41NzUgOS4xNzYzNSAxNi4wNjMyTDExLjUxMDggMjAuMTAzM0MxMS44MzMgMjAuNjYxMiAxMS42NDE1IDIxLjM3NTUgMTEuMDgzNiAyMS42OTc4QzEwLjUyNTYgMjIuMDE5OSA5LjgxMTI3IDIxLjgyODUgOS40ODkxIDIxLjI3MDVMNy43MzkxIDE4LjI0MDVDNy4xODE0IDE4LjU2MTkgNi40Njg1IDE4LjM3MDUgNi4xNDYzMiAxNy44MTMyQzUuODI0MTUgMTcuMjU1MiA2LjAxNTU3IDE2LjU0MDkgNi41NzM1NyAxNi4yMTg4TDcuNTgzNTggMTUuNjM2TDcuNzk4OTEgMTUuNTM4NloiIGZpbGw9IiMwMDQyODUiLz4KPHBhdGggaWQ9IlZlY3Rvcl80IiBkPSJNMjQuNDk5NCA5LjMzMzMzQzI0LjQ5OTQgNi4xMTE2NyAyMS44ODgzIDMuNTAwNTcgMTguNjY2NyAzLjUwMDU3QzE1LjQ0NSAzLjUwMDU3IDEyLjgzMzkgNi4xMTE2NyAxMi44MzM5IDkuMzMzMzNDMTIuODMzOSAxMi41NTUgMTUuNDQ1IDE1LjE2NjEgMTguNjY2NyAxNS4xNjYxQzIxLjg4ODMgMTUuMTY2MSAyNC40OTk0IDEyLjU1NSAyNC40OTk0IDkuMzMzMzNaTTI2LjgzMzkgOS4zMzMzM0MyNi44MzM5IDEzLjg0MzcgMjMuMTc3IDE3LjUwMDYgMTguNjY2NyAxNy41MDA2QzE0LjE1NjMgMTcuNTAwNiAxMC40OTk0IDEzLjg0MzcgMTAuNDk5NCA5LjMzMzMzQzEwLjQ5OTQgNC44MjMwMSAxNC4xNTYzIDEuMTY2MSAxOC42NjY3IDEuMTY2MUMyMy4xNzcgMS4xNjYxIDI2LjgzMzkgNC44MjMwMSAyNi44MzM5IDkuMzMzMzNaIiBmaWxsPSIjMDA0Mjg1Ii8+CjwvZz4KPC9zdmc+Cg==","ob-users":"data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjI4IiBoZWlnaHQ9IjI4IiB2aWV3Qm94PSIwIDAgMjggMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xOS44MzMzIDI0LjQ5OTRDMTkuODMzMiAyMi4zMzM3IDE4Ljk3MjIgMjAuMjU2MiAxNy40NDA4IDE4LjcyNDhDMTUuOTA5MyAxNy4xOTM2IDEzLjgzMTggMTYuMzMzOSAxMS42NjYxIDE2LjMzMzlDOS41MDAzNyAxNi4zMzQxIDcuNDIyODUgMTcuMTkzNCA1Ljg5MTQ0IDE4LjcyNDhDNC4zNjAwMyAyMC4yNTYyIDMuNTAwNzIgMjIuMzMzNyAzLjUwMDU3IDI0LjQ5OTRDMy41MDA1NyAyNS4xNDM4IDIuOTc3NjcgMjUuNjY2NyAyLjMzMzMzIDI1LjY2NjdDMS42ODkgMjUuNjY2NyAxLjE2NjEgMjUuMTQzOCAxLjE2NjEgMjQuNDk5NEMxLjE2NjI1IDIxLjcxNDkgMi4yNzMyNyAxOS4wNDQ2IDQuMjQyMjcgMTcuMDc1NkM2LjIxMTI3IDE1LjEwNjYgOC44ODE1MyAxMy45OTk2IDExLjY2NjEgMTMuOTk5NEMxNC40NTA5IDEzLjk5OTQgMTcuMTIyNSAxNS4xMDY1IDE5LjA5MTYgMTcuMDc1NkMyMS4wNjA1IDE5LjA0NDYgMjIuMTY1OSAyMS43MTUgMjIuMTY2MSAyNC40OTk0QzIyLjE2NjEgMjUuMTQzNiAyMS42NDQ2IDI1LjY2NjQgMjEuMDAwNiAyNS42NjY3QzIwLjM1NjIgMjUuNjY2NyAxOS44MzMzIDI1LjE0MzggMTkuODMzMyAyNC40OTk0WiIgZmlsbD0iIzVBNjQ3MiIvPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik0xNi4zMzMzIDkuMzMyNzZDMTYuMzMzIDYuNzU1NyAxNC4yNDMyIDQuNjY3MjQgMTEuNjY2MSA0LjY2NzI0QzkuMDg5MjIgNC42Njc1NCA3LjAwMDg4IDYuNzU1ODkgNy4wMDA1NyA5LjMzMjc2QzcuMDAwNTcgMTEuOTA5OSA5LjA4OTAzIDEzLjk5OTcgMTEuNjY2MSAxNEMxNC4yNDM0IDE0IDE2LjMzMzMgMTEuOTEwMSAxNi4zMzMzIDkuMzMyNzZaTTE4LjY2NjEgOS4zMzI3NkMxOC42NjYxIDEzLjE5ODggMTUuNTMyMSAxNi4zMzI4IDExLjY2NjEgMTYuMzMyOEM3LjgwMDM3IDE2LjMzMjUgNC42NjYxIDEzLjE5ODYgNC42NjYxIDkuMzMyNzZDNC42NjY0MSA1LjQ2NzIyIDcuODAwNTYgMi4zMzMwNyAxMS42NjYxIDIuMzMyNzZDMTUuNTMxOSAyLjMzMjc2IDE4LjY2NTggNS40NjcwMyAxOC42NjYxIDkuMzMyNzZaIiBmaWxsPSIjNUE2NDcyIi8+CjxwYXRoIGlkPSJWZWN0b3JfMyIgZD0iTTI0LjQ5OTcgMjMuMzMyNUMyNC40OTkzIDE5LjgyMDQgMjIuMzg0MSAxNi40OTU2IDIwLjMwMDcgMTQuOTMyOUMyMC4wMDY5IDE0LjcxMjYgMTkuODM0MiAxNC4zNjcgMTkuODM0MSAxMy45OTk4QzE5LjgzNDIgMTMuNjMyNyAyMC4wMDcxIDEzLjI4NyAyMC4zMDA3IDEzLjA2NjdDMjAuOTE0IDEyLjYwNjQgMjEuNDAzNSAxMi4wMDE0IDIxLjcyNzcgMTEuMzA2NEMyMi4wNTIgMTAuNjExMyAyMi4xOTk5IDkuODQ3MjYgMjIuMTU4NCA5LjA4MTMyQzIyLjExNjggOC4zMTU1MiAyMS44ODc1IDcuNTcxOTYgMjEuNDkwMSA2LjkxNjAzQzIxLjA5MjYgNi4yNjAwNyAyMC41NCA1LjcxMTE0IDE5Ljg4MDMgNS4zMTk4NEMxOS4zMjYyIDQuOTkxMTkgMTkuMTQzMyA0LjI3NjEgMTkuNDcxOCAzLjcyMTk0QzE5LjgwMDUgMy4xNjc4MiAyMC41MTU2IDIuOTg0OTYgMjEuMDY5NyAzLjMxMzQ5QzIyLjA1OTQgMy45MDA0NiAyMi44ODk5IDQuNzIyMDMgMjMuNDg2MiA1LjcwNjA3QzI0LjA4MjUgNi42OTAwNSAyNC40MjcxIDcuODA2IDI0LjQ4OTQgOC45NTQ4NUMyNC41NTE3IDEwLjEwMzUgMjQuMzI5NiAxMS4yNSAyMy44NDM0IDEyLjI5MjVDMjMuNTU4NyAxMi45MDI3IDIzLjE4NTQgMTMuNDY0NiAyMi43NDI4IDEzLjk2NTZDMjQuOTI3MiAxNi4wOTIxIDI2LjgzMzkgMTkuNTcyOCAyNi44MzQxIDIzLjMzMjVDMjYuODM0MSAyMy45NzY4IDI2LjMxMTEgMjQuNDk5NyAyNS42NjY5IDI0LjQ5OThDMjUuMDIyNiAyNC40OTk4IDI0LjQ5OTcgMjMuOTc2OSAyNC40OTk3IDIzLjMzMjVaIiBmaWxsPSIjNUE2NDcyIi8+CjwvZz4KPC9zdmc+Cg=="};
+// 리뷰용 화면 이동. 화면 이름은 Figma 화면 코드 그대로(D-143).
+const FIGMA = 'https://www.figma.com/design/AnRP8zHPMcjHE7sJJORa0d/?node-id=';
+
+const PLAN = BUNDLE.plan; // 목록(묶음별, build.py)
+const FLOW = new Set(['RS1', 'RS2', 'RC0', 'D0', 'RV2', 'AD7', 'AD7b']); // 현아님 Flow 쪽
+
+const screens = {};
+document.querySelectorAll('template[id^="s-"]').forEach(t => {
+  const d = t.dataset;
+  screens[t.id.slice(2)] = { name: d.name, nav: d.nav, node: d.node, overlay: d.overlay, tpl: t,
+    user: d.user, badge: d.badge, homeicon: d.homeicon, layout: d.layout };
+});
+let current = null;   // 지금 화면 코드
+let openOv = null;    // 열린 창 코드
+
+const $ = id => document.getElementById(id);
+let toastTimer;
+function toast(msg) {
+  const el = $('rv-toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+function setTag(code) {
+  const s = screens[code];
+  $('rv-code').textContent = code;
+  $('rv-name').textContent = s.name;
+  $('rv-figma').href = FIGMA + s.node.replace(':', '-');
+}
+
+// 창(알림, 워크스페이스 전환): 화면 위에 띄우고 바깥을 누르면 닫힘
+function closeOverlay() {
+  if (!openOv) return;
+  $('ov').innerHTML = '';
+  document.querySelector('.hdr .unread').style.visibility = '';
+  openOv = null;
+  if (current) setTag(current);
+}
+function openOverlay(code) {
+  closeOverlay();
+  const s = screens[code];
+  const layer = $('ov');
+  layer.appendChild(s.tpl.content.cloneNode(true));
+  fillIcons(layer);
+  openOv = code;
+  placeOverlay();
+  if (s.overlay === 'bell') document.querySelector('.hdr .unread').style.visibility = 'hidden';
+  setTag(code);
+}
+// 창 위치: Figma 기준(알림은 종 아래 오른쪽 끝 맞춤, 워크스페이스는 전환 버튼 위 10px)
+function placeOverlay() {
+  const pop = $('ov').querySelector('.pop');
+  if (!pop) return;
+  const kind = screens[openOv].overlay;
+  if (kind === 'bell') {
+    const r = document.querySelector('.hdr .bell').getBoundingClientRect();
+    pop.style.left = (r.right + scrollX - pop.offsetWidth) + 'px';
+    pop.style.top = (r.bottom + scrollY + 3) + 'px';
+  } else if (kind === 'switcher') {
+    const r = document.querySelector('.switcher').getBoundingClientRect();
+    pop.style.left = (r.left + scrollX - 6) + 'px';
+    pop.style.top = (r.top + scrollY - 10 - pop.offsetHeight) + 'px';
+  }
+}
+
+// 화면마다 다른 헤더 계정, My tasks 숫자, Home 아이콘(Figma 화면 값 그대로)
+const SHELL = { user: 'Juya Kim|juya.k@bharvest.io|JK', badge: '5' };
+const homeIcon = document.querySelector('#sb [data-nav="home"] img');
+const homeIconDefault = homeIcon.src;
+function setShell(s) {
+  const [name, mail, ini] = (s.user || SHELL.user).split('|');
+  document.querySelector('.hdr .who p:first-child').textContent = name;
+  document.querySelector('.hdr .who p:last-child').textContent = mail;
+  document.querySelector('.hdr .avatar').textContent = ini;
+  const badge = s.badge === undefined ? SHELL.badge : s.badge;
+  const c = document.querySelector('#sb .count');
+  c.textContent = badge; c.style.display = badge ? '' : 'none';
+  homeIcon.src = (s.homeicon && ICONS[s.homeicon]) || homeIconDefault;
+}
+
+function fillIcons(root) { root.querySelectorAll('[data-i]').forEach(im => { im.src = ICONS[im.dataset.i]; }); }
+
+function render(code) {
+  const s = screens[code];
+  if (!s || s.overlay) return false;
+  closeOverlay();
+  current = code;
+  // 앱 틀이 없는 화면(온보딩 들어오기 전)은 #bare에, 나머지는 앱 틀 본문에
+  const bare = s.layout === 'bare';
+  document.querySelector('.app').style.display = bare ? 'none' : '';
+  const main = bare ? $('bare') : $('main');
+  $('bare').innerHTML = ''; $('main').innerHTML = '';
+  main.appendChild(s.tpl.content.cloneNode(true));
+  fillIcons(main);
+  if (!bare) {
+    document.querySelectorAll('#sb .nav').forEach(n => n.classList.toggle('on', n.dataset.nav === s.nav));
+    setShell(s);
+  }
+  setTag(code);
+  window.scrollTo(0, 0);
+  return true;
+}
+
+function go(code, el) {
+  if (screens[code] && screens[code].overlay) {
+    if (openOv === code) closeOverlay(); else openOverlay(code);
+    return;
+  }
+  closeOverlay();
+  if (screens[code]) {
+    if (location.hash !== '#' + code) location.hash = code; else render(code);
+    if (el && el.dataset.note) toast(el.dataset.note);
+    return;
+  }
+  if (OTHER[code]) { location.href = OTHER[code]; return; }
+  if (FLOW.has(code) || (el && el.dataset.flow)) toast(code + ': Flow 쪽 화면(현아님 담당), 합칠 때 연결');
+  else toast(code + ': 아직 HTML로 만들지 않은 화면');
+}
+
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-close]')) { e.preventDefault(); closeOverlay(); return; }
+  const nf = e.target.closest('[data-nofigma]');
+  if (nf) {
+    e.preventDefault();
+    if (nf.dataset.hide) { const t = nf.closest(nf.dataset.hide); if (t) t.remove(); }
+    toast('Figma에 없음: ' + nf.dataset.nofigma);
+    return;
+  }
+  const el = e.target.closest('[data-go]');
+  if (!el) {
+    if (openOv && !e.target.closest('.pop') && !e.target.closest('.rv-tag, .rv-list')) closeOverlay();
+    return;
+  }
+  e.preventDefault();
+  go(el.dataset.go, el);
+});
+
+function buildList() {
+  const box = $('rv-list');
+  box.innerHTML = PLAN.map(([g, codes]) =>
+    '<h4>' + g + '</h4>' + codes.map(c => {
+      const s = screens[c];
+      return '<a href="#' + c + '" class="' + (s ? '' : 'todo') + '"><b>' + c + '</b><span>' + (s ? s.name : '아직 없음') + '</span></a>';
+    }).join('')
+  ).join('');
+  box.addEventListener('click', e => {
+    const a = e.target.closest('a');
+    if (a && a.classList.contains('todo')) { e.preventDefault(); toast(a.querySelector('b').textContent + ': 아직 HTML로 만들지 않은 화면'); }
+    else if (a) {
+      const c = a.querySelector('b').textContent;
+      box.classList.remove('show');
+      if (screens[c] && screens[c].overlay) { e.preventDefault(); openOverlay(c); }
+    }
+  });
+}
+$('rv-open').addEventListener('click', () => $('rv-list').classList.toggle('show'));
+
+function route() {
+  const code = location.hash.slice(1);
+  if (screens[code] && screens[code].overlay) { if (!current) render(BUNDLE.start); openOverlay(code); return; }
+  render(code) || render(BUNDLE.start);
+}
+window.addEventListener('hashchange', route);
+window.addEventListener('resize', placeOverlay);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverlay(); });
+buildList();
+route();
+
+</script>
+</body>
+</html>
