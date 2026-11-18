@@ -220,6 +220,7 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 
 /* modal */
 .scrim{position:fixed;inset:0;background:rgba(5,13,24,.35);display:grid;place-items:center;z-index:50;padding:16px}
+.modal.wide{width:min(640px,100%)}
 .modal{width:min(480px,100%);background:#fff;border-radius:14px;box-shadow:0 20px 48px rgba(5,13,24,.2);overflow:hidden}
 .modal .mh{padding:22px 24px 14px}
 .modal .mh h3{margin:0 0 4px;font-size:20px;font-weight:600}
@@ -280,8 +281,8 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--brand-strong);color:#fff;border-radius:10px;padding:12px 18px;font-size:13px;z-index:60;box-shadow:0 8px 24px rgba(5,13,24,.25)}
 
 /* prototype-only control panel (not product UI) */
-.proto{position:fixed;right:16px;bottom:16px;z-index:45;width:300px;background:#fff;border:1.5px dashed var(--brand);border-radius:12px;box-shadow:0 6px 18px rgba(5,13,24,.12);font-family:"IBM Plex Sans KR","DM Sans",sans-serif;font-size:12px}
-.proto .ph{display:flex;align-items:center;gap:8px;padding:10px 12px;border:0;background:none;width:100%;text-align:left}
+.proto{position:fixed;right:16px;bottom:16px;z-index:45;width:300px;max-height:calc(100vh - 32px);overflow:auto;background:#fff;border:1.5px dashed var(--brand);border-radius:12px;box-shadow:0 6px 18px rgba(5,13,24,.12);font-family:"IBM Plex Sans KR","DM Sans",sans-serif;font-size:12px}
+.proto .ph{display:flex;align-items:center;gap:8px;padding:10px 12px;position:sticky;top:0;background:#fff;border-bottom:1px dashed var(--border-strong);margin-bottom:10px}
 .proto .ph b{color:var(--brand);font-size:12px}
 .proto .pb{padding:0 12px 12px;display:flex;flex-direction:column;gap:10px}
 .proto .pl{font-size:11px;color:var(--muted);margin-bottom:4px}
@@ -289,12 +290,16 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 .proto .select{height:34px;font-size:12px;font-family:inherit}
 .proto .btn{height:30px;font-size:11px;padding:0 10px;font-family:inherit}
 .proto .pnote{font-size:11px;color:var(--muted);line-height:1.45}
-.proto.min .pb{display:none}
 .proto .fig{flex:none;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:700;color:#fff;background:var(--brand);border-radius:6px;padding:1px 7px}
 .proto .fig.none{background:var(--muted)}
 .proto .fign{font-size:11px;color:var(--strong);line-height:1.45}
 .proto .fign em{font-style:normal;color:var(--muted)}
 
+@media (min-width:1280px){
+  body{padding-right:324px}
+  .proto{top:16px;bottom:16px;max-height:none}
+  .toast{left:calc(50% - 162px)}
+}
 @media (max-width:900px){
   .side{display:none}
   .body{padding:0 8px 8px}
@@ -407,13 +412,36 @@ const STATIC_TASKS = [
   ['Accept an approval group invite','Treasury signers, from Jason Lee','40m'],
 ];
 
+const DEFAULT_CLAUSES = [
+  {title:'Backing & custody acknowledgement', body:'I understand this token is backed 1:1 by reserves held at the designated custodian, and that issuance settles only after the deposit is verified.', required:true},
+  {title:'Redemption policy', body:'I accept the redemption minimums, fees, and fulfillment timelines disclosed for this token.', required:true},
+  {title:'Reserve attestation updates', body:'Send me reserve attestation and disclosure updates for this token.', required:false},
+];
+// Order from the AD4 dropdown note: this organization, members, other organizations, our investors
+const INVESTORS = [
+  {id:'ault', name:'Ault Global Commodities', sub:'This organization'},
+  {id:'jason', name:'Jason Lee', sub:'Member'},
+  {id:'colossus', name:'Colossus', sub:'Another organization'},
+  {id:'minji', name:'Minji Park', sub:'Individual, 0x7C1a…09bE'},
+  {id:'northgate', name:'Northgate Capital', sub:'Organization, KYB verified'},
+];
+const isOrgRule = () => S.rule!=='direct';
+const ruleNeed = () => S.rule==='org3' ? 3 : 2;
+function termsLine(d){
+  const w = x => x==='any' ? 'any KYC-verified investor' : 'only investors you approve', t = TERMS[d.kind], s = TOKENS[d.token]?.sym || 'AGP';
+  const cap = x => x[0].toUpperCase()+x.slice(1);
+  const base = d.splitRules ? `${t.issue}: ${w(d.who)}, steps of ${d.size}. ${t.redeem}: ${w(d.redeemWho)}, steps of ${d.redeemSize} ${s}` : `${cap(w(d.who))}, steps of ${d.size} ${s}`;
+  return base + (d.excluded.length ? `. ${d.excluded.length} excluded` : '');
+}
+const termsText = cl => { const t = cl.filter(c=>c.title.trim()), r = t.filter(c=>c.required).length; return t.length ? `${r} required, ${t.length-r} optional` : 'No terms'; };
 const fresh = (kind='commodity') => {
   const tk = kind==='custom' ? 'bmax' : 'agp', t = TOKENS[tk], c0 = CUSTODIANS[kind][0];
   return {
     kind, tokenSrc:'fireblocks', token:tk, addr:'', read:null,
     img:'', imgUrl:'', imgErr:false, name:t.name, desc:t.desc, docs:[],
     custodians:{[c0.id]:true}, holder:'Ault Global Commodities', acct:'', por:null, porErr:null, porFlag:false, showCombo:false,
-    who:'any', size:100, issueFee:'', redeemFee:'', excluded:'none', terms:'2 required, 1 optional',
+    who:'any', size:100, issueFee:'', redeemFee:'', excluded:[], clauses:clone(DEFAULT_CLAUSES),
+    splitRules:false, redeemWho:'any', redeemSize:500, docusignCred:'legal', savedAt:null,
     roles:{am:['gov'], mint:['gov'], burn:['gov'], op:['gov']},
     treasury:'op', feeWallet:'', agreements:'Off',
     executor:'Fireblocks', credential:'treasury', vault:'Vault 1', burnOther:false, burnVault:'Vault 2', vaultId:'', assetId:'', note:'',
@@ -428,7 +456,7 @@ const S = {
   once:{},                                  // one-shot failures already shown
   modal:null, mf:{}, signing:false, signErr:false,
   notes:[], notifOpen:false, menu:null, tip:false, done1:false, done2:false,
-  errs:{}, fromReview:false, task:null, taskTab:'todo', protoMin:true, refused:false,
+  errs:{}, fromReview:false, task:null, taskTab:'todo', refused:false,
 };
 
 /* ================= helpers ================= */
@@ -458,7 +486,7 @@ function banner(tone, title, body, extra=''){
 }
 function sel(bind, opts, val, extra=''){ return `<select class="select ${bad(bind)}" data-bind="${bind}" ${extra}>${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${v===val?'selected':''}>${esc(l)}</option>`}).join('')}</select>`; }
 function go(screen, extra){
-  Object.assign(S, {screen, menu:null, tip:false, errs:{}}, extra||{});
+  Object.assign(S, {screen, menu:null, tip:false, errs:{}, resumed:false, xOpen:false}, extra||{});
   if (STEP_OF[screen]!=null) S.d.reached = Math.max(S.d.reached, STEP_OF[screen]);
   if (screen==='ad6') S.fromReview = false;
   render(); window.scrollTo(0,0);
@@ -495,14 +523,15 @@ function footer(next, {back=true, label='Continue', disabled=false, danger=false
   return `<div class="footer"><button class="link" data-a="save">Save and exit</button><button class="link danger" data-a="discard">Discard draft</button><span class="grow"></span>
   ${back?'<button class="btn" data-a="back">Back</button>':''}<button class="btn ${danger?'danger':'primary'}" data-a="next" data-v="${next}" ${disabled?'disabled':''}>${label}</button></div>`;
 }
-const wrap = (cur, body, next, opts) => `<button class="back" data-a="go" data-v="tokens">← Your tokens</button>${draftHead()}${steps(cur)}${body}${footer(next, opts)}`;
+const resumeBanner = () => S.resumed ? banner('prog','Picked up where you left off', `Saved today at ${new Date(S.d.savedAt||Date.now()).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} in this browser. Your uploaded files are back too.`) : '';
+const wrap = (cur, body, next, opts) => `<button class="back" data-a="go" data-v="tokens">← Your tokens</button>${resumeBanner()}${draftHead()}${steps(cur)}${body}${footer(next, opts)}`;
 
 function summaryRows(d, edit, flagBacking){
   const rows = [
     ['Token', `${d.name} (${sym(d)}) on Ault Mainnet`, 'ad1'],
     ['Investors see', `${d.name}, ${d.docs.length ? d.docs.length+' public document'+(d.docs.length>1?'s':'') : 'no public documents'}`, 'ad2'],
     ['Backed by', custNames(d).join(', ') + (flagBacking ? '. Custody statement flagged' : (d.porFlag && !d.por ? '. Upload a new custody statement' : '')), 'ad3', flagBacking || (d.porFlag && !d.por)],
-    ['Investor terms', `${d.who==='any'?'Any KYC-verified investor':'Only investors you approve'}, steps of ${d.size} ${sym(d)}`, 'ad4'],
+    ['Investor terms', termsLine(d), 'ad4'],
     ['Roles', rolePeople(d).join(', '), 'ad5'],
     ['Signing', `${d.vault} by ${d.executor}`, 'ad5b'],
     ['Wallets', feeSet(d) ? 'Treasury wallet, fee wallet' : 'Treasury wallet', 'ad5'],
@@ -532,6 +561,7 @@ function validate(screen){
   }
   if (screen==='ad4'){
     if (!(Number(d.size)>0)) e.size = 'Enter a size above 0.';
+    if (d.splitRules && !(Number(d.redeemSize)>0)) e.redeemSize = 'Enter a size above 0.';
     ['issueFee','redeemFee'].forEach(k=>{ if (!FEE_RE.test(d[k])) e[k] = 'USDT counts in 6 decimals. Use up to 6 decimal places.'; });
   }
   if (screen==='ad5'){
@@ -556,10 +586,10 @@ const V = {};
 V.tokens = () => {
   const d = S.d, rows = [];
   const draftStep = STEP_SCREEN[Math.min(d.reached,5)];
-  if (S.draftSaved) rows.push(`<div class="lrow" data-a="go" data-v="${draftStep}"><div class="idn"><span class="tile">DFT</span><div><b>${esc(d.name||'Untitled token')}</b><span>Draft saved in this browser only</span></div></div><div>${badge('neu','Draft')}</div><div style="display:flex;gap:8px;justify-content:flex-end;align-items:center"><button class="btn" data-a="go" data-v="${draftStep}">Continue</button><button class="link" style="color:var(--muted)" aria-label="Delete draft" data-a="deleteDraft"><i data-lucide="trash-2" style="width:16px"></i></button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
+  if (S.draftSaved) rows.push(`<div class="lrow" data-a="resume" data-v="${draftStep}"><div class="idn"><span class="tile">DFT</span><div><b>${esc(d.name||'Untitled token')}</b><span>Draft saved in this browser only</span></div></div><div>${badge('neu','Draft')}</div><div style="display:flex;gap:8px;justify-content:flex-end;align-items:center"><button class="btn" data-a="resume" data-v="${draftStep}">Continue</button><button class="link" style="color:var(--muted)" aria-label="Delete draft" data-a="deleteDraft"><i data-lucide="trash-2" style="width:16px"></i></button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
   [...S.reqs].reverse().filter(r=>r.status!=='live').forEach(r=>{
     const m = {
-      org:['prog','Org approval',`Waiting on Governance, ${r.approvals.length} of 2`],
+      org:['prog','Org approval',`Waiting on Governance, ${r.approvals.length} of ${need(r)}`],
       review:['prog','In platform review',`Submitted ${fmt(r.at.submitted)}`],
       rejected:['crit','Rejected','Custody statement flagged'],
       withdrawn:['neu','Withdrawn',`Withdrawn ${fmt(r.at.withdrawn)} by ${r.by}`],
@@ -717,21 +747,29 @@ V.ad3 = () => {
 };
 
 V.ad4 = () => {
-  const d = S.d, s = sym(), t = T(), n = Number(d.size)||0;
+  const d = S.d, s = sym(), t = T(), iw = t.issue.toLowerCase(), rw = t.redeem.toLowerCase();
   const c = custList(d).find(x=>d.custodians[x.id]) || custList(d)[0];
   const fee = (k, label, per) => `<div class="field"><label class="label" for="${k}">${label} <span class="opt">(optional)</span></label><div class="suffix"><input class="input ${!FEE_RE.test(d[k])||S.errs[k]?'bad':''}" id="${k}" inputmode="decimal" data-bind="${k}" placeholder="No fee" value="${esc(d[k])}"><span>USDT per ${per}</span></div>${!FEE_RE.test(d[k]) ? err(k,'USDT counts in 6 decimals. Use up to 6 decimal places.') : ''}</div>`;
+  const who = key => `<div class="seg"><button class="${d[key]==='any'?'on':''}" data-a="setv" data-v="${key}:any">Any KYC-verified investor</button><button class="${d[key]==='approved'?'on':''}" data-a="setv" data-v="${key}:approved">Only investors I approve</button></div>`;
+  const size = (key, id, label, verb) => { const v = Number(d[key])||0; return `<div class="field"><label class="label" for="${id}">${label} <span class="req">*</span></label>
+      <div style="display:flex;gap:8px;align-items:center"><div style="position:relative;width:210px"><input class="input ${bad(key)}" id="${id}" type="number" min="1" step="1" data-bind="${key}" value="${esc(d[key])}" style="height:36px;padding-right:56px"><span class="small muted" style="position:absolute;right:12px;top:8px">${s}</span></div>
+      ${[1,10,100].map(x=>`<button class="btn" style="padding:0 10px;${v===x?'background:var(--brand-tint);border-color:var(--brand);color:var(--brand)':''}" data-a="setv" data-v="${key}:${x}">${x}</button>`).join('')}</div>
+      <span class="hint" id="hint-${key}" data-verb="${verb}">${sizeHint(v, verb, s)}</span>${err(key, S.errs[key])}</div>`; };
+  const rules = d.splitRules ? `
+    <div class="field"><span class="label">Who can ${iw} <span class="req">*</span></span>${who('who')}
+      <button class="link small" style="align-self:flex-start;font-size:12px" data-a="split" data-v="0">Use the same rules for both</button></div>
+    ${size('size','rs',`${t.issue} size`,'request')}
+    <div class="field"><span class="label">Who can ${rw} <span class="req">*</span></span>${who('redeemWho')}</div>
+    ${size('redeemSize','rrs',`${t.redeem} size`, rw)}`
+  : `<div class="field"><span class="label">Who can request <span class="req">*</span></span>${who('who')}
+      <button class="link small" style="align-self:flex-start;font-size:12px" data-a="split" data-v="1">${t.diffRule}</button></div>
+    ${size('size','rs','Request size','request')}`;
+  const ex = d.excluded.map(id=>INVESTORS.find(x=>x.id===id)), q = (S.xq||'').toLowerCase();
+  const cand = INVESTORS.filter(x=>!d.excluded.includes(x.id) && (!q || (x.name+' '+x.sub).toLowerCase().includes(q)));
   return wrap(3, `
   <div class="card"><div class="card-h"><h2>Who can request, and how much?</h2></div>
-   <div class="card-b">
-    <div class="field"><span class="label">Who can request <span class="req">*</span></span>
-      <div class="seg"><button class="${d.who==='any'?'on':''}" data-a="who" data-v="any">Any KYC-verified investor</button><button class="${d.who==='approved'?'on':''}" data-a="who" data-v="approved">Only investors I approve</button></div>
-      <button class="link small" style="align-self:flex-start;font-size:12px" data-a="soon">${t.diffRule}</button></div>
-    <div class="field"><label class="label" for="rs">Request size <span class="req">*</span></label>
-      <div style="display:flex;gap:8px;align-items:center"><div style="position:relative;width:210px"><input class="input ${bad('size')}" id="rs" type="number" min="1" step="1" data-bind="size" value="${esc(d.size)}" style="height:36px;padding-right:56px"><span class="small muted" style="position:absolute;right:12px;top:8px">${s}</span></div>
-      ${[1,10,100].map(v=>`<button class="btn" style="padding:0 10px;${n===v?'background:var(--brand-tint);border-color:var(--brand);color:var(--brand)':''}" data-a="size" data-v="${v}">${v}</button>`).join('')}</div>
-      <span class="hint" id="size-hint">${n>0?`Investors request ${n}, ${n*2}, ${n*3} ${s}…`:''}</span>${err('size', S.errs.size)}</div>
-   </div></div>
-  <div class="card"><div class="card-h" style="padding-bottom:8px"><div class="eyebrow">Filled in for you</div><div class="hint" style="margin-top:6px">We set these from your Backing choice. Change anything right here.</div></div>
+   <div class="card-b">${rules}</div></div>
+  <div class="card"><div class="card-h" style="padding-bottom:8px"><div class="eyebrow">Filled in for you</div><div class="hint" style="margin-top:6px">${d.splitRules ? `We set these from your Backing choice. ${t.issue} and ${rw} now follow the rules above.` : 'We set these from your Backing choice. Change anything right here.'}</div></div>
    <div class="card-b">
     <div class="grid2">
       <div class="field"><span class="label">${t.issueReqs}</span>${sel('issueVia',[c.issueVia],c.issueVia)}</div>
@@ -739,10 +777,17 @@ V.ad4 = () => {
       ${fee('issueFee', `${t.issue} fee`, t.per1)}
       ${fee('redeemFee', `${t.redeem} fee`, t.per2)}
     </div>
-    <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Excluded investors <span class="opt">(optional)</span></span>${sel('excluded',[['none','None. Add investors to exclude'],['jason','Jason Lee, Member'],['colossus','Colossus, Another organization']],d.excluded)}</div>
-    <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Terms investors accept</span>${sel('terms',['2 required, 1 optional'],d.terms)}<span class="hint">Backing &amp; custody acknowledgement and Redemption policy are required. Reserve attestation updates is optional.</span></div>
+    <div class="field" style="max-width:calc(50% + 14px)"><label class="label" for="xq">Excluded investors <span class="opt">(optional)</span></label>
+      <div class="xsearch" style="position:relative"><input class="input" id="xq" data-xq placeholder="Search investors by name or wallet" value="${esc(S.xq||'')}" autocomplete="off" role="combobox" aria-expanded="${!!S.xOpen}" aria-controls="xlist">
+      ${S.xOpen?`<div class="menu" id="xlist" role="listbox" style="top:48px;left:0;right:0">${cand.map(x=>`<button role="option" data-a="exAdd" data-v="${x.id}"><span class="grow">${esc(x.name)}<small>${esc(x.sub)}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">No investors match.</div>'}</div>`:''}</div>
+      ${ex.map(x=>`<div class="file"><span class="grow"><span style="display:block;font-weight:500;font-size:13px">${esc(x.name)}</span><span class="hint">${esc(x.sub)}</span></span><button class="link danger" data-a="exRm" data-v="${x.id}">Remove</button></div>`).join('')}
+      <span class="hint">Excluded investors can’t request this token, even if they pass KYC.</span></div>
+    <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Terms investors accept</span>
+      <div style="display:flex;gap:12px;align-items:center"><div class="input ro grow" style="color:var(--strong);background:#fff">${termsText(d.clauses)}</div><button class="btn" data-a="editTerms">Edit terms</button></div>
+      <span class="hint">${esc(d.clauses.filter(x=>x.title.trim()).map(x=>x.title+(x.required?'':' (optional)')).join(', '))}</span></div>
    </div></div>`, 'ad5');
 };
+const sizeHint = (v, verb, s) => v>0 ? `Investors ${verb} ${v.toLocaleString('en-US')}, ${(v*2).toLocaleString('en-US')}, ${(v*3).toLocaleString('en-US')} ${s}…` : '';
 
 V.ad5 = () => {
   const d = S.d, t = T();
@@ -761,7 +806,9 @@ V.ad5 = () => {
     <div class="field"><span class="label">Treasury wallet <span class="req">*</span></span>${sel('treasury',[['op','Operation wallet, 0x25AB…297C (Default)'],['fee','Fee wallet, 0x9C1D…4E20']],d.treasury)}</div>
     <div class="field"><span class="label">Fee wallet (USDT)${fee?' <span class="req">*</span>':''}</span>${sel('feeWallet',[['',fee?'Select a wallet':'Select a wallet. Needed with a fee'],['op','Operation wallet, 0x25AB…297C'],['fee','Fee wallet, 0x9C1D…4E20']],d.feeWallet)}${err('feeWallet', S.errs.feeWallet)}</div>
     <div class="field"><span class="label">Signed agreements <span class="opt">(optional)</span></span>${sel('agreements',['Off','Issuance','Redemption','Issuance and redemption'],scen('docusignOff')?'Off':d.agreements, scen('docusignOff')?'disabled':'')}
-      ${scen('docusignOff')?'<span class="hint">Connect DocuSign on the Credentials page to enable agreement requirements.</span>':''}</div>
+      ${scen('docusignOff')?'<span class="hint">Connect DocuSign on the Credentials page to enable agreement requirements.</span>':''}
+      ${!scen('docusignOff') && d.agreements!=='Off' ? `<span class="hint">${{Issuance:'Investors sign the issuance agreement in DocuSign before each mint.', Redemption:'Investors sign the redemption agreement in DocuSign before each burn.', 'Issuance and redemption':'Investors sign an agreement in DocuSign before each mint and burn.'}[d.agreements]}</span>` : ''}</div>
+    ${!scen('docusignOff') && d.agreements!=='Off' ? `<div class="field"><span class="label">DocuSign credential <span class="req">*</span></span>${sel('docusignCred',[['legal','Ault Legal DocuSign'],['ops','Ault Ops DocuSign']],d.docusignCred)}</div>` : ''}
    </div></div>`, 'ad5b');
 };
 
@@ -807,12 +854,12 @@ function readyCard(){
 }
 
 V.ad6 = () => {
-  const d = S.d, org = S.rule==='org';
+  const d = S.d, org = isOrgRule();
   let top = '';
   if (S.refused) top = banner('crit','The listing request was refused', `Asset ${esc(sym())}_AULT is already linked to another token. Pick a different asset in Operations, then submit again.`, '<button class="btn" data-a="edit" data-v="ad5b">Open Operations</button>');
   else if (d.from?.type==='rejected') top = banner('att','Started from your rejected request', `We copied what you submitted on ${fmt(d.from.at)}. The platform flagged Backing: the account number on the custody statement doesn't match the reserve account. Fix it, then submit again.`);
   else if (d.from?.type==='orgRejected') top = banner('att','Your last proposal was rejected', `${esc(d.from.by)}, ${fmt(d.from.at)}: “${esc(d.from.reason)}” We filled in what you proposed. Change anything before you sign.`);
-  return `<button class="back" data-a="go" data-v="tokens">← Your tokens</button>${top}${draftHead()}${steps(5)}
+  return `<button class="back" data-a="go" data-v="tokens">← Your tokens</button>${resumeBanner()}${top}${draftHead()}${steps(5)}
   ${readyCard()}
   <div class="card"><div class="card-h"><h2>What you're submitting</h2></div>${summaryRows(d, true)}
     <div style="padding:14px 24px;border-top:1px solid var(--border)">${d.reviewFiles.map(f=>`<div class="small" style="margin-bottom:6px"><i data-lucide="paperclip" style="width:13px;height:13px;vertical-align:-2px"></i> ${esc(f.name)} <span class="muted">${mb(f.size)}, reviewers only</span></div>`).join('')}
@@ -824,7 +871,7 @@ V.ad6 = () => {
 function reqProgress(r){
   const org = r.path==='org', s = r.status;
   const items = [];
-  if (org) items.push(['Proposed', `${fmt(r.at.proposed)} by ${r.by}`], ['Org approval', s==='org' ? `${r.approvals.length} of 2, Governance` : (r.at.orgApproved ? `Approved ${fmt(r.at.orgApproved)}` : 'Governance, 2 of 4')]);
+  if (org) items.push(['Proposed', `${fmt(r.at.proposed)} by ${r.by}`], ['Org approval', s==='org' ? `${r.approvals.length} of ${need(r)}, Governance` : (r.at.orgApproved ? `Approved ${fmt(r.at.orgApproved)}, ${need(r)} of ${need(r)}` : `Governance, ${need(r)} of 4`)]);
   else items.push(['Submitted', `${fmt(r.at.submitted)} by ${r.by}`]);
   items.push(['Platform review', org && !r.at.submitted ? 'After org approval' : '1 to 2 business days'], ['Live','Opens in Your tokens']);
   const base = org ? 1 : 0; // index of the stage after "submitted/proposed"
@@ -842,7 +889,10 @@ function reqProgress(r){
     return `${i?`<div class="conn ${i<=cur&&!(stop&&i===cur)?'on':''}" style="flex:1"></div>`:''}<div class="s"><span class="ring ${cls}">${inner}</span><div><b style="${i>cur?'color:var(--muted)':''}">${b}</b><span>${esc(sp)}</span></div></div>`;
   }).join('')}</div></div>`;
 }
-function others(by){ const o = GOVERNANCE.filter(n=>n!==by); return o.slice(0,-1).join(', ') + ' or ' + o.at(-1); }
+const need = r => r.need || 2;
+const left = r => need(r) - r.approvals.length;
+function waitingOn(r, joiner=' or '){ const o = GOVERNANCE.filter(n=>!r.approvals.includes(n)); return o.length>1 ? o.slice(0,-1).join(', ')+joiner+o.at(-1) : (o[0]||''); }
+const ord = n => n + ({1:'st',2:'nd',3:'rd'}[n]||'th');
 
 V.ad7 = () => {
   const r = getR(); if (!r) return V.tokens();
@@ -854,13 +904,21 @@ V.ad7 = () => {
     sub = `Listing proposal, signed by ${r.by}, ${fmt(r.at.proposed)}`;
     if (myTurn){
       bdg = badge('prog','Your turn');
-      top = banner('prog','Your turn: approve this listing proposal', `${esc(r.by)} proposed it. One more approval sends it to the platform for review.`);
-      side = `<div class="card" style="padding:16px"><div class="eyebrow">Governance, 2 of 4</div><p class="small muted" style="margin:6px 0 12px">${esc(me().name)} (you). Approving sends the listing request to the platform.</p><div style="display:flex;gap:8px"><button class="btn wide" data-a="reject" data-v="${r.id}">Reject</button><button class="btn primary wide" data-a="approve" data-v="${r.id}">Approve</button></div></div>`;
+      top = banner('prog','Your turn: approve this listing proposal', `${esc(r.by)} proposed it. ${left(r)===1 ? 'One more approval sends it to the platform for review.' : `${left(r)} more approvals are needed before it goes to the platform.`}`);
+      side = `<div class="card" style="padding:16px"><div class="eyebrow">Governance, ${need(r)} of 4</div><p class="small muted" style="margin:6px 0 12px">${esc(me().name)} (you). Approving sends the listing request to the platform.</p><div style="display:flex;gap:8px"><button class="btn wide" data-a="reject" data-v="${r.id}">Reject</button><button class="btn primary wide" data-a="approve" data-v="${r.id}">Approve</button></div></div>`;
+    } else if (!mine && r.approvals.includes(me().name)) {
+      bdg = badge('prog','Waiting');
+      top = banner('prog','You approved this proposal', `Governance needs ${need(r)} of 4. Waiting for ${left(r)===1?'one more':left(r)+' more'} of ${esc(waitingOn(r))}. Then it goes to the platform.`);
+      side = sideCard(`Governance, ${need(r)} of 4`, `${esc(me().name)} (you), approved ${fmt(r.apAt?.[me().name]||Date.now())}. ${esc(waitingOn(r,' and '))} haven’t answered.`, '');
     } else {
       bdg = badge('prog','Org approval');
-      top = banner('prog','Proposal sent', `Waiting for 1 more approval from Governance: ${esc(others(r.by))}. The listing request goes to the platform once approved.`);
+      top = banner('prog','Proposal sent', `Waiting for ${left(r)} more approval${left(r)>1?'s':''} from Governance: ${esc(waitingOn(r))}. The listing request goes to the platform once approved.`);
       side = mine ? sideCard('Need a change?','Withdraw the proposal before it is approved. Nothing is sent to the platform.',`<button class="btn wide" data-a="withdrawProp" data-v="${r.id}">Withdraw proposal</button>`) : '';
     }
+  } else if ((s==='review'||s==='live') && r.path==='org' && !mine && !r.approvals.includes(me().name) && r.decidedBy!==me().name){
+    bdg = badge('neu','Closed'); sub = `Proposal by ${r.by}, ${fmt(r.at.proposed)}`;
+    top = banner('neu','This proposal is no longer open', `Governance approved it on ${fmt(r.at.orgApproved)} with ${need(r)} of ${need(r)} approvals. Nothing for you to sign.`);
+    side = sideCard(`Governance, ${need(r)} of 4`, `${esc(me().name)} (you). The proposal closed before your vote.`, '');
   } else if (s==='review'){
     bdg = badge('prog','In review');
     if (r.path==='org'){
@@ -958,7 +1016,7 @@ function myTasks(){
 }
 V.tasks = () => {
   const todo = myTasks();
-  const done = S.reqs.filter(r=>r.decidedBy===me().name).map(r=>({id:'d'+r.id, rid:r.id, title: r.status==='orgRejected' && !r.platformRefused ? 'Rejected a listing proposal' : 'Approved a listing proposal', sub:`${r.d.name} (${sym(r.d)}), from ${r.by}`, ago:fmt(r.at.decided||r.at.orgApproved)}));
+  const done = S.reqs.filter(r=>r.decidedBy===me().name || (r.by!==me().name && r.approvals.includes(me().name))).map(r=>({id:'d'+r.id, rid:r.id, title: r.status==='orgRejected' && !r.platformRefused ? 'Rejected a listing proposal' : 'Approved a listing proposal', sub:`${r.d.name} (${sym(r.d)}), from ${r.by}`, ago:fmt(r.at.decided||r.at.orgApproved)}));
   const list = S.taskTab==='todo' ? todo : done;
   if (!list.find(t=>t.id===S.task)) S.task = list[0]?.id || null;
   const t = list.find(x=>x.id===S.task);
@@ -970,9 +1028,9 @@ V.tasks = () => {
       ${reqProgress(r)}
       ${open?`<div class="card"><div class="card-h" style="padding-bottom:4px"><div class="eyebrow">Your turn</div><h2 style="margin-top:4px;font-size:18px">Check what ${esc(r.by.split(' ')[0])} proposed, then decide</h2></div>
         <div class="sum" style="grid-template-columns:140px 1fr"><span class="k">Token</span><span class="v">${esc(d.name)} (${esc(sym(d))}) on Ault Mainnet</span></div>
-        <div class="sum" style="grid-template-columns:140px 1fr"><span class="k">Investor terms</span><span class="v">${d.who==='any'?'Any KYC-verified investor':'Only investors you approve'}, steps of ${d.size} ${esc(sym(d))}</span></div>
+        <div class="sum" style="grid-template-columns:140px 1fr"><span class="k">Investor terms</span><span class="v">${esc(termsLine(d))}</span></div>
         <div class="sum" style="grid-template-columns:140px 1fr"><span class="k">Backed by</span><span class="v">${esc(custNames(d).join(', '))}${d.por?', proof of reserve attached':''}</span></div>
-        <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center"><span class="grow hint">One more approval sends it to the platform for review.</span><button class="btn" data-a="reject" data-v="${r.id}">Reject</button><button class="btn primary" data-a="approve" data-v="${r.id}">Approve proposal</button></div></div>`:''}
+        <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center"><span class="grow hint">${left(r)===1 ? 'One more approval sends it to the platform for review.' : `${left(r)} more approvals are needed before it goes to the platform.`}</span><button class="btn" data-a="reject" data-v="${r.id}">Reject</button><button class="btn primary" data-a="approve" data-v="${r.id}">Approve proposal</button></div></div>`:''}
       <div class="card"><div class="card-h" style="padding-bottom:8px"><div class="eyebrow">Details</div></div>
         ${[['Signing',`${d.vault} by ${d.executor}`],['Roles',rolePeople(d).join(', ')],['Template','Fireblocks ERC-20F'],['Token',`${d.name} (${sym(d)})`]].map(([k,v])=>`<div class="sum" style="grid-template-columns:140px 1fr"><span class="k">${k}</span><span class="v">${esc(v)}</span></div>`).join('')}
         <div style="padding:12px 24px;border-top:1px solid var(--border)"><button class="link" data-a="openReq" data-v="${r.id}" data-back="tasks">Open the full proposal →</button></div></div>
@@ -995,16 +1053,16 @@ function signBtn(label, act, danger){
   return `<button class="btn ${danger?'danger':'primary'}" data-a="${act}" ${S.signing?'disabled':''}>${S.signing?'<span class="spin"></span>Signing':label}</button>`;
 }
 const mrows = rows => rows.map(([k,v])=>`<div class="mrow"><span class="k">${k}</span><span class="v">${esc(v)}</span></div>`).join('');
-const modalWrap = (inner, label) => `<div class="scrim" data-a="closeModal"><div class="modal" role="dialog" aria-modal="true" aria-label="${esc(label)}">${inner}</div></div>`;
+const modalWrap = (inner, label, cls='') => `<div class="scrim" data-a="closeModal"><div class="modal ${cls}" role="dialog" aria-modal="true" aria-label="${esc(label)}">${inner}</div></div>`;
 const cancelBtn = (txt='Cancel') => `<button class="btn" data-a="closeModal" ${S.signing?'disabled':''}>${txt}</button>`;
 
 function modalHTML(){
   const m = S.modal; if (!m) return '';
   const d = S.d, r = m.rid ? getR(m.rid) : null;
   if (m.type==='submit'){
-    const org = S.rule==='org';
-    return modalWrap(`<div class="mh"><h3>${org?'Propose':'Submit'} ${esc(d.name)} for review?</h3><p>${org?'Your organization needs 2 of 4 approvals before the listing request is sent to the platform.':'The platform checks your settings and documents before the token can take requests.'}</p></div>
-      ${org ? mrows([['Who approves','Governance, 2 of 4. Your signature counts as 1.'],['Then','Sent to the platform for review once approved'],['Until then','You can withdraw the proposal']])
+    const org = isOrgRule();
+    return modalWrap(`<div class="mh"><h3>${org?'Propose':'Submit'} ${esc(d.name)} for review?</h3><p>${org?`Your organization needs ${ruleNeed()} of 4 approvals before the listing request is sent to the platform.`:'The platform checks your settings and documents before the token can take requests.'}</p></div>
+      ${org ? mrows([['Who approves',`Governance, ${ruleNeed()} of 4. Your signature counts as 1.`],['Then','Sent to the platform for review once approved'],['Until then','You can withdraw the proposal']])
             : mrows([['Review','Usually 1 to 2 business days'],['Before a decision','You can withdraw it'],['After approval',`${d.name} opens for requests`]])}
       ${signRow(me().name)}<div class="mfoot">${cancelBtn()}${signBtn(org?'Sign and propose':'Sign and submit','signSubmit')}</div>`, 'Submit');
   }
@@ -1013,7 +1071,7 @@ function modalHTML(){
       ${signRow(me().name)}<div class="mfoot">${cancelBtn('Keep request')}${signBtn('Sign and withdraw','signWithdraw',true)}</div>`, 'Withdraw request');
   if (m.type==='withdrawProp') return modalWrap(`<div class="mh"><h3>Withdraw this proposal?</h3><p>Governance members can no longer approve it, and nothing is sent to the platform. To list ${esc(r.d.name)} later, start a new draft.</p></div>
       <div class="mfoot">${cancelBtn('Keep proposal')}<button class="btn danger" data-a="confirmWithdrawProp">Withdraw proposal</button></div>`, 'Withdraw proposal');
-  if (m.type==='approve') return modalWrap(`<div class="mh"><h3>Approve this listing proposal?</h3><p>Yours is the 2nd of 2 approvals. The listing request goes to the platform for review.</p></div>
+  if (m.type==='approve') return modalWrap(`<div class="mh"><h3>Approve this listing proposal?</h3><p>Yours is the ${ord(r.approvals.length+1)} of ${need(r)} approvals. ${left(r)===1 ? 'The listing request goes to the platform for review.' : 'More approvals are needed before it goes to the platform.'}</p></div>
       ${signRow(me().name)}<div class="mfoot">${cancelBtn('Keep reviewing')}${signBtn('Sign and approve','signApprove')}</div>`, 'Approve proposal');
   if (m.type==='reject') return modalWrap(`<div class="mh"><h3>Reject this listing proposal?</h3><p>${esc(r.by)} sees your reason and can propose again. Nothing goes to the platform.</p></div>
       <div class="mbody"><label class="label" for="rr">Reason <span class="req">*</span></label><textarea class="input ${S.errs.rejReason?'bad':''}" id="rr" data-mf="rejReason" placeholder="e.g. Wait for the Q4 audit before listing.">${esc(S.mf.rejReason||'')}</textarea>${S.errs.rejReason?err('rejReason','Add a reason. Everyone in Governance sees it.'):'<span class="hint">Everyone in Governance sees this reason.</span>'}</div>
@@ -1026,6 +1084,21 @@ function modalHTML(){
       <div class="mfoot">${cancelBtn('Keep draft')}<button class="btn danger" data-a="discardOk">Delete draft</button></div>`, 'Delete draft');
   if (m.type==='newOverDraft') return modalWrap(`<div class="mh"><h3>Start a new token?</h3><p>You have an unfinished draft (${esc(d.name||'Untitled token')}). Starting a new token deletes that draft and its attached files from this device.</p></div>
       <div class="mfoot"><button class="btn" data-a="continueDraft">Continue the draft</button><button class="btn danger" data-a="replaceDraft">Delete draft and start new</button></div>`, 'Start new');
+  if (m.type==='rights') return modalWrap(`<div class="mh"><h3>Listing isn’t open to you</h3><p>Ault Global Commodities hasn’t given you listing. Ask an owner: Joe Miller.</p></div>
+      <div class="mfoot"><button class="btn primary" data-a="closeModal">Close</button></div>`, 'No listing rights');
+  if (m.type==='terms'){
+    const cl = S.mf.clauses;
+    return modalWrap(`<div class="mh"><h3>Terms investors accept</h3><p>Investors accept required terms before they request ${T().per1==='mint'?'a mint':'issuance'}.</p></div>
+      <div class="mbody" style="max-height:60vh;overflow:auto;gap:12px">${cl.map((c,i)=>`<div class="card" style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;flex:none">
+        <div style="display:flex;gap:10px;align-items:center"><span class="muted" aria-hidden="true">⋮⋮</span><span class="eyebrow grow">Clause ${i+1}</span>
+          <button style="display:flex;gap:6px;align-items:center;border:0;background:none;padding:0;font-size:12px" role="checkbox" aria-checked="${c.required}" data-a="clReq" data-v="${i}"><span class="chk ${c.required?'on':''}"></span>Required</button>
+          <button class="link danger" style="font-size:12px" data-a="clDel" data-v="${i}">Delete</button></div>
+        <div class="field"><label class="label" for="clt${i}">Heading</label><input class="input" id="clt${i}" data-cl="${i}:title" value="${esc(c.title)}" placeholder="Title"></div>
+        <div class="field"><label class="label" for="clb${i}">Body</label><textarea class="input" id="clb${i}" data-cl="${i}:body" placeholder="Description shown to the investor before they request issuance.">${esc(c.body)}</textarea></div></div>`).join('')}
+        <button class="link" style="align-self:flex-start" data-a="clAdd">+ Add clause</button>
+        <span class="hint">Clauses without a heading are left out when you submit.</span></div>
+      <div class="mfoot">${cancelBtn()}<button class="btn primary" data-a="clSave">Save terms</button></div>`, 'Terms investors accept', 'wide');
+  }
   if (m.type==='kyc') return modalWrap(`<div class="mh"><h3>Confirm your identity before listing a token</h3><p>Listing needs your own KYC. It takes about 3 minutes.</p></div>
       <div class="mfoot">${cancelBtn('Close')}<button class="btn primary" data-a="soon">Verify identity</button></div>`, 'Verify identity');
   return '';
@@ -1050,7 +1123,7 @@ const FIGMA = {
   'AD2x':'Details, 필수 입력 누락', 'AD2x2':'Details, 이미지 URL 불러오기 실패', 'ADS1':'Your tokens, 초안 저장 뒤', 'ADS2':'작성 중, 초안 이어 쓰기',
   'AD3':'Backing', 'AD3a':'Backing, 이 자산을 보관하는 곳 없음', 'AD3b':'Backing, 증빙 올린 뒤', 'AD3c':'Backing, 커스텀 자산 (BMAX)', 'AD3d':'Backing, 함께 고를 수 없는 보관기관 펼침',
   'AD3x':'Backing, 증빙 파일 용량·형식 오류', 'AD3y':'Backing, 보관기관 목록 불러오기 실패', 'ADD1':'작성 중, 초안 버리기 확인',
-  'AD4':'Investor terms', 'AD4c':'Investor terms, Mint/Burn (BMAX)', 'AD4d':'Investor terms, 수수료 입력', 'AD4x':'Investor terms, 수수료 소수점 초과',
+  'AD4':'Investor terms', 'AD4a':'Investor terms, 상환 규칙 따로', 'AD4b':'Investor terms, 제외 투자자 목록', 'AD4e':'Investor terms, 조항 편집 창', 'AD4e2':'Investor terms, Add clause 누른 뒤', 'AD5h':'Operations, 서명 계약 켬 (DocuSign)', 'PR2b':'제안, 내가 승인한 뒤 다른 승인자 차례', 'PR2y':'제안, 이미 끝난 제안 (승인자)', 'AD4c':'Investor terms, Mint/Burn (BMAX)', 'AD4d':'Investor terms, 수수료 입력', 'AD4x':'Investor terms, 수수료 소수점 초과',
   'AD5':'Operations, 역할 (기본값 그대로)', 'AD5-B':'Operations, 역할 (BMAX)', 'AD5a':'Operations, 역할을 바꾼 뒤 (칩)', 'AD5f':'Operations, + Add 목록 펼침',
   'AD5k':'Operations, DocuSign 미연결', 'AD5x':'Operations, Fee wallet 없음', 'AD5b':'Operations, 서명', 'AD5b-B':'Operations, 서명 (BMAX)',
   'AD5c':'Operations, 서명, 자산 보유 vault 없음', 'AD5c2':'Operations, 계약에 연결된 Fireblocks 자산 없음', 'AD5d':'Operations, 서명, Burn을 다른 vault로', 'AD5e2':'Operations, 서명, Fireblocks 응답 없음',
@@ -1066,12 +1139,14 @@ const FIGMA = {
 // Which Figma frame the current HTML state shows. Returns [code, note] — code null means no Figma frame exists.
 function figmaCode(){
   const d = S.d, m = S.modal?.type, custom = d.kind==='custom', sc = S.screen;
-  if (m==='newOverDraft') return ['ADD3']; if (m==='discard') return ['ADD1']; if (m==='deleteDraft') return ['ADD2']; if (m==='kyc') return ['AD0a2'];
+  if (m==='newOverDraft') return ['ADD3']; if (m==='discard') return ['ADD1']; if (m==='deleteDraft') return ['ADD2']; if (m==='kyc') return ['AD0a2']; if (m==='rights') return ['AD0a'];
+  if (m==='terms') return [S.mf.clauses.length > S.d.clauses.length ? 'AD4e2' : 'AD4e'];
+  if (S.resumed && STEP_OF[S.screen]!=null) return ['ADS2'];
   if (m==='platformRefused') return ['PR2z']; if (m==='approve') return ['PR2s']; if (m==='reject') return ['PR2r'];
   if (m==='withdrawReq') return ['AD7c']; if (m==='withdrawProp') return ['PR4'];
   if (m==='submit'){
     if (S.signErr) return ['AD6e2']; if (scen('passkeyOther') && !S.once.passkeyOther) return ['AD6e3']; if (S.signing) return ['AD6e'];
-    return [S.rule==='org' ? 'AD6d' : 'AD6c'];
+    return [isOrgRule() ? 'AD6d' : 'AD6c'];
   }
   if (sc==='tokens'){
     if (scen('noRights')) return ['YT1c']; if (scen('noKyc')) return ['YT2'];
@@ -1098,11 +1173,12 @@ function figmaCode(){
     if (d.showCombo) return ['AD3d']; if (custom) return ['AD3c']; if (d.por) return ['AD3b']; return ['AD3'];
   }
   if (sc==='ad4'){
-    if (!FEE_RE.test(d.issueFee) || !FEE_RE.test(d.redeemFee)) return ['AD4x']; if (feeSet(d)) return ['AD4d'];
+    if (!FEE_RE.test(d.issueFee) || !FEE_RE.test(d.redeemFee)) return ['AD4x']; if (d.splitRules) return ['AD4a'];
+    if (d.excluded.length || S.xOpen) return ['AD4b']; if (feeSet(d)) return ['AD4d'];
     return [custom ? 'AD4c' : 'AD4'];
   }
   if (sc==='ad5'){
-    if (S.errs.feeWallet) return ['AD5x']; if (scen('docusignOff')) return ['AD5k']; if (S.menu) return ['AD5f'];
+    if (S.errs.feeWallet) return ['AD5x']; if (scen('docusignOff')) return ['AD5k']; if (S.menu) return ['AD5f']; if (d.agreements!=='Off') return ['AD5h'];
     if (JSON.stringify(d.roles) !== JSON.stringify(fresh().roles)) return ['AD5a'];
     return [custom ? 'AD5-B' : 'AD5'];
   }
@@ -1120,9 +1196,11 @@ function figmaCode(){
     const r = getR(); if (!r) return [null,''];
     const mine = r.by===me().name, rc = r.d.kind==='custom';
     switch (r.status){
-      case 'org': return [mine ? 'PR1' : 'PR2'];
-      case 'review': return r.path==='org' ? (mine ? ['PR5'] : [null,'상장 요청 상세, 승인자가 보는 심사 중']) : [r.fresh ? 'AD7b' : (rc ? 'AD7-B' : 'AD7')];
-      case 'live': return r.race ? ['AD7x'] : [null,'상장 요청 상세, 상장됨'];
+      case 'org': return [mine ? 'PR1' : (r.approvals.includes(me().name) ? 'PR2b' : 'PR2')];
+      case 'review': if (r.path==='org' && !mine && !r.approvals.includes(me().name) && r.decidedBy!==me().name) return ['PR2y'];
+        return r.path==='org' ? (mine ? ['PR5'] : [null,'상장 요청 상세, 승인자가 보는 심사 중']) : [r.fresh ? 'AD7b' : (rc ? 'AD7-B' : 'AD7')];
+      case 'live': if (r.path==='org' && !mine && !r.approvals.includes(me().name) && r.decidedBy!==me().name) return ['PR2y'];
+        return r.race ? ['AD7x'] : [null,'상장 요청 상세, 상장됨'];
       case 'rejected': return [r.race ? 'AD7x2' : 'AD8x'];
       case 'withdrawn': return ['AD7w'];
       case 'orgRejected': return r.platformRefused ? [null,'제안한 사람이 보는 PR2z 결과'] : ['PR3'];
@@ -1140,14 +1218,16 @@ function figmaCode(){
 const lbl = c => `${c} ${FIGMA[c]}`;
 const SCENARIOS = [
   ['정상 화면', [['st:start','Tokens 목록 (시작)'],['st:review',lbl('AD6b')],['st:inReview',lbl('AD7b')],['st:live',lbl('AD8')],['st:rejected',lbl('AD8x')],['st:withdrawn',lbl('AD7w')]]],
-  ['조직 승인 경로', [['st:orgWaiting',lbl('PR1')],['st:orgTurn',lbl('E1')],['st:orgApproved',lbl('PR5')],['st:orgRejected',lbl('PR3')],['st:propWithdrawn',lbl('PR4w')]]],
-  ['시작 전 막힘', [['noRights',lbl('YT1c')],['noKyc',lbl('YT2')],['kybExpired',lbl('AD0b')]]],
+  ['작성 중 펼침, 편집', [['st:resume',lbl('ADS2')],['st:split',lbl('AD4a')],['st:excluded',lbl('AD4b')],['st:terms',lbl('AD4e')],['st:terms2',lbl('AD4e2')],['st:docusign',lbl('AD5h')]]],
+  ['조직 승인 경로', [['st:orgWaiting',lbl('PR1')],['st:orgTurn',lbl('E1')],['st:prMid',lbl('PR2b')],['st:orgClosed',lbl('PR2y')],['st:orgApproved',lbl('PR5')],['st:orgRejected',lbl('PR3')],['st:propWithdrawn',lbl('PR4w')]]],
+  ['시작 전 막힘', [['noRights',lbl('YT1c')],['noRightsPopup',lbl('AD0a')],['noKyc',lbl('YT2')],['kybExpired',lbl('AD0b')]]],
   ['단계에서 막힘', [['noFbTokens',lbl('AD1g')],['addrListed',lbl('AD1c2')],['noCustodian',lbl('AD3a')],['docusignOff',lbl('AD5k')],['kycTodo',lbl('AD6')],['waitingPlatform',lbl('AD6a')],['passkeyOther',lbl('AD6e3')]]],
   ['외부, 서버 실패', [['fbFail',lbl('AD1e')],['addrNoAnswer',lbl('AD1d')],['addrNetFail',lbl('AD1i')],['custFail',lbl('AD3y')],['noVault',lbl('AD5c')],['noAsset',lbl('AD5c2')],['fbNoAnswer',lbl('AD5e2')],['serverRefused',lbl('ADE1')],['passkeyFail',lbl('AD6e2')],['platformRefused',lbl('PR2z')]]],
   ['결과 경합', [['raceLive',lbl('AD7x')],['raceRejected',lbl('AD7x2')]]],
 ];
 // Targets that only make sense for one viewer or one listing rule
 const FORCED = {
+  'st:prMid':{persona:'joe', rule:'org3'}, 'st:orgClosed':{persona:'joe', rule:'org'},
   'st:orgWaiting':{persona:'juya', rule:'org'}, 'st:orgTurn':{persona:'joe', rule:'org'}, 'st:orgApproved':{persona:'juya', rule:'org'},
   'st:orgRejected':{persona:'juya', rule:'org'}, 'st:propWithdrawn':{persona:'juya', rule:'org'}, 'platformRefused':{persona:'joe', rule:'org'},
   'st:inReview':{persona:'juya'}, 'st:live':{persona:'juya'}, 'st:rejected':{persona:'juya'}, 'st:withdrawn':{persona:'juya'},
@@ -1162,8 +1242,8 @@ function fullDraft(kind){
   d.reached = 5;
   return d;
 }
-function seedReq(status, path){
-  const now = Date.now(), r = {id:++S.seq, d:fullDraft(S.pend.kind), by:'Juya Kim', path, status, approvals:[], at:{}, fresh:false};
+function seedReq(status, path, need=2){
+  const now = Date.now(), r = {id:++S.seq, d:fullDraft(S.pend.kind), by:'Juya Kim', path, need, status, approvals:[], at:{}, fresh:false};
   if (path==='org'){ r.at.proposed = now; r.approvals.push('Juya Kim'); }
   else r.at.submitted = now;
   if (status==='review' && path==='org'){ r.approvals.push('Joe Miller'); r.at.orgApproved = r.at.submitted = now; r.decidedBy = 'Joe Miller'; }
@@ -1186,6 +1266,14 @@ function applyProto(){
   const atStep = (screen) => { S.d = fullDraft(p.kind); S.d.reached = STEP_OF[screen]; S.draftSaved = true; go(screen); };
   switch (tgt){
     case 'st:start': case 'noKyc': go('tokens'); break;
+    case 'noRightsPopup': go('tokens'); S.modal = {type:'rights'}; render(); break;
+    case 'st:resume': S.d = fullDraft(p.kind); S.d.reached = 1; S.d.savedAt = new Date().setHours(14,20,0,0); S.draftSaved = true; go('ad2', {resumed:true}); break;
+    case 'st:split': atStep('ad4'); S.d.splitRules = true; render(); break;
+    case 'st:excluded': atStep('ad4'); S.d.excluded = ['minji','northgate']; render(); break;
+    case 'st:terms': case 'st:terms2': atStep('ad4'); A.editTerms(); if (tgt==='st:terms2') A.clAdd(); break;
+    case 'st:docusign': atStep('ad5'); S.d.agreements = 'Redemption'; render(); break;
+    case 'st:prMid': { const r = seedReq('org','org',3); r.approvals.push('Joe Miller'); r.apAt = {'Joe Miller':Date.now()}; go('ad7'); break; }
+    case 'st:orgClosed': { const r = seedReq('review','org'); r.approvals = ['Juya Kim','Jason Lee']; r.decidedBy = 'Jason Lee'; go('ad7'); break; }
     case 'noRights': S.tip = true; go('tokens'); S.tip = true; render(); break;
     case 'kybExpired': go('ad0'); break;
     case 'st:review': case 'kycTodo': case 'waitingPlatform': toReview(); break;
@@ -1215,7 +1303,7 @@ function applyProto(){
     case 'noVault': case 'noAsset': case 'fbNoAnswer': atStep('ad5b'); break;
     default: go('tokens');
   }
-  S.protoMin = true; render();
+  render();
 }
 
 function protoHTML(){
@@ -1225,14 +1313,16 @@ function protoHTML(){
   const [fc, fnote] = figmaCode();
   const fig = fc ? `<span class="fig" title="Figma 프레임">${esc(fc)}</span><span class="fign">${esc(FIGMA[fc])}${fnote?`<br><em>${esc(fnote)}</em>`:''}</span>`
                  : `<span class="fig none" title="Figma 프레임 없음">Figma 없음</span><span class="fign">${esc(fnote||'')}</span>`;
-  return `<button class="ph" data-a="protoMin" aria-expanded="${!S.protoMin}"><span class="grow" style="display:flex;flex-direction:column;gap:4px"><b>프로토타입 설정</b><span style="display:flex;gap:6px;align-items:flex-start">${fig}</span></span><i data-lucide="${S.protoMin?'chevron-up':'chevron-down'}" style="width:14px;flex:none"></i></button>
+  return `<div class="ph"><span class="grow" style="display:flex;flex-direction:column;gap:4px"><b>프로토타입 설정</b><span style="display:flex;gap:6px;align-items:flex-start">${fig}</span></span></div>
   <div class="pb">
     <div><div class="pl">화면 또는 상황</div><select class="select" data-proto="target" aria-label="화면 또는 상황">${SCENARIOS.map(([g,items])=>`<optgroup label="${g}">${items.map(([v,l])=>`<option value="${v}" ${p.target===v?'selected':''}>${l}</option>`).join('')}</optgroup>`).join('')}</select></div>
     <div><div class="pl">토큰 종류</div>${seg('kind',[['commodity','Commodity (AGP)'],['custom','Custom (BMAX)']])}</div>
     <div><div class="pl">보는 사람${forced?.persona?' (이 화면은 자동으로 정해짐)':''}</div>${forced?.persona ? `<div class="seg"><button class="on" disabled>${PEOPLE[forced.persona].name}</button></div>` : seg('persona',[['juya','Juya Kim (제안)'],['joe','Joe Miller (승인)']])}</div>
-    <div><div class="pl">상장 규칙${forced?.rule?' (이 화면은 자동으로 정해짐)':''}</div>${forced?.rule ? `<div class="seg"><button class="on" disabled>${forced.rule==='org'?'조직 승인 2 of 4':'바로 제출'}</button></div>` : seg('rule',[['direct','바로 제출'],['org','조직 승인 2 of 4']])}</div>
+    <div><div class="pl">상장 규칙${forced?.rule?' (이 화면은 자동으로 정해짐)':''}</div>${forced?.rule ? `<div class="seg"><button class="on" disabled>${{org:'조직 승인 2 of 4', org3:'조직 승인 3 of 4', direct:'바로 제출'}[forced.rule]}</button></div>` : seg('rule',[['direct','바로 제출'],['org','승인 2 of 4'],['org3','승인 3 of 4']])}</div>
     <div style="display:flex;gap:6px"><button class="btn" data-a="reset">처음부터</button><span class="grow"></span><button class="btn primary" data-a="applyProto" style="min-width:72px">확인</button></div>
     ${inReview.length?`<div style="border-top:1px dashed var(--border-strong);padding-top:10px"><div class="pl">플랫폼 심사 (포털 밖)</div><div style="display:flex;gap:6px"><button class="btn primary" data-a="platform" data-v="approve">승인</button><button class="btn" data-a="platform" data-v="reject">거절</button></div></div>`:''}
+    <div style="border-top:1px dashed var(--border-strong);padding-top:10px"><div class="pl">지금 상태 그대로 보는 사람만 바꾸기</div><div class="seg"><button class="${S.persona==='juya'?'on':''}" data-a="persona" data-v="juya">Juya Kim</button><button class="${S.persona==='joe'?'on':''}" data-a="persona" data-v="joe">Joe Miller</button></div></div>
+    ${S.reqs.some(r=>r.status==='org')?`<div style="border-top:1px dashed var(--border-strong);padding-top:10px"><div class="pl">조직 승인 (다른 Governance 멤버)</div><button class="btn" data-a="otherApprove">다른 멤버가 승인</button></div>`:''}
     <div class="pnote">확인을 누르면 고른 조건으로 새로 시작해서 그 화면을 엽니다. 입력 오류는 직접 입력해서 확인할 수 있고, 실패 상황은 한 번만 일어나며 다시 시도하면 넘어갑니다.</div>
   </div>`;
 }
@@ -1242,7 +1332,7 @@ function render(){
   const a = document.activeElement, fid = a && a.id, ss = a && a.selectionStart, se = a && a.selectionEnd;
   $('#app').innerHTML = (V[S.screen]||V.tokens)();
   $('#layer').innerHTML = modalHTML() + notifHTML();
-  const p = $('#proto'); p.classList.toggle('min', S.protoMin); p.innerHTML = protoHTML();
+  const p = $('#proto'); p.innerHTML = protoHTML();
   $('#unread').hidden = !S.notes.some(n=>n.to===S.persona && !n.seen);
   $('#ini').textContent = me().ini; $('#pname').textContent = me().name; $('#pmail').textContent = me().mail;
   $('#taskcount').textContent = myTasks().length;
@@ -1254,12 +1344,12 @@ function render(){
 
 /* ================= actions ================= */
 function newReq(){
-  const r = {id:++S.seq, d:clone(S.d), by:me().name, path:S.rule, status:S.rule==='org'?'org':'review', approvals:[], at:{}, fresh:true};
+  const r = {id:++S.seq, d:clone(S.d), by:me().name, path:isOrgRule()?'org':'direct', need:ruleNeed(), status:isOrgRule()?'org':'review', approvals:[], at:{}, fresh:true};
   if (r.path==='org'){ r.at.proposed = Date.now(); r.approvals.push(me().name); }
   else r.at.submitted = Date.now();
   S.reqs.forEach(x=>x.fresh=false);
   S.reqs.push(r); S.cur = r.id; S.draftSaved = false; S.d = fresh(S.d.kind);
-  if (r.path==='org') note(S.persona==='juya'?'joe':'juya','users-round',`${r.by} proposed listing ${r.d.name}`,'Your approval is needed. 1 of 2 approved','task',r.id);
+  if (r.path==='org') note(S.persona==='juya'?'joe':'juya','users-round',`${r.by} proposed listing ${r.d.name}`,`Your approval is needed. 1 of ${r.need} approved`,'task',r.id);
   return r;
 }
 function sign(then){
@@ -1272,6 +1362,7 @@ function sign(then){
 }
 function closeModal(){ S.modal=null; S.signErr=false; S.mf={}; S.errs={}; }
 function startNew(){
+  if (scen('noRightsPopup')){ S.modal={type:'rights'}; render(); return; }
   if (scen('noKyc')){ S.modal={type:'kyc'}; render(); return; }
   if (S.draftSaved){ S.modal={type:'newOverDraft'}; render(); return; }
   go('ad0');
@@ -1281,7 +1372,7 @@ function restartFrom(r){
   d.reached = 5;
   if (r.status==='rejected'){ d.por = null; d.porFlag = true; d.from = {type:'rejected', at:r.at.submitted}; }
   else d.from = {type:'orgRejected', at:r.at.decided, by:r.rejBy, reason:r.rejReason};
-  S.d = d; S.draftSaved = true; S.rule = r.path; go('ad6');
+  S.d = d; S.draftSaved = true; S.rule = r.path==='org' ? (need(r)===3 ? 'org3' : 'org') : 'direct'; go('ad6');
 }
 function startRead(){
   const d = S.d; clearTimeout(startRead.t);
@@ -1305,7 +1396,8 @@ const A = {
   tip(){ S.tip=!S.tip; render(); },
   addToken(){ startNew(); },
   start(){ S.d = fresh(); S.draftSaved = false; S.refused=false; go('ad1'); },
-  continueDraft(){ closeModal(); go(STEP_SCREEN[Math.min(S.d.reached,5)]); },
+  continueDraft(){ closeModal(); go(STEP_SCREEN[Math.min(S.d.reached,5)], {resumed:true}); },
+  resume(v){ go(v, {resumed:true}); },
   replaceDraft(){ closeModal(); S.draftSaved=false; S.d=fresh(); go('ad0'); },
   startNew(){ startNew(); },
   next(v){
@@ -1315,7 +1407,7 @@ const A = {
     go(S.fromReview ? 'ad6' : v);
   },
   back(){ go(PREV[S.screen]||'tokens'); },
-  save(){ S.draftSaved=true; go('tokens'); toast('Draft saved in this browser'); },
+  save(){ S.draftSaved=true; S.d.savedAt=Date.now(); go('tokens'); toast('Draft saved in this browser'); },
   discard(){ S.modal={type:'discard'}; render(); },
   deleteDraft(){ S.modal={type:'deleteDraft'}; render(); },
   discardOk(){ closeModal(); S.draftSaved=false; S.d=fresh(); go('tokens'); toast('Draft deleted'); },
@@ -1332,6 +1424,24 @@ const A = {
   rmDoc(v){ S.d.docs.splice(+v,1); render(); },
   who(v){ S.d.who=v; render(); },
   size(v){ S.d.size=+v; delete S.errs.size; render(); },
+  setv(v){ const i=v.indexOf(':'), k=v.slice(0,i), x=v.slice(i+1); S.d[k] = /^\d+$/.test(x) ? +x : x; delete S.errs[k]; render(); },
+  split(v){ S.d.splitRules = v==='1'; render(); },
+  exAdd(v){ S.d.excluded.push(v); S.xq=''; S.xOpen=false; render(); },
+  exRm(v){ S.d.excluded = S.d.excluded.filter(x=>x!==v); render(); },
+  editTerms(){ S.mf = {clauses: clone(S.d.clauses)}; S.modal = {type:'terms'}; render(); },
+  clReq(v){ const c=S.mf.clauses[+v]; c.required=!c.required; render(); },
+  clDel(v){ S.mf.clauses.splice(+v,1); render(); },
+  clAdd(){ S.mf.clauses.push({title:'', body:'', required:false}); render(); document.getElementById('clt'+(S.mf.clauses.length-1))?.focus(); },
+  clSave(){ S.d.clauses = S.mf.clauses; closeModal(); render(); toast('Terms saved'); },
+  otherApprove(){
+    const r = [...S.reqs].reverse().find(x=>x.status==='org'); if (!r) return;
+    const who = GOVERNANCE.find(n=>!r.approvals.includes(n) && n!=='Joe Miller' && n!==me().name) || GOVERNANCE.find(n=>!r.approvals.includes(n));
+    r.approvals.push(who); r.apAt = {...(r.apAt||{}), [who]:Date.now()};
+    const to = r.by==='Juya Kim'?'juya':'joe';
+    if (left(r)<=0){ r.status='review'; r.at.orgApproved = r.at.submitted = Date.now(); r.decidedBy = who; note(to,'check',`Governance approved ${r.d.name}`,'The listing request went to the platform','req',r.id); }
+    else note(to,'users-round',`${who} approved your listing proposal`,`${r.approvals.length} of ${need(r)} approved`,'req',r.id);
+    render(); toast(`${who} 승인 (${r.approvals.length} of ${need(r)})`);
+  },
   addRole(v,t,e){ e.stopPropagation(); S.menu = S.menu===v?null:v; render(); },
   pick(v){ const [k,id]=v.split(':'); S.d.roles[k].push(id); S.menu=null; render(); },
   rmRole(v){ const [k,id]=v.split(':'); S.d.roles[k]=S.d.roles[k].filter(x=>x!==id); render(); },
@@ -1365,6 +1475,11 @@ const A = {
   signApprove(){
     const r = getR(S.modal.rid);
     sign(()=>{
+      if (left(r) > 1){
+        r.approvals.push(me().name); r.apAt = {...(r.apAt||{}), [me().name]:Date.now()};
+        note(r.by==='Juya Kim'?'juya':'joe','users-round',`${me().name} approved your listing proposal`,`${r.approvals.length} of ${need(r)} approved`,'req',r.id);
+        closeModal(); S.cur = r.id; go('ad7'); toast('Approved. Waiting for another approver.'); return;
+      }
       r.decidedBy = me().name; r.at.decided = Date.now();
       if (scen('platformRefused')){
         r.status='orgRejected'; r.platformRefused=true; r.rejBy=me().name; r.rejReason='Reason from the platform: a contract address is 0x followed by 40 hex characters.';
@@ -1391,12 +1506,11 @@ const A = {
   bell(v,t,e){ e.stopPropagation(); S.notifOpen=!S.notifOpen; if (S.notifOpen) S.notes.filter(n=>n.to===S.persona).forEach(n=>n.seenSoon=true); else S.notes.forEach(n=>{ if(n.seenSoon) n.seen=true; }); render(); },
   openNote(v){
     const n = S.notes[+v]; n.seen = true; S.notifOpen=false;
-    if (n.go==='task'){ S.taskTab='todo'; S.task='r'+n.id; go('tasks'); }
+    if (n.go==='task'){ const r = getR(n.id); if (r && r.status==='org' && !r.approvals.includes(me().name)){ S.taskTab='todo'; S.task='r'+n.id; go('tasks'); } else { S.cur=n.id; S.backTo=null; go('ad7'); } }
     else if (n.go==='token'){ S.cur=n.id; go('ad8'); }
     else { S.cur=n.id; S.backTo=null; go('ad7'); }
   },
   /* prototype panel */
-  protoMin(){ S.protoMin=!S.protoMin; render(); },
   persona(v){ if (S.persona===v) return; S.persona=v; S.notifOpen=false; closeModal(); S.backTo=null; S.taskTab='todo'; S.task=null; go(myTasks().some(t=>t.rid) ? 'tasks' :(S.screen==='ad7'||S.screen==='ad8') ? S.screen : 'tokens'); toast(`${me().name}(으)로 보는 중`); },
   rule(v){ S.rule=v; render(); },
   pend(v){ const [k,val]=v.split(':'); S.pend[k]=val; $('#proto').innerHTML = protoHTML(); if (window.lucide) lucide.createIcons(); },
@@ -1418,26 +1532,31 @@ document.addEventListener('click', e => {
     let dirty = false;
     if (S.menu){ S.menu=null; dirty=true; }
     if (S.tip){ S.tip=false; dirty=true; }
+    if (S.xOpen && !e.target.closest('.xsearch')){ S.xOpen=false; dirty=true; }
     if (S.notifOpen && !e.target.closest('.notif')){ A.bell(null,null,{stopPropagation(){}}); return; }
     if (dirty) render();
     return;
   }
   if (t.getAttribute('aria-disabled')==='true' && t.dataset.a!=='tip') return;
+  if (S.xOpen && !t.closest('.xsearch')) S.xOpen = false;
   (A[t.dataset.a] || A.soon)(t.dataset.v, t, e);
 });
 
 document.addEventListener('input', e => {
   const el = e.target;
   if (el.dataset.mf){ S.mf[el.dataset.mf] = el.value; if (S.errs[el.dataset.mf]){ delete S.errs[el.dataset.mf]; document.getElementById('err-'+el.dataset.mf)?.remove(); el.classList.remove('bad'); } return; }
+  if (el.dataset.cl){ const [i,f]=el.dataset.cl.split(':'); S.mf.clauses[+i][f]=el.value; return; }
+  if (el.hasAttribute('data-xq')){ S.xq = el.value; S.xOpen = true; if (!e.isComposing) render(); return; }
   const b = el.dataset.bind; if (!b || el.tagName==='SELECT') return;
   const d = S.d; d[b] = el.value;
   if (S.errs[b]){ delete S.errs[b]; document.getElementById('err-'+b)?.remove(); el.classList.remove('bad'); }
   if (b==='name'){ const pv=$('#pv-name'); if (pv) pv.textContent = d.name || 'Token name'; const h=$('.rhead h1'); if (h) h.textContent = d.name || 'New token'; }
   if (b==='desc'){ const pv=$('#pv-desc'); if (pv) pv.textContent = d.desc; }
-  if (b==='size'){ const n=Number(d.size)||0; $('#size-hint').textContent = n>0?`Investors request ${n}, ${n*2}, ${n*3} ${sym()}…`:''; }
+  if (b==='size' || b==='redeemSize'){ const h=$('#hint-'+b); if (h) h.textContent = sizeHint(Number(d[b])||0, h.dataset.verb, sym()); }
   if (b==='issueFee' || b==='redeemFee'){ if (!e.isComposing) render(); }
   if (b==='addr'){ d.read = null; const v = el.value.trim(); if (ADDR_RE.test(v)) startRead(); }
 });
+document.addEventListener('focusin', e => { if (e.target.hasAttribute?.('data-xq') && !S.xOpen){ S.xOpen = true; render(); } });
 document.addEventListener('change', e => {
   const el = e.target;
   if (el.dataset.proto){ S.pend[el.dataset.proto] = el.value; $('#proto').innerHTML = protoHTML(); if (window.lucide) lucide.createIcons(); return; }
@@ -1451,7 +1570,7 @@ document.addEventListener('change', e => {
     img.src = u; return;
   }
   if (el.dataset.bind==='addr'){ const v=el.value.trim(); S.d.addr=v; if (v && !ADDR_RE.test(v)){ S.errs.addr='Must be a 0x-prefixed 40-character address'; render(); } return; }
-  if (el.dataset.bind==='size'){ render(); return; }
+  if (el.dataset.bind==='size' || el.dataset.bind==='redeemSize'){ render(); return; }
   const f = el.dataset.file; if (!f || !el.files.length) return;
   takeFiles(f, [...el.files]);
 });
