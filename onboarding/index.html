@@ -2091,7 +2091,7 @@ function render(code) {
   if (!s || s.overlay) return false;
   closeOverlay();
   current = code;
-  if (s.sb && !s.obctx) lastOb = code;
+  if (s.sb === 'open' && !s.obctx) lastOb = code;
   const bare = s.layout === 'bare';
   document.querySelector('.app').style.display = bare ? 'none' : '';
   const main = bare ? $('bare') : $('main');
