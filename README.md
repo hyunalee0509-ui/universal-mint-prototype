@@ -10,7 +10,7 @@
 - [Deposit Confirmation · DS2](https://hyunalee0509-ui.github.io/universal-mint-prototype/ds2/)
 - [Bar Serial Numbers · DS4g](https://hyunalee0509-ui.github.io/universal-mint-prototype/ds4g/)
 - [Issue and Redeem · IS0–D2, RD2–RC1x, RC0](https://hyunalee0509-ui.github.io/universal-mint-prototype/issue-flow/)
-- [Menu](https://hyunalee0509-ui.github.io/universal-mint-prototype/menu/) (main에 합친 뒤 열림)
+- [Menu](https://hyunalee0509-ui.github.io/universal-mint-prototype/menu/)
 
 로그인이나 저장소 초대 없이 웹 링크로 열 수 있습니다. 저장소와 배포된 웹사이트는 공개입니다.
 
