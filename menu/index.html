@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=1440">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Universal Mint 메뉴 쪽 리뷰 프로토타입</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +41,6 @@ body {
   font-variation-settings: "opsz" 14;
   color: var(--content-strong);
   -webkit-font-smoothing: antialiased;
-  min-width: 1440px;
 }
 a, button { color: inherit; font: inherit; background: none; border: 0; cursor: pointer; text-align: left; text-decoration: none; }
 img { display: block; }
@@ -62,8 +61,8 @@ img { display: block; }
 .hdr .who p:first-child { font-weight: 600; font-size: 14px; line-height: 1.5; }
 .hdr .who p:last-child { font-size: 12px; line-height: 1.45; color: var(--content-muted); }
 
-.body { flex: 1; display: flex; padding: 0 20px 20px; }
-.panel { flex: 1; display: flex; align-items: stretch; background: var(--bg-surface-subtle); border: 1px solid var(--border-default); border-radius: 20px; overflow: hidden; }
+.body { flex: 1; min-width: 0; display: flex; padding: 0 20px 20px; }
+.panel { flex: 1; min-width: 0; min-height: calc(100vh - 82px); display: flex; align-items: stretch; background: var(--bg-surface-subtle); border: 1px solid var(--border-default); border-radius: 20px; overflow: hidden; }
 
 .sb { width: 248px; flex-shrink: 0; border-right: 1px solid var(--border-default); display: flex; flex-direction: column; }
 .sb .groups { flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 12px 0; }
@@ -90,7 +89,7 @@ img { display: block; }
 .chev14 { width: 14px; height: 14px; flex-shrink: 0; }
 .chev16 { width: 16px; height: 16px; flex-shrink: 0; }
 
-.main { flex: 1; min-width: 1150px; min-height: 816px; display: flex; flex-direction: column; gap: 24px; padding: 32px 32px 24px; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 24px; padding: 32px 32px 24px; }
 
 /* 공통 부품 */
 .page-head { display: flex; flex-direction: column; gap: 12px; white-space: nowrap; }
@@ -123,6 +122,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 
 .btn { height: 36px; padding: 0 16px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; font-weight: 500; font-size: 12px; line-height: 1.45; white-space: nowrap; flex-shrink: 0; }
 .btn.secondary { background: var(--bg-surface); border: 1px solid var(--border-strong); color: var(--brand-default); }
+.btn.secondary.dark { color: var(--content-strong); }
 
 .bar { width: 117px; height: 4px; border-radius: 2px; background: var(--border-default); overflow: hidden; flex-shrink: 0; }
 .bar i { display: block; height: 4px; border-radius: 2px; }
@@ -140,6 +140,17 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .rv-list a:hover { background: var(--bg-surface-subtle); }
 .rv-list a b { width: 56px; flex-shrink: 0; }
 .rv-list a.todo { color: var(--content-faint); }
+
+/* 반응형: 현아님 Add Token과 같은 기준(900px 이하에서 사이드바 숨김, 한 열) */
+@media (max-width: 900px) {
+  .sb { display: none; }
+  .body { padding: 0 8px 8px; }
+  .main { padding: 20px 16px 48px; }
+  .hdr .who { display: none; }
+  .thead { display: none; }
+  .page-head { white-space: normal; }
+  .rv-tag #rv-name { display: none; }
+}
 
 </style>
 </head>
@@ -260,6 +271,66 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .c2-ws .monogram b { font-weight: 600; font-size: 11px; color: #fff; }
 .c2-div { width: 240px; height: 1px; background: var(--border-default); }
 .c2-create { padding: 10px 0 10px 12px; font-weight: 500; font-size: 13px; color: var(--brand-default); white-space: pre; }
+@media (max-width: 900px) {
+  .c1 { left: 8px !important; right: 8px; width: auto; }
+}
+</style>
+
+<template id="s-C3" data-name="승인·서명 확인 창 · Approve and sign" data-overlay="modal" data-node="2319:9279">
+<div class="scrim" data-close></div>
+<div class="pop modal">
+  <div class="m-head"><p>Approve and sign</p><p>You are signing for Ault Global Commodities.</p></div>
+  <div class="m-body">
+    <div class="m-sum">
+      <div><p>Organization</p><p>Ault Global Commodities</p></div>
+      <div><p>Action</p><p>Approve issuance ISS-0011</p></div>
+      <div><p>Amount</p><p>1,200 ASLV</p></div>
+      <div><p>Receiving wallet</p><p>0x25AB…297C</p></div>
+      <div><p>Approvals after you</p><p>2 of 2</p></div>
+    </div>
+    <p class="m-note">Your passkey confirms this approval. Minting cannot be undone.</p>
+  </div>
+  <div class="m-foot"><button class="btn secondary dark" data-close>Cancel</button><a class="btn primary" data-go="IB1e">Approve with passkey</a></div>
+</div>
+</template>
+
+<template id="s-C11" data-name="반대 · 반려 사유 창 (Vote against · Reject 공통)" data-overlay="modal" data-node="2431:25137">
+<div class="scrim" data-close></div>
+<div class="pop modal">
+  <div class="m-head"><p>Vote against this change?</p><p>Tell the other voters why. Your reason is shown with your vote and in the audit log.</p></div>
+  <div class="m-body">
+    <div class="m-sum">
+      <div><p>Change</p><p>Redemption fee 0.3% to 0.5%</p></div>
+      <div><p>Votes so far</p><p>Joe Miller approved</p></div>
+      <div><p>If you vote against</p><p>It does not pass (needs 2 of 2)</p></div>
+      <div><p>Rule</p><p>Governance, 2 of 4</p></div>
+    </div>
+    <label class="m-field"><span>Reason (required)</span><textarea placeholder="e.g. Custody cost rose less than this increase"></textarea></label>
+  </div>
+  <div class="m-foot"><button class="btn secondary dark" data-close>Cancel</button><a class="btn primary" data-go="IB1e">Vote against</a></div>
+</div>
+</template>
+
+<style>
+.scrim { position: fixed; inset: 0; z-index: 44; background: rgba(5,13,24,.4); }
+.pop.modal { position: fixed; z-index: 45; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 520px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: auto; border: 0; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.16); display: flex; flex-direction: column; }
+.m-head { display: flex; flex-direction: column; gap: 6px; padding: 24px 24px 16px; }
+.m-head p:first-child { font-weight: 600; font-size: 20px; }
+.m-head p:last-child { font-size: 14px; color: var(--content-muted); }
+.m-body { display: flex; flex-direction: column; gap: 16px; padding: 0 24px 8px; }
+.m-sum { background: #f6f7f9; border-radius: 10px; overflow: hidden; }
+.m-sum > div { height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px; white-space: nowrap; }
+.m-sum > div + div { border-top: 1px solid var(--border-default); }
+.m-sum p:first-child { font-size: 13px; color: var(--content-muted); }
+.m-sum p:last-child { font-weight: 500; font-size: 14px; overflow: hidden; text-overflow: ellipsis; }
+.m-note { font-size: 13px; color: var(--content-muted); }
+.m-field { display: flex; flex-direction: column; gap: 6px; }
+.m-field span { font-weight: 500; font-size: 13px; }
+.m-field textarea { height: 80px; padding: 10px 12px; border: 1px solid #d0d5dd; border-radius: 8px; font: inherit; font-size: 14px; color: var(--content-strong); resize: none; outline: none; }
+.m-field textarea::placeholder { color: #8c94a0; }
+.m-field textarea:focus { border-color: var(--brand-default); }
+.m-foot { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px 24px; }
+.btn.primary { background: var(--brand-default); color: var(--content-on-brand); }
 </style>
 
 <!-- Home 묶음. data-user = 헤더 계정(이름|이메일|이니셜), data-badge = 사이드바 My tasks 숫자(빈 값이면 없음) -->
@@ -706,7 +777,6 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .card.r14 { border-radius: 14px; }
 .badge.neutral { background: var(--bg-surface-muted); color: var(--content-muted); }
 .badge.info { background: var(--status-info-subtle); color: var(--status-info); }
-.btn.secondary.dark { color: var(--content-strong); }
 .h-lr-head { display: flex; align-items: center; gap: 8px; padding: 20px 24px 16px; font-size: 16px; white-space: nowrap; }
 .h-lr-head p { font-weight: 700; }
 .h-lr-head span { color: var(--content-muted); }
@@ -734,6 +804,26 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .h-closed .tx p:last-child { font-size: 13px; color: var(--content-muted); }
 .h-closed .exp { font-weight: 500; font-size: 14px; color: var(--brand-default); }
 .h-dash { width: 160px; flex-shrink: 0; font-size: 14px; }
+
+@media (max-width: 900px) {
+  .h-cols { flex-direction: column; }
+  .h-side { width: 100%; }
+  .h-work { width: 100%; }
+  .h-res, .h-dash { display: none; }
+  .h-sup { width: auto; }
+  .h-tasks { flex-wrap: wrap; white-space: normal; }
+  .h-tasks .o { display: none; }
+  .h-lr .cell:not(.end) { display: none; }
+  .h-lr .cell.end { width: auto; }
+  .h-closed { flex-direction: column; align-items: flex-start; gap: 8px; white-space: normal; }
+  .h-setup .tx { white-space: normal; }
+  .h-setup .dismiss { width: auto; }
+  .h-error { white-space: normal; padding: 56px 16px 64px; }
+}
+@media (max-width: 1200px) and (min-width: 901px) {
+  .h-cols { flex-direction: column; }
+  .h-side, .h-work { width: 100%; }
+}
 
 </style>
 
@@ -907,6 +997,7 @@ function route() {
 }
 window.addEventListener('hashchange', route);
 window.addEventListener('resize', placeOverlay);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverlay(); });
 buildList();
 route();
 
