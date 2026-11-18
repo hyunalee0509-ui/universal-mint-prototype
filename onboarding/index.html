@@ -192,7 +192,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .rv-tabs a { margin: 0; padding: 8px 12px 10px; border-radius: 0; border-bottom: 2px solid transparent; font-weight: 600; color: #6b7280; cursor: pointer; }
 .rv-tabs a:hover { background: none; color: #111827; }
 .rv-tabs a.on { color: #111827; border-bottom-color: #111827; }
-.rv-list[data-tab="flows"] #rv-screens, .rv-list[data-tab="screens"] #rv-flows { display: none; }
+.rv-list[data-view="flows"] #rv-screens, .rv-list[data-view="screens"] #rv-flows { display: none; }
 .rv-list h4 { top: 43px; }
 .rv-list h4:first-child { border-top: 1px solid #e3e6ea; margin-top: 0; }
 #rv-flows { padding: 8px 0; }
@@ -3718,7 +3718,7 @@ function buildList() {
       }).join('');
     }).join('') + '</div>';
   box.addEventListener('click', e => {
-    const t = e.target.closest('[data-tab]');
+    const t = e.target.closest('.rv-tabs [data-tab]');
     if (t) { e.preventDefault(); showTab(t.dataset.tab); return; }
     const a = e.target.closest('#rv-screens a');
     if (a && a.classList.contains('todo')) { e.preventDefault(); toast(a.querySelector('b').textContent + ': 이 프로토타입에 없는 화면'); }
@@ -3731,7 +3731,7 @@ function buildList() {
 }
 function showTab(tab) {
   const box = $('rv-list');
-  box.dataset.tab = tab;
+  box.dataset.view = tab;
   box.querySelectorAll('[data-tab]').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
   box.scrollTop = 0;
   if (tab === 'flows') { flowTab(); return; }
