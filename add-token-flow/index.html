@@ -178,6 +178,9 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 .menu button{display:flex;width:100%;gap:8px;align-items:center;border:0;background:none;border-radius:8px;padding:8px 10px;text-align:left;font-size:13px}
 .menu button:hover{background:var(--bg-subtle)}
 .menu small{display:block;color:var(--muted);font-size:12px}
+.menu .mgroup{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);padding:8px 10px 4px}
+.menu .mgroup:not(:first-child){border-top:1px solid var(--border);margin-top:4px}
+.menu .mmeta{font-size:12px;color:var(--muted);font-weight:400}
 
 .sum{display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:center;padding:14px 24px;border-top:1px solid var(--border)}
 .sum .k{color:var(--muted);font-size:13px}
@@ -372,11 +375,15 @@ const PEOPLE = {
 };
 const GOVERNANCE = ['Juya Kim','Joe Miller','Jason Lee','David Park']; // 2 of 4
 const MEMBERS = [
-  {id:'gov', name:'Governance', meta:'2 of 4', sub:'Approval group'},
+  // Approval groups from Figma AR1 (Approval rules, Groups)
+  {id:'gov', name:'Governance', meta:'2 of 4', sub:'Admins. Approves every action without its own group', kind:'group'},
+  {id:'mintgrp', name:'Mint approvers', meta:'2 of 2', sub:'Approves new supply. Juya Kim, Joe Miller', kind:'group'},
+  {id:'treasury', name:'Treasury signers', meta:'1 of 2', sub:'Approves supply leaving and wallet changes. Jason Lee, David Park', kind:'group'},
   {id:'juya', name:'Juya Kim', sub:'Member'}, {id:'joe', name:'Joe Miller', sub:'Member'},
   {id:'jason', name:'Jason Lee', sub:'Member'}, {id:'david', name:'David Park', sub:'Member'},
-  {id:'colossus', name:'Colossus', sub:'Another organization'},
+  {id:'colossus', name:'Colossus', sub:'Another organization', kind:'org'},
 ];
+const MEMBER_GROUPS = [['group','Approval groups'],[undefined,'Members'],['org','Other organizations']];
 const TOKENS = {
   agp:  {sym:'AGP', name:'Ault Platinum', vault:'Ault Treasury, Vault 1', addr:'0x8f3a…c21b', dec:6, color:'#b3bac4', kind:'commodity', asset:'Platinum', unit:'oz', desc:'Allocated platinum bars in segregated storage. 1 token = 1 oz.'},
   apd:  {sym:'APD', name:'Ault Palladium', vault:'Ault Operations, Vault 2', addr:'0x41c0…9e07', dec:6, color:'#c9b48f', kind:'commodity', asset:'Palladium', unit:'oz', desc:'Allocated palladium bars in segregated storage. 1 token = 1 oz.'},
@@ -823,16 +830,24 @@ V.ad4 = () => {
 };
 const sizeHint = (v, verb, s) => v>0 ? `Investors ${verb} ${v.toLocaleString('en-US')}, ${(v*2).toLocaleString('en-US')}, ${(v*3).toLocaleString('en-US')} ${s}…` : '';
 
+function roleMenu(k){
+  const left = MEMBERS.filter(m=>!S.d.roles[k].includes(m.id));
+  const body = MEMBER_GROUPS.map(([kind,title])=>{
+    const items = left.filter(m=>m.kind===kind);
+    return items.length ? `<div class="mgroup">${title}</div>` + items.map(m=>`<button role="menuitem" data-a="pick" data-v="${k}:${m.id}"><span class="grow">${esc(m.name)}${m.meta?` <span class="mmeta">${m.meta}</span>`:''}<small>${esc(m.sub)}</small></span></button>`).join('') : '';
+  }).join('');
+  return `<div class="menu" role="menu" style="top:32px;left:0;width:300px;max-height:340px;overflow:auto">${body||'<div class="hint" style="padding:8px">Everyone is already added.</div>'}</div>`;
+}
 V.ad5 = () => {
   const d = S.d, t = T();
   const fee = feeSet(d);
   return wrap(4, `
-  <div class="card"><div class="card-h"><h2>Request roles</h2><div class="hint" style="margin-top:12px">${t.roleSub}</div></div>
+  <div class="card" style="overflow:visible"><div class="card-h"><h2>Request roles</h2><div class="hint" style="margin-top:12px">${t.roleSub}</div></div>
    <div class="card-b">${ROLES.map(([k,n,req])=>`
     <div class="rolerow"><div><div class="label">${n}${req?' <span class="req">*</span>':''}</div><div class="hint">${t.roles[k]}</div></div>
      <div class="chips" style="position:relative">${d.roles[k].map(id=>{const m=MEMBERS.find(x=>x.id===id);return `<span class="chip">${esc(m.name)}${m.meta?` <small>${m.meta}</small>`:''}<button aria-label="Remove ${esc(m.name)}" data-a="rmRole" data-v="${k}:${id}">×</button></span>`}).join('')}
       <button class="addchip" data-a="addRole" data-v="${k}" aria-expanded="${S.menu===k}">+ Add</button>
-      ${S.menu===k?`<div class="menu" style="top:32px;left:0">${MEMBERS.filter(m=>!d.roles[k].includes(m.id)).map(m=>`<button data-a="pick" data-v="${k}:${m.id}"><span class="grow">${esc(m.name)}<small>${esc(m.sub)}${m.meta?', '+m.meta:''}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">Everyone is already added.</div>'}</div>`:''}
+      ${S.menu===k?roleMenu(k):''}
       ${S.errs[k] && !d.roles[k].length ? `<span class="err" style="width:100%">${S.errs[k]}</span>` : ''}</div></div>`).join('')}
    </div></div>
   <div class="card"><div class="card-h" style="padding-bottom:12px"><div class="eyebrow">Wallets and agreements</div></div>
