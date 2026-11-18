@@ -292,7 +292,10 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 .proto .pnote{font-size:11px;color:var(--muted);line-height:1.45}
 .proto .fig{flex:none;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:700;color:#fff;background:var(--brand);border-radius:6px;padding:1px 7px}
 .proto .fig.none{background:var(--muted)}
-.proto .fign{font-size:11px;color:var(--strong);line-height:1.45}
+.proto .fign{font-size:11px;color:var(--strong);line-height:1.45;text-decoration:none}
+.proto a.fig{text-decoration:none}
+.proto a.fig:hover{background:#00356b}
+.proto a.fign:hover{text-decoration:underline}
 .proto .fign em{font-style:normal;color:var(--muted)}
 
 @media (min-width:1280px){
@@ -1136,6 +1139,9 @@ const FIGMA = {
   'AD7':'상장 요청 상세', 'AD7-B':'상장 요청 상세, 심사 중 (BMAX)', 'AD7c':'상장 요청 철회 확인', 'AD7w':'상장 요청 상세, 철회됨', 'AD7x':'철회 실패, 이미 결정됨', 'AD7x2':'철회 실패, 이미 거절됨',
   'AD8':'상장 완료, 토큰 상세', 'AD8-B':'상장 완료, 토큰 상세 (BMAX)', 'AD8x':'거절, 이전 값으로 새 초안', 'AD8x2':'거절 뒤, 이전 값으로 새 초안', 'E2':'알림, 상장 승인됨', 'E3':'알림, 상장 거절됨',
 };
+// Figma node ids for each frame code, read from the Add Token section
+const FIGMA_NODES = {"AD0": "3179:106864", "AD1a": "3179:107444", "AD1b": "3179:107728", "AD2": "3179:109107", "AD2b": "3179:110464", "AD3": "3179:110636", "AD4": "3179:111765", "AD5": "3179:113343", "AD5b": "3179:114775", "AD6b": "3179:115848", "AD6c": "3179:116559", "AD7b": "3179:119379", "AD7 진입": "3179:119685", "AD7": "3179:120691", "AD8": "3179:121609", "E2": "3179:121738", "AD1c": "3179:107892", "AD2-B": "3179:109274", "AD3b": "3179:110967", "AD4a": "3179:112031", "AD5-B": "3179:113720", "AD6d": "3179:116935", "E1": "3179:119171", "PR5": "3179:119532", "AD7-B": "3179:120838", "AD8-B": "3179:122001", "AD3c": "3179:111124", "PR1": "3179:117723", "AD5d": "3179:115498", "AD2a": "3179:109441", "AD5a": "3179:113921", "AD4b": "3179:112242", "PR2": "3179:117876", "AD2r": "3179:109609", "AD5h": "3179:114372", "AD4c": "3179:112445", "PR2b": "3179:118030", "ADS1": "3179:110120", "AD4d": "3179:112636", "ADS2": "3179:110293", "AD4e": "3179:112829", "AD4e2": "3179:113078", "AD1f": "3179:108550", "AD3d": "3179:111280", "AD5f": "3179:114151", "AD6e": "3179:117132", "PR2r": "3179:118184", "ADD2": "3179:119854", "AD7c": "3179:120985", "ADD1": "3179:111601", "PR2s": "3179:118357", "AD1h": "3179:108763", "PR4": "3179:118859", "AD0a": "3179:106994", "AD1c2": "3179:108064", "AD3a": "3179:110806", "AD-C": "3179:113675", "AD6": "3179:116022", "AD6a": "3179:116756", "ADD3": "3179:120031", "AD0a2": "3179:107154", "YT1c": "3179:120208", "AD1g": "3179:108622", "AD6e3": "3179:117526", "AD0b": "3179:107315", "YT2": "3179:120365", "AD5k": "3185:94677", "PR2y": "3190:83283", "AD2x": "3179:109784", "AD3x": "3179:111444", "AD5x": "3179:114574", "AD2x2": "3179:109952", "AD1x": "3185:94084", "AD4x": "3185:94365", "AD1d": "3179:108236", "AD5c": "3179:115175", "ADE1": "3179:116382", "AD6e2": "3179:117329", "AD7x": "3179:121302", "AD7x2": "3179:121453", "AD5c2": "3179:115337", "AD1e": "3179:108408", "AD1i": "3179:108935", "AD5e2": "3179:115688", "AD3y": "3190:82979", "PR2z": "3190:83563", "PR3": "3179:118530", "YTw": "3179:120522", "AD7w": "3179:121151", "AD8x": "3179:122130", "PR3e": "3179:118681", "AD8x2": "3179:122281", "PR4w": "3179:119020", "E3": "3179:122459", "AD1a-B": "3179:107586", "AD5b-B": "3179:115015", "AD6b-B": "3179:116208"};
+const figmaUrl = c => FIGMA_NODES[c] ? `https://www.figma.com/design/AnRP8zHPMcjHE7sJJORa0d/Universal-Mint-UXUI?node-id=${FIGMA_NODES[c].replace(':','-')}` : null;
 // Which Figma frame the current HTML state shows. Returns [code, note] — code null means no Figma frame exists.
 function figmaCode(){
   const d = S.d, m = S.modal?.type, custom = d.kind==='custom', sc = S.screen;
@@ -1311,7 +1317,10 @@ function protoHTML(){
   const p = S.pend, seg = (key, opts) => `<div class="seg">${opts.map(([v,l])=>`<button class="${p[key]===v?'on':''}" data-a="pend" data-v="${key}:${v}">${l}</button>`).join('')}</div>`;
   const forced = FORCED[p.target];
   const [fc, fnote] = figmaCode();
-  const fig = fc ? `<span class="fig" title="Figma 프레임">${esc(fc)}</span><span class="fign">${esc(FIGMA[fc])}${fnote?`<br><em>${esc(fnote)}</em>`:''}</span>`
+  const url = fc && figmaUrl(fc);
+  const fig = fc ? (url
+      ? `<a class="fig" href="${url}" target="_blank" rel="noopener" title="Figma에서 ${esc(fc)} 열기">${esc(fc)} <i data-lucide="external-link" style="width:11px;height:11px;vertical-align:-1px"></i></a><a class="fign" href="${url}" target="_blank" rel="noopener">${esc(FIGMA[fc])}${fnote?`<br><em>${esc(fnote)}</em>`:''}</a>`
+      : `<span class="fig">${esc(fc)}</span><span class="fign">${esc(FIGMA[fc])}</span>`)
                  : `<span class="fig none" title="Figma 프레임 없음">Figma 없음</span><span class="fign">${esc(fnote||'')}</span>`;
   return `<div class="ph"><span class="grow" style="display:flex;flex-direction:column;gap:4px"><b>프로토타입 설정</b><span style="display:flex;gap:6px;align-items:flex-start">${fig}</span></span></div>
   <div class="pb">
