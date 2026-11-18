@@ -3347,17 +3347,18 @@ function openOverlay(code) {
   const layer = $('ov');
   layer.appendChild(s.tpl.content.cloneNode(true));
   fillIcons(layer);
-  if (code === 'C1' && ST.s < 9) {
+  if (code === 'C1' && scOf(ST.s) !== 'ops') {
     const pop = layer.querySelector('.c1'), ns = notes();
-    pop.querySelectorAll('.c1-item').forEach(x => x.remove());
-    pop.insertAdjacentHTML('beforeend', ns.length ? ns.map(([ic, t, d, g, age]) => `<a class="c1-item" data-go="${g}"><div class="mk"><img src="${ICONS[ic]}" width="16" height="16" alt=""></div>`
-      + `<div class="tx"><p>${t}</p><p>${d}</p></div><p class="age">${age}</p></a>`).join('') : '<p class="c1-none">No notifications yet</p>');
+    if (scOf(ST.s) === 'first') pop.querySelectorAll('.c1-item').forEach(x => x.remove());
+    pop.querySelector('.c1-head').insertAdjacentHTML('afterend', ns.length ? ns.map(([ic, t, d, g, age]) => `<a class="c1-item" data-go="${g}"><div class="mk"><img src="${ICONS[ic]}" width="16" height="16" alt=""></div>`
+      + `<div class="tx"><p>${t}</p><p>${d}</p></div><p class="age">${age}</p></a>`).join('') : scOf(ST.s) === 'first' ? '<p class="c1-none">No notifications yet</p>' : '');
     ST.seen = ns.length; saveST();
   }
   openOv = code;
   placeOverlay();
   if (s.overlay === 'bell') document.querySelector('.hdr .unread').style.visibility = 'hidden';
   setTag(code);
+  hints();
 }
 function placeOverlay() {
   const pop = $('ov').querySelector('.pop');
@@ -3467,18 +3468,34 @@ const STATES = [
   { t: '첫 발행 진행 중', start: 'FR-H7', goal: 'My tasks에서 입고를 확인하세요', hint: ['IB1', '@deposit'], ff: ['발행 끝 (승인, 서명)', 'FR-H8'],
     note: ['nt-token', '1,200 ASLV minted', 'ISS-0001 for Daehan Securities', 'FR-TK3', '1m'] },
   { t: '첫 발행 끝', start: 'FR-H8', goal: '첫 발행이 끝났습니다. 메뉴에서 바뀐 숫자를 보세요', ff: ['운영 중으로', 'H1'] },
-  { t: '운영 중', start: 'H1', goal: '지금 화면 그대로: 발행 승인, 상환, 정지 제안과 투표' },
+  { sc: 'ops', t: '운영 중', start: 'H1', goal: '지금 화면 그대로: 발행 승인, 상환, 정지 제안과 투표' },
+  { sc: 'join', t: '초대받음, 로그인 전', start: 'SG1', goal: '초대받은 이메일로 로그인하세요' },
+  { sc: 'join', t: '초대 고르기', start: 'OB0a', goal: 'Ault Global Commodities 초대에 합류하세요', hint: ['OBJ1'] },
+  { sc: 'join', t: '합류, 신원 확인 전', start: 'OBJ1', goal: '승인하려면 먼저 신원 확인을 마치세요', hint: ['Verify identity'],
+    flow: ['Verify identity', null, '신원 확인'], ff: ['신원 확인 끝', 'H1'],
+    note: ['nt-check', 'Identity verified', 'You can now approve, vote and sign', 'IB1', '1m'] },
+  { sc: 'join', t: '첫 할 일', start: 'H1', goal: 'My tasks에서 첫 발행 승인을 처리하세요', opsOk: true,
+    next: { H1: 'IB1', IB1: 'IB1c', IB1c: 'C3', C3: 'IB1e' }, ff: ['운영 중으로', 'H1', 9] },
 ];
-const NEXT = { SG1: 'SG2', SG2: 'OB0b', OB0b: 'OB0c-0', 'OB0c-0': 'OB0c', OB0c: 'OB0d-0', 'OB0d-0': 'OB0d', OB0d: 'OB0e-0', 'OB0e-0': 'OB0e-r', 'OB0e-r': 'OB0e', OB0e: 'OB1',
+STATES.forEach(x => { x.sc = x.sc || 'first'; });
+const SC = {
+  first: { t: '처음 시작', from: 0, goals: [['조직 만들기 신청', 2], ['심사 통과', 3], ['신원 인증', 4], ['첫 상장 요청', 5], ['상장 승인', 6], ['첫 발행 요청', 7], ['입고 확인', 'dep'], ['발행 끝', 8]] },
+  join: { t: '초대 합류', from: 10, goals: [['초대 합류', 12], ['신원 확인', 13], ['첫 발행 승인', 'task']] },
+  ops: { t: '운영 중', from: 9, goals: [] },
+};
+const scOf = n => STATES[n].sc;
+const stCode = n => (scOf(n) === 'join' ? 'J' + (n - SC.join.from) : 'S' + n);
+const NEXT = { SG1: 'OB0b', SG2: 'OB0b', OB0b: 'OB0c-0', 'OB0c-0': 'OB0c', OB0c: 'OB0d-0', 'OB0d-0': 'OB0d', OB0d: 'OB0e-0', 'OB0e-0': 'OB0e-r', 'OB0e-r': 'OB0e', OB0e: 'OB1',
   OB2: 'OBK1', OB2o: 'OBK1', OBK1: 'OB3a', OB3: 'AD1' };
-const GOALS = [['조직 만들기 신청', 2], ['심사 통과', 3], ['신원 인증', 4], ['첫 상장 요청', 5], ['상장 승인', 6], ['첫 발행 요청', 7], ['입고 확인', 'dep'], ['발행 끝', 8]];
-const goalDone = g => g[1] === 'dep' ? ST.s >= 8 || ST.dep : ST.s >= g[1];
+const goalDone = g => g[1] === 'dep' ? ST.s === 8 || ST.dep : g[1] === 'task' ? !!ST.task : ST.s >= g[1];
 const FR_TK = { TK4: 'TK4-e', TK6: 'TK6-E', TK9: 'TK0-0', 'TK9-s': 'TK7', 'TK9-r': 'IS1' };
 const LINKS = {
   5: Object.assign({ H1: 'FR-H5', IB1: 'OB-IB', RQ1: 'OB-RQ', RQ2: 'RQ2-e', TK1: 'FR-TK5', TK3: 'TK0-r' }, FR_TK),
   6: Object.assign({ H1: 'FR-H6', IB1: 'OB-IB', RQ1: 'OB-RQ', RQ2: 'RQ2-e', TK1: 'FR-TK6', TK3: 'TK0-0' }, FR_TK),
   7: Object.assign({ H1: 'FR-H7', IB1: 'FR-IB7', RQ1: 'FR-RQ7', RQ2: 'RQ2-e', TK1: 'FR-TK7', TK3: 'TK0-0' }, FR_TK),
   8: { H1: 'FR-H8', IB1: 'IB4', RQ1: 'FR-RQ8', RQ2: 'FR-RQ8', TK1: 'FR-TK8', TK3: 'FR-TK3', 'TK9-s': 'TK7' },
+  10: { OB0b: 'OB0a' },
+  12: { H1: 'OBJ1' },
 };
 [5, 6, 7, 8].forEach(n => Object.assign(LINKS[n], { PP1: 'PP1-e', DC1: 'OB-DC', TK14: 'TK14-e' }));
 const SCREEN_ST = {};
@@ -3486,24 +3503,28 @@ const SCREEN_ST = {};
  [2, ['OB1', 'OB1v', 'OB1w', 'OB1x', 'OB1r']], [3, ['OB2', 'OB2o', 'OBK1']], [4, ['OB3a', 'OB3']],
  [5, ['OB4', 'FR-H5', 'FR-TK5', 'TK0-r']], [6, ['FR-H6', 'FR-TK6']], [7, ['FR-H7', 'FR-TK7', 'FR-RQ7', 'FR-IB7']], [8, ['FR-H8', 'FR-TK8', 'FR-RQ8', 'FR-TK3']]]
   .forEach(([n, cs]) => cs.forEach(c => { SCREEN_ST[c] = n; }));
+const JOIN_ST = { SG1: 10, SG2: 10, OB0a: 11, OBJ1: 12 };
 const SHARED = new Set(['PP1-e', 'IB4', 'RQ2-e', 'TK4-e', 'TK6-E', 'TK14-e', 'TK7', 'TK0-0']);
 const FR_AT = PLAN.findIndex(([g]) => g.startsWith('처음 시작'));
 const OPS = new Set(PLAN.slice(FR_AT + 1).flatMap(([, cs]) => cs).filter(c => !(c in SCREEN_ST) && !SHARED.has(c)));
-const notes = () => ST.s >= 9 ? [] : STATES.slice(0, ST.s).filter(x => x.note).map(x => x.note).reverse();
+const notes = () => STATES.filter((x, i) => i < ST.s && x.note && x.sc === scOf(ST.s)).map(x => x.note).reverse();
 let viaGo = false;
 let flowHit = -1;
 
 function setState(n, byFF) {
-  if (n < 9 && ST.s >= 9) ST.fold = false;
-  if (n >= 9 && ST.s < 9) ST.fold = true;
-  ST.s = n; ST.dep = n >= 8; flowHit = -1;
+  const wasOps = scOf(ST.s) === 'ops', isOps = scOf(n) === 'ops';
+  if (!isOps && wasOps) ST.fold = false;
+  if (isOps && !wasOps) ST.fold = true;
+  if (n !== ST.s) { ST.dep = n === 8; ST.task = false; }
+  ST.s = n; flowHit = -1;
   if (!byFF) ST.seen = notes().length;
   saveST();
 }
 function syncState(code) {
   let n = SCREEN_ST[code];
+  if (JOIN_ST[code] !== undefined && (scOf(ST.s) === 'join' || n === undefined)) n = JOIN_ST[code];
   if (code === 'TK0-0') n = ST.s === 6 || ST.s === 7 ? ST.s : 6;
-  if (n === undefined && OPS.has(code)) n = 9;
+  if (n === undefined && OPS.has(code)) n = STATES[ST.s].opsOk ? ST.s : 9;
   if (n !== undefined && n !== ST.s) setState(n);
 }
 function remap(code) {
@@ -3514,48 +3535,50 @@ function remap(code) {
 }
 function dot() {
   const u = document.querySelector('.hdr .unread');
-  u.style.visibility = ST.s >= 9 || notes().length > ST.seen ? '' : 'hidden';
+  u.style.visibility = scOf(ST.s) !== 'first' || notes().length > ST.seen ? '' : 'hidden';
 }
 
 const gd = document.createElement('div');
 gd.className = 'gd'; gd.id = 'gd';
 document.body.appendChild(gd);
 function guide() {
-  const st = STATES[ST.s], first = ST.s < 9;
+  const st = STATES[ST.s], sc = SC[st.sc], ops = st.sc === 'ops';
   gd.classList.toggle('fold', ST.fold);
   if (ST.fold) {
-    gd.innerHTML = `<button class="gd-pill" data-gd="open" title="시나리오 가이드 펼치기"><b>${first ? '처음 시작' : '시나리오'}</b><span>${first ? 'S' + ST.s + ' ' + st.t : '운영 중'}</span><i>▴</i></button>`;
+    gd.innerHTML = `<button class="gd-pill" data-gd="open" title="시나리오 가이드 펼치기"><b>${ops ? '시나리오' : sc.t}</b><span>${ops ? '운영 중' : stCode(ST.s) + ' ' + st.t}</span><i>▴</i></button>`;
     hints(); return;
   }
-  const now = GOALS.findIndex(g => !goalDone(g));
-  const goals = first ? '<ol class="gd-goals">' + GOALS.map((g, i) => `<li class="${goalDone(g) ? 'ok' : i === now ? 'now' : ''}">${g[0]}</li>`).join('') + '</ol>' : '';
-  const goal = ST.s === 7 && ST.dep ? '입고를 확인했습니다. Mint approvers 승인과 Fireblocks 서명은 ⏩로 넘기세요' : st.goal;
+  const now = sc.goals.findIndex(g => !goalDone(g));
+  const goals = sc.goals.length ? '<ol class="gd-goals">' + sc.goals.map((g, i) => `<li class="${goalDone(g) ? 'ok' : i === now ? 'now' : ''}">${g[0]}</li>`).join('') + '</ol>' : '';
+  const goal = ST.s === 7 && ST.dep ? '입고를 확인했습니다. Mint approvers 승인과 Fireblocks 서명은 ⏩로 넘기세요'
+    : st.opsOk && ST.task ? '첫 할 일을 처리했습니다. 둘러보거나 ⏩로 마치세요' : st.goal;
   const ff = st.ff ? `<button class="gd-ff" data-gd="ff">⏩ ${st.ff[0]}</button>` : '';
-  const fl = st.flow ? `<a class="gd-flow" href="${FLOW_URL[st.flow[1]]}" target="_blank" rel="noopener">${st.flow[2]} Flow 화면 ↗</a>` : '';
-  gd.innerHTML = `<div class="gd-hd"><div class="gd-seg"><a data-gd="first" class="${first ? 'on' : ''}">처음 시작</a><a data-gd="ops" class="${first ? '' : 'on'}">운영 중</a></div>`
+  const fl = st.flow && st.flow[1] ? `<a class="gd-flow" href="${FLOW_URL[st.flow[1]]}" target="_blank" rel="noopener">${st.flow[2]} Flow 화면 ↗</a>` : '';
+  gd.innerHTML = '<div class="gd-hd"><div class="gd-seg">' + Object.entries(SC).map(([k, v]) => `<a data-gd="sc" data-k="${k}" class="${k === st.sc ? 'on' : ''}">${v.t}</a>`).join('') + '</div>'
     + '<button class="gd-x" data-gd="fold" title="접기">▾</button></div>'
-    + `<p class="gd-st">S${ST.s} · ${st.t}</p><p class="gd-goal">${goal}</p>`
+    + `<p class="gd-st">${stCode(ST.s)} · ${st.t}</p><p class="gd-goal">${goal}</p>`
     + (ff || fl ? `<div class="gd-ac">${ff}${fl}</div>` : '') + goals
     + `<div class="gd-ft"><label><input type="checkbox" data-gd="hint"${ST.hint ? ' checked' : ''}>다음 버튼 강조</label>`
-    + (first ? '<a data-gd="first">처음부터 다시</a>' : '') + '</div>';
+    + (ops ? '' : `<a data-gd="sc" data-k="${st.sc}">처음부터 다시</a>`) + '</div>';
   hints();
 }
 function hints() {
   document.querySelectorAll('.gd-hl').forEach(e => e.classList.remove('gd-hl'));
-  if (!ST.hint || ST.s >= 9) return;
+  if (!ST.hint || scOf(ST.s) === 'ops') return;
   const st = STATES[ST.s];
-  let codes = NEXT[current] ? [NEXT[current]] : st.hint || [];
+  const nx = (st.next && st.next[openOv || current]) || NEXT[current];
+  let codes = nx ? [nx] : st.hint || [];
   if (current === 'FR-IB7') codes = ['@deposit'];
-  if ((ST.s === 7 && ST.dep) || flowHit === ST.s) codes = [];
+  if ((ST.s === 7 && ST.dep) || (st.opsOk && ST.task) || flowHit === ST.s) codes = [];
   let found = false;
-  codes.forEach(c => document.querySelectorAll(`#main [data-go="${c}"], #bare [data-go="${c}"], #sb .inset:not(.lk):not([hidden]) [data-go="${c}"]`)
-    .forEach(e => { if (e.getClientRects().length) { e.classList.add('gd-hl'); found = true; } }));
+  codes.forEach(c => document.querySelectorAll(`#ov [data-go="${c}"], #main [data-go="${c}"], #bare [data-go="${c}"], #sb .inset:not(.lk):not([hidden]) [data-go="${c}"]`)
+    .forEach(e => { if (e.getClientRects().length && !(nx && found)) { e.classList.add('gd-hl'); found = true; } }));
   if (!found) { const b = gd.querySelector('.gd-ff') || gd.querySelector('.gd-pill'); if (b && st.ff) b.classList.add('gd-hl'); }
 }
 function fastForward() {
   const st = STATES[ST.s];
   if (!st.ff) return;
-  setState(ST.s + 1, true);
+  setState(st.ff[2] !== undefined ? st.ff[2] : ST.s + 1, true);
   go(st.ff[1]);
   guide(); dot();
 }
@@ -3566,8 +3589,7 @@ gd.addEventListener('click', e => {
   e.preventDefault();
   const k = a.dataset.gd;
   if (k === 'ff') fastForward();
-  else if (k === 'first') startScenario(0);
-  else if (k === 'ops') startScenario(9);
+  else if (k === 'sc') startScenario(SC[a.dataset.k].from);
   else if (k === 'fold' || k === 'open') { ST.fold = k === 'fold'; saveST(); guide(); }
 });
 gd.addEventListener('change', e => { if (e.target.dataset.gd === 'hint') { ST.hint = e.target.checked; saveST(); hints(); } });
@@ -3596,6 +3618,7 @@ function render(code) {
   }
   setTag(code);
   window.scrollTo(0, 0);
+  if (STATES[ST.s].opsOk && code === 'IB1e' && !ST.task) { ST.task = true; saveST(); }
   guide(); dot();
   return true;
 }
@@ -3610,14 +3633,14 @@ function go(code, el) {
     return;
   }
   const fl = STATES[ST.s].flow;
-  if (ST.s < 9 && fl && fl[0] === code) {
+  if (fl && fl[0] === code) {
     flowHit = ST.s; hints();
-    toast(fl[2] + ' 흐름은 따로 있는 Flow 화면에서 봅니다(가이드 카드 링크). 다 봤으면 ⏩로 넘기세요');
+    toast(fl[1] ? fl[2] + ' 흐름은 따로 있는 Flow 화면에서 봅니다(가이드 카드 링크). 다 봤으면 ⏩로 넘기세요' : fl[2] + ' 화면은 Figma에 없음. 가이드 카드의 ⏩로 넘기세요');
     return;
   }
   if (ST.s <= 4 && SCREEN_ST[code] !== undefined && SCREEN_ST[code] <= 4 && !(ST.s === 2 && SCREEN_ST[code] === 3)) {
     if (SCREEN_ST[code] !== ST.s) setState(SCREEN_ST[code]);
-  }
+  } else if ((ST.s === 10 || ST.s === 11) && JOIN_ST[code] !== undefined && JOIN_ST[code] !== ST.s) setState(JOIN_ST[code]);
   if (code === '@collapse' || code === '@expand') {
     ibC = code === '@collapse';
     code = (ibC ? IB_FOLD[current] : IB_OPEN[current]) || current;
@@ -3676,7 +3699,7 @@ document.addEventListener('click', e => {
 function buildList() {
   const box = $('rv-list');
   box.innerHTML = '<h4><span>시나리오 · 상태</span><em><a class="rv-reset" data-st="0">처음부터 다시</a></em></h4>'
-    + STATES.map((x, i) => `<a data-st="${i}"><b>S${i}</b><span>${x.t} <i>${i < 9 ? '처음 시작' : '지금 화면 그대로'}</i></span></a>`).join('')
+    + STATES.map((x, i) => `<a data-st="${i}"><b>${stCode(i)}</b><span>${x.t} <i>${x.sc === 'ops' ? '지금 화면 그대로' : SC[x.sc].t}</i></span></a>`).join('')
     + PLAN.map(([g, codes]) => {
     const made = codes.filter(c => screens[c]).length;
     return '<h4><span>' + g + '</span><em>' + (made === codes.length ? made + '장' : made + ' / ' + codes.length + '장') + '</em></h4>' + codes.map(c => {
