@@ -131,7 +131,8 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 
 .rv-tag { position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; border-radius: 999px; background: #1f2937; color: #fff; font-size: 13px; box-shadow: 0 4px 16px rgba(0,0,0,.2); max-width: calc(100vw - 32px); }
 .rv-tag b { font-weight: 700; }
-.rv-tag #rv-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px; color: rgba(255,255,255,.8); }
+.rv-tag #rv-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px; color: rgba(255,255,255,.85); }
+.rv-tag #rv-name i { font-style: normal; color: rgba(255,255,255,.5); }
 .rv-tag #rv-figma { font-size: 11px; color: rgba(255,255,255,.5); padding: 4px 0; flex-shrink: 0; }
 .rv-tag #rv-figma:hover { color: #fff; text-decoration: underline; }
 .rv-tag .rv-sep { width: 1px; height: 16px; background: rgba(255,255,255,.2); flex-shrink: 0; }
@@ -139,12 +140,18 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .rv-tag #rv-open:hover { background: #e5e7eb; }
 .rv-toast { position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); z-index: 60; padding: 10px 16px; border-radius: 10px; background: #1f2937; color: #fff; font-size: 13px; max-width: 560px; display: none; }
 .rv-toast.show { display: block; }
-.rv-list { position: fixed; right: 16px; bottom: 68px; z-index: 55; width: 320px; max-height: 70vh; overflow: auto; background: #fff; border: 1px solid var(--border-default); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.16); padding: 8px; display: none; font-size: 13px; }
+.rv-list { position: fixed; right: 16px; bottom: 68px; z-index: 55; width: 360px; max-width: calc(100vw - 32px); max-height: 70vh; overflow: auto; background: #fff; border: 1px solid var(--border-default); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.16); padding: 0 0 8px; display: none; font-size: 13px; }
 .rv-list.show { display: block; }
-.rv-list h4 { font-size: 11px; text-transform: uppercase; color: var(--content-muted); padding: 8px 8px 4px; }
-.rv-list a { display: flex; gap: 8px; padding: 6px 8px; border-radius: 6px; }
+
+.rv-list h4 { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 0 4px; padding: 9px 16px; background: #f1f3f5; border-top: 1px solid #e3e6ea; border-bottom: 1px solid #e3e6ea; font-size: 13px; font-weight: 700; color: #111827; }
+.rv-list h4:first-child { margin-top: 0; border-top: 0; }
+.rv-list h4 em { font-style: normal; font-size: 12px; font-weight: 500; color: #6b7280; }
+.rv-list a { display: flex; align-items: baseline; gap: 10px; margin: 0 8px; padding: 6px 8px; border-radius: 6px; }
 .rv-list a:hover { background: var(--bg-surface-subtle); }
+.rv-list a.cur { background: #e8eef7; }
 .rv-list a b { width: 56px; flex-shrink: 0; }
+.rv-list a span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-list a span i { font-style: normal; color: #8b95a1; }
 .rv-list a.todo { color: var(--content-faint); }
 
 
@@ -2328,10 +2335,22 @@ function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
 }
 
+const GROUP_OF = {};
+PLAN.forEach(([g, cs]) => cs.forEach(c => { GROUP_OF[c] = g; }));
+const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+function nameHTML(code) {
+  let n = screens[code].name;
+  const i = n.indexOf(' · ');
+  if (i > 0 && (GROUP_OF[code] || '').toLowerCase().includes(n.slice(0, i).toLowerCase())) n = n.slice(i + 3);
+  const m = n.match(/^(.*?)\s*\((.*)\)$/);
+  return m ? esc(m[1]) + ' <i>' + esc(m[2]) + '</i>' : esc(n);
+}
+
 function setTag(code) {
   const s = screens[code];
   $('rv-code').textContent = code;
-  $('rv-name').textContent = s.name;
+  $('rv-name').innerHTML = nameHTML(code);
+  $('rv-name').title = s.name;
   const f = $('rv-figma');
   if (s.node) { f.href = FIGMA + s.node.replace(':', '-'); f.textContent = 'Figma ↗'; f.classList.remove('off'); }
   else { f.removeAttribute('href'); f.textContent = 'Figma에 없음'; f.classList.add('off'); }
@@ -2526,12 +2545,13 @@ document.addEventListener('click', e => {
 
 function buildList() {
   const box = $('rv-list');
-  box.innerHTML = PLAN.map(([g, codes]) =>
-    '<h4>' + g + '</h4>' + codes.map(c => {
+  box.innerHTML = PLAN.map(([g, codes]) => {
+    const made = codes.filter(c => screens[c]).length;
+    return '<h4><span>' + g + '</span><em>' + (made === codes.length ? made + '장' : made + ' / ' + codes.length + '장') + '</em></h4>' + codes.map(c => {
       const s = screens[c];
-      return '<a href="#' + c + '" class="' + (s ? '' : 'todo') + '"><b>' + c + '</b><span>' + (s ? s.name : '준비 중') + '</span></a>';
-    }).join('')
-  ).join('');
+      return '<a href="#' + c + '" class="' + (s ? '' : 'todo') + '"' + (s ? ' title="' + esc(s.name).replace(/"/g, '&quot;') + '"' : '') + '><b>' + c + '</b><span>' + (s ? nameHTML(c) : '준비 중') + '</span></a>';
+    }).join('');
+  }).join('');
   box.addEventListener('click', e => {
     const a = e.target.closest('a');
     if (a && a.classList.contains('todo')) { e.preventDefault(); toast(a.querySelector('b').textContent + ': 이 프로토타입에 없는 화면'); }
@@ -2542,7 +2562,14 @@ function buildList() {
     }
   });
 }
-$('rv-open').addEventListener('click', () => $('rv-list').classList.toggle('show'));
+$('rv-open').addEventListener('click', () => {
+  const box = $('rv-list');
+  box.classList.toggle('show');
+  const code = openOv || current;
+  box.querySelectorAll('a').forEach(a => a.classList.toggle('cur', a.getAttribute('href') === '#' + code));
+  const cur = box.querySelector('a.cur');
+  if (box.classList.contains('show') && cur) cur.scrollIntoView({ block: 'center' });
+});
 
 function route() {
   const code = location.hash.slice(1);
