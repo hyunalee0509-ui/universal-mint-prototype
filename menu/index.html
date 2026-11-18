@@ -677,7 +677,7 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 </template>
 
 <template id="s-OB1v" data-name="신청서 보기 (읽기 전용)" data-node="2870:70598" data-nav="onboarding" data-badge="" data-sb="lock-all" data-obhome="OB1" data-homeicon="nav-home-empty">
-<a class="o2-back" data-go="back">← Onboarding</a>
+<a class="o2-back" data-go="OB1">← Onboarding</a>
 <div class="o2-ph"><h1>Your application</h1><span class="badge info">In review</span></div>
 <div class="o2-cols">
   <div class="l">
@@ -1072,7 +1072,7 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 </template>
 
 <template id="s-OS1v" data-name="Standard · 신청서 보기 (읽기 전용)" data-node="2874:70901" data-nav="onboarding" data-badge="" data-ws="standard" data-sb="lock-all" data-homeicon="nav-home-grid" data-obhome="OS1">
-<a class="o2-back" data-go="back">← Onboarding</a>
+<a class="o2-back" data-go="OS1">← Onboarding</a>
 <div class="o2-ph"><h1>Your application</h1><span class="badge info">In review</span></div>
 <div class="o2-cols">
   <div class="l">
@@ -1340,12 +1340,13 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 .rv-tag #rv-figma.off:hover { color: rgba(255,255,255,.5); text-decoration: none; }
 @media (max-width: 900px) {
   .o4-sum .cards, .o4-quick { flex-direction: column; }
+  .o4-th { overflow-x: auto; }   
   .o4-setup { flex-wrap: wrap; }
   .o4-setup .tx { white-space: normal; }
 }
 </style>
 
-<template id="s-C1" data-name="헤더 알림 패널 (종 누름)" data-overlay="bell" data-node="2320:9882">
+<template id="s-C1" data-name="헤더 알림 패널 (종 누름)" data-overlay="bell" data-base="H1" data-node="2320:9882">
 <div class="pop c1">
   <div class="c1-head"><p>Notifications</p><div style="flex:1"></div><button class="c1-x" data-close aria-label="Close"><img data-i="close" width="20" height="20" alt=""></button></div>
   <a class="c1-item" data-go="PF5"><div class="mk"><img data-i="act-people" width="16" height="16" alt=""></div><div class="tx"><p>Kevin Cho invited you to Mint approvers</p><p>Harbor Trust · Open My invitations</p></div><p class="age">5m</p></a>
@@ -1357,7 +1358,7 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 </div>
 </template>
 
-<template id="s-C2" data-name="워크스페이스 전환 열림" data-overlay="switcher" data-node="2320:10123">
+<template id="s-C2" data-name="워크스페이스 전환 열림" data-overlay="switcher" data-base="H1" data-node="2320:10123">
 <div class="pop c2">
   <p class="c2-label">Workspaces</p>
   <a class="c2-ws on" data-close>
@@ -1411,7 +1412,7 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 }
 </style>
 
-<template id="s-C3" data-name="승인·서명 확인 창 · Approve and sign" data-overlay="modal" data-node="2319:9279">
+<template id="s-C3" data-name="승인·서명 확인 창 · Approve and sign" data-overlay="modal" data-base="H1" data-node="2319:9279">
 <div class="scrim" data-close></div>
 <div class="pop modal">
   <div class="m-head"><p>Approve and sign</p><p>You are signing for Ault Global Commodities.</p></div>
@@ -1429,7 +1430,7 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 </div>
 </template>
 
-<template id="s-C11" data-name="반대 · 반려 사유 창 (Vote against · Reject 공통)" data-overlay="modal" data-node="2431:25137">
+<template id="s-C11" data-name="반대 · 반려 사유 창 (Vote against · Reject 공통)" data-overlay="modal" data-base="H1" data-node="2431:25137">
 <div class="scrim" data-close></div>
 <div class="pop modal">
   <div class="m-head"><p>Vote against this change?</p><p>Tell the other voters why. Your reason is shown with your vote and in the audit log.</p></div>
@@ -2001,6 +2002,7 @@ function setTag(code) {
 function closeOverlay() {
   if (!openOv) return;
   $('ov').innerHTML = '';
+  if (location.hash === '#' + openOv && current) history.replaceState(null, '', '#' + current);
   document.querySelector('.hdr .unread').style.visibility = '';
   openOv = null;
   if (current) setTag(current);
@@ -2165,7 +2167,7 @@ function buildList() {
     else if (a) {
       const c = a.querySelector('b').textContent;
       box.classList.remove('show');
-      if (screens[c] && screens[c].overlay) { e.preventDefault(); if (screens[c].base && current !== screens[c].base) render(screens[c].base); openOverlay(c); }
+      if (screens[c] && screens[c].overlay && location.hash === '#' + c) { e.preventDefault(); route(); }
     }
   });
 }
