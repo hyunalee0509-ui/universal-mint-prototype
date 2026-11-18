@@ -10,8 +10,8 @@
 - [Deposit Confirmation · DS2](https://hyunalee0509-ui.github.io/universal-mint-prototype/ds2/)
 - [Bar Serial Numbers · DS4g](https://hyunalee0509-ui.github.io/universal-mint-prototype/ds4g/)
 - [Issue and Redeem · IS0–D2, RD2–RC1x, RC0](https://hyunalee0509-ui.github.io/universal-mint-prototype/issue-flow/)
-- [Menu](https://hyunalee0509-ui.github.io/universal-mint-prototype/menu/)
-- [Onboarding](https://hyunalee0509-ui.github.io/universal-mint-prototype/onboarding/)
+- [Menu](https://hyunalee0509-ui.github.io/universal-mint-prototype/menu/) (Home에서 시작)
+- [Onboarding](https://hyunalee0509-ui.github.io/universal-mint-prototype/onboarding/) (로그인에서 시작, Menu와 같은 파일)
 
 로그인이나 저장소 초대 없이 웹 링크로 열 수 있습니다. 저장소와 배포된 웹사이트는 공개입니다.
 
@@ -21,8 +21,8 @@
 - `issuer-onboarding.html`: 제공된 `Issuer Onboarding MVP.html` 원본
 - `ds2/`: DS2 입고 확인 프로토타입 원본과 `deposit.png`
 - `ds4g/`: DS4g 바 시리얼 번호 검토 프로토타입 원본과 `serialization.png`
-- `onboarding/`: 온보딩 프로토타입(로그인, 조직 만들기 등). 화면 이름은 Figma 화면 코드, 원본은 따로 관리하고 완성 파일만 이 폴더에 넣음
-- `menu/`: 메뉴 쪽 프로토타입(Home, 알림, 워크스페이스 전환 등). 화면 이름은 Figma 화면 코드, 원본은 따로 관리하고 완성 파일만 이 폴더에 넣음
+- `onboarding/`: 온보딩과 메뉴를 합친 프로토타입. `menu/`와 같은 파일이고 로그인 화면에서 시작
+- `menu/`: 온보딩과 메뉴를 합친 프로토타입(로그인, 조직 만들기, 심사, Home, 알림 등). Home에서 시작. 화면 이름은 Figma 화면 코드, 원본은 따로 관리하고 완성 파일만 넣음
 - `issue-flow/`: Issue 흐름(IS0–D2)과 Redeem 흐름(RD2–RD4, RC0–RC1x) 프로토타입과 문서 이미지 `transfer.png`, `deposit.png`, `serialization.png`
 - `add-token-flow/`: Figma Add Token 구현. 정상 경로(AD0–AD8), 철회·거절 결과, 조직 승인 경로(PR1–PR5, E1), BMAX, 입력 오류와 막힘·실패 상황. 오른쪽 아래 "프로토타입 설정"에서 화면이나 상황, 토큰 종류, 보는 사람, 상장 규칙을 고르고 확인을 누르면 그 화면이 바로 열립니다. 상자 맨 위에는 지금 보이는 화면의 Figma 프레임 번호(예: AD6b)가 표시됩니다. 아이콘과 로고는 `assets/`
 
