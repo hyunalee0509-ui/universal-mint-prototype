@@ -6,19 +6,17 @@
 
 - [프로토타입 선택 화면](https://hyunalee0509-ui.github.io/universal-mint-prototype/)
 - [Issuer Onboarding](https://hyunalee0509-ui.github.io/universal-mint-prototype/issuer-onboarding.html)
-- [Add Token](https://hyunalee0509-ui.github.io/universal-mint-prototype/add-token.html)
+- [Add Token · Happy path (AD0–AD8)](https://hyunalee0509-ui.github.io/universal-mint-prototype/add-token-flow/)
 - [Deposit Confirmation · DS2](https://hyunalee0509-ui.github.io/universal-mint-prototype/ds2/)
 - [Bar Serial Numbers · DS4g](https://hyunalee0509-ui.github.io/universal-mint-prototype/ds4g/)
 - [Issue and Redeem · IS0–D2, RD2–RC1x, RC0](https://hyunalee0509-ui.github.io/universal-mint-prototype/issue-flow/)
-- [Add Token · Happy path (AD0–AD8)](https://hyunalee0509-ui.github.io/universal-mint-prototype/add-token-flow/)
 
 로그인이나 저장소 초대 없이 웹 링크로 열 수 있습니다. 저장소와 배포된 웹사이트는 공개입니다.
 
 ## 파일
 
-- `index.html`: 여섯 프로토타입으로 이동하는 시작 화면
+- `index.html`: 다섯 프로토타입으로 이동하는 시작 화면
 - `issuer-onboarding.html`: 제공된 `Issuer Onboarding MVP.html` 원본
-- `add-token.html`: 제공된 `Add token.html` 원본
 - `ds2/`: DS2 입고 확인 프로토타입 원본과 `deposit.png`
 - `ds4g/`: DS4g 바 시리얼 번호 검토 프로토타입 원본과 `serialization.png`
 - `issue-flow/`: Issue 흐름(IS0–D2)과 Redeem 흐름(RD2–RD4, RC0–RC1x) 프로토타입과 문서 이미지 `transfer.png`, `deposit.png`, `serialization.png`
