@@ -223,6 +223,21 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
   .rv-step span { display: none; }
   .rv-tag { gap: 8px; padding-left: 12px; }
 }
+.rv-list .rv-fl { display: flex; align-items: flex-start; gap: 8px; cursor: default; }
+.rv-list .rv-fl .tt { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin: 0; padding: 0; cursor: pointer; }
+.rv-list .rv-fl .tt:hover { background: none; }
+.rv-list .rv-fl .tt b { width: auto; }
+.rv-list .rv-fl .tt span { white-space: normal; font-size: 12px; color: #6b7280; }
+.rv-list .rv-fl .go { flex-shrink: 0; margin: 0; padding: 2px 10px; border: 1px solid #d1d5db; border-radius: 999px; font-size: 12px; font-weight: 600; color: #111827; cursor: pointer; }
+.rv-list .rv-fl em { flex-shrink: 0; }
+.rv-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 8px 8px 54px; }
+.rv-chips:empty { display: none; }
+.rv-list .rv-chips a { display: inline-block; margin: 0; padding: 1px 6px; border: 1px solid #d9dde3; border-radius: 5px; font-size: 11px; font-weight: 600; color: #374151; cursor: pointer; }
+.rv-list .rv-chips a.nf { border-style: dashed; border-color: #b9c0ca; }
+.rv-list .rv-chips a:hover { background: #f1f3f5; }
+.rv-list .rv-chips a.cur { background: #111827; border-color: #111827; color: #fff; }
+.rv-lg { display: flex; align-items: center; gap: 6px; margin: 8px 18px 4px; font-size: 11px; color: #9ca3af; }
+.rv-lg i { width: 14px; height: 10px; border: 1px dashed #b9c0ca; border-radius: 3px; }
 
 </style>
 </head>
@@ -3366,6 +3381,7 @@ function openOverlay(code) {
   placeOverlay();
   if (s.overlay === 'bell') document.querySelector('.hdr .unread').style.visibility = 'hidden';
   setTag(code);
+  ST.at = code; saveST();
   hints();
 }
 function placeOverlay() {
@@ -3462,27 +3478,27 @@ try { const v = JSON.parse(localStorage.getItem(ST_KEY)); if (v && typeof v.s ==
 function saveST() { try { localStorage.setItem(ST_KEY, JSON.stringify(ST)); } catch (e) {} }
 const FLOW_URL = { 'add-token-flow': '../add-token-flow/', 'issue-flow': '../issue-flow/' };
 const STATES = [
-  { t: '계정만', start: 'SG1', goal: '로그인하고 새 조직 만들기를 시작하세요' },
-  { t: '조직 만들기', start: 'OB0b', goal: '회사 정보와 발행 계획을 넣고 신청하세요' },
-  { t: '심사 중', start: 'OB1', goal: 'Universal Mint가 신청을 심사합니다', ff: ['심사 승인', 'OB2'],
+  { t: '계정만', start: 'SG1', scr: ['SG1', 'SG2'], goal: '로그인하고 새 조직 만들기를 시작하세요' },
+  { t: '조직 만들기', start: 'OB0b', scr: ['OB0b', 'OB0c-0', 'OB0c', 'OB0c-S', 'OB0c-P', 'OB0d-0', 'OB0d', 'OB0d-w', 'OB0d-j', 'OB0e-0', 'OB0e', 'OB0e-r'], goal: '회사 정보와 발행 계획을 넣고 신청하세요' },
+  { t: '심사 중', start: 'OB1', scr: ['OB1', 'OB1v', 'OB1w', 'OB1x', 'OB1r', 'C2-OB'], goal: 'Universal Mint가 신청을 심사합니다', ff: ['심사 승인', 'OB2'],
     note: ['nt-check', 'Application approved', 'Ault Global Commodities · Start verification', 'OB2', '5d'] },
-  { t: '인증', start: 'OB2', goal: '신원 인증을 마치고 첫 토큰 준비로 넘어가세요' },
-  { t: '첫 토큰 준비', start: 'OB3a', goal: 'Add token으로 첫 상장 요청을 보내세요', hint: ['AD1'], flow: ['AD1', 'add-token-flow', 'Add token'],
+  { t: '인증', start: 'OB2', scr: ['OB2', 'OB2o', 'OBK1', 'OB-HK', 'OB-IB', 'OB-RQ', 'OB-PP', 'OB-TK', 'OB-DC'], goal: '신원 인증을 마치고 첫 토큰 준비로 넘어가세요' },
+  { t: '첫 토큰 준비', start: 'OB3a', scr: ['OB3a', 'OB3', 'OB-H'], goal: 'Add token으로 첫 상장 요청을 보내세요', hint: ['AD1'], flow: ['AD1', 'add-token-flow', 'Add token'],
     ff: ['상장 요청을 보냄', 'OB4'], note: ['nt-token', 'Listing request sent', 'Ault Silver, ASLV · In platform review', 'TK0-r', '4d'] },
-  { t: '상장 심사 중', start: 'FR-H5', goal: 'Universal Mint가 상장을 심사합니다. 그동안 메뉴를 둘러보세요', ff: ['상장 승인', 'FR-H6'],
+  { t: '상장 심사 중', start: 'FR-H5', scr: ['OB4', 'FR-H5', 'OB-IB', 'OB-RQ', 'PP1-e', 'FR-TK5', 'TK0-r', 'OB-DC'], goal: 'Universal Mint가 상장을 심사합니다. 그동안 메뉴를 둘러보세요', ff: ['상장 승인', 'FR-H6'],
     note: ['nt-check', 'Ault Silver listed', 'ASLV · Ready for the first issue', 'TK0-0', '1d'] },
-  { t: '상장됨, 첫 발행 전', start: 'FR-H6', goal: 'Issue로 첫 발행 요청을 보내세요', hint: ['IS1'], flow: ['IS1', 'issue-flow', 'Issue'],
+  { t: '상장됨, 첫 발행 전', start: 'FR-H6', scr: ['FR-H6', 'FR-TK6', 'TK0-0', 'TK4-e', 'TK6-E', 'TK14-e', 'TK7'], goal: 'Issue로 첫 발행 요청을 보내세요', hint: ['IS1'], flow: ['IS1', 'issue-flow', 'Issue'],
     ff: ['발행 요청을 보냄', 'FR-H7'], note: ['act-people', 'Daehan Securities requested 1,200 ASLV', 'ISS-0001 · Confirm the deposit', 'FR-IB7', '40m'] },
-  { t: '첫 발행 진행 중', start: 'FR-H7', goal: 'My tasks에서 입고를 확인하세요', hint: ['IB1', '@deposit'], ff: ['발행 끝 (승인, 서명)', 'FR-H8'],
+  { t: '첫 발행 진행 중', start: 'FR-H7', scr: ['FR-H7', 'FR-IB7', 'FR-RQ7', 'RQ2-e', 'FR-TK7', 'TK0-0'], goal: 'My tasks에서 입고를 확인하세요', hint: ['IB1', '@deposit'], ff: ['발행 끝 (승인, 서명)', 'FR-H8'],
     note: ['nt-token', '1,200 ASLV minted', 'ISS-0001 for Daehan Securities', 'FR-TK3', '1m'] },
-  { t: '첫 발행 끝', start: 'FR-H8', goal: '첫 발행이 끝났습니다. 메뉴에서 바뀐 숫자를 보세요', ff: ['운영 중으로', 'H1'] },
+  { t: '첫 발행 끝', start: 'FR-H8', scr: ['FR-H8', 'IB4', 'FR-RQ8', 'FR-TK8', 'FR-TK3'], goal: '첫 발행이 끝났습니다. 메뉴에서 바뀐 숫자를 보세요', ff: ['운영 중으로', 'H1'] },
   { sc: 'ops', t: '운영 중', start: 'H1', goal: '지금 화면 그대로: 발행 승인, 상환, 정지 제안과 투표' },
-  { sc: 'join', t: '초대받음, 로그인 전', start: 'SG1', goal: '초대받은 이메일로 로그인하세요' },
-  { sc: 'join', t: '초대 고르기', start: 'OB0a', goal: 'Ault Global Commodities 초대에 합류하세요', hint: ['OBJ1'] },
-  { sc: 'join', t: '합류, 신원 확인 전', start: 'OBJ1', goal: '승인하려면 먼저 신원 확인을 마치세요', hint: ['Verify identity'],
+  { sc: 'join', t: '초대받음, 로그인 전', start: 'SG1', scr: ['SG1', 'SG2'], goal: '초대받은 이메일로 로그인하세요' },
+  { sc: 'join', t: '초대 고르기', start: 'OB0a', scr: ['OB0a'], goal: 'Ault Global Commodities 초대에 합류하세요', hint: ['OBJ1'] },
+  { sc: 'join', t: '합류, 신원 확인 전', start: 'OBJ1', scr: ['OBJ1'], goal: '승인하려면 먼저 신원 확인을 마치세요', hint: ['Verify identity'],
     flow: ['Verify identity', null, '신원 확인'], ff: ['신원 확인 끝', 'H1'],
     note: ['nt-check', 'Identity verified', 'You can now approve, vote and sign', 'IB1', '1m'] },
-  { sc: 'join', t: '첫 할 일', start: 'H1', goal: 'My tasks에서 첫 발행 승인을 처리하세요', opsOk: true,
+  { sc: 'join', t: '첫 할 일', start: 'H1', scr: ['H1', 'IB1', 'IB1c', 'C3', 'IB1e'], goal: 'My tasks에서 첫 발행 승인을 처리하세요', opsOk: true,
     next: { H1: 'IB1', IB1: 'IB1c', IB1c: 'C3', C3: 'IB1e' }, ff: ['운영 중으로', 'H1', 9] },
 ];
 STATES.forEach(x => { x.sc = x.sc || 'first'; });
@@ -3512,10 +3528,8 @@ const SCREEN_ST = {};
  [5, ['OB4', 'FR-H5', 'FR-TK5', 'TK0-r']], [6, ['FR-H6', 'FR-TK6']], [7, ['FR-H7', 'FR-TK7', 'FR-RQ7', 'FR-IB7']], [8, ['FR-H8', 'FR-TK8', 'FR-RQ8', 'FR-TK3']]]
   .forEach(([n, cs]) => cs.forEach(c => { SCREEN_ST[c] = n; }));
 const JOIN_ST = { SG1: 10, SG2: 10, OB0a: 11, OBJ1: 12 };
-const SHARED = new Set(['PP1-e', 'IB4', 'RQ2-e', 'TK4-e', 'TK6-E', 'TK14-e', 'TK7', 'TK0-0']);
-const FR_AT = PLAN.findIndex(([g]) => g.startsWith('처음 시작'));
-const OPS = new Set(PLAN.slice(FR_AT + 1).flatMap(([, cs]) => cs).filter(c => !(c in SCREEN_ST) && !SHARED.has(c)));
 const notes = () => STATES.filter((x, i) => i < ST.s && x.note && x.sc === scOf(ST.s)).map(x => x.note).reverse();
+let firstRoute = true;
 let viaGo = false;
 let flowHit = -1;
 
@@ -3524,13 +3538,6 @@ function setState(n, byFF) {
   ST.s = n; flowHit = -1;
   if (!byFF) ST.seen = notes().length;
   saveST();
-}
-function syncState(code) {
-  let n = SCREEN_ST[code];
-  if (JOIN_ST[code] !== undefined && (scOf(ST.s) === 'join' || n === undefined)) n = JOIN_ST[code];
-  if (code === 'TK0-0') n = ST.s === 6 || ST.s === 7 ? ST.s : 6;
-  if (n === undefined && OPS.has(code)) n = STATES[ST.s].opsOk ? ST.s : 9;
-  if (n !== undefined && n !== ST.s) setState(n);
 }
 function remap(code) {
   const cur = current && screens[current];
@@ -3557,19 +3564,24 @@ function guide() {
   if ($('rv-list').classList.contains('show')) flowTab();
   hints();
 }
+const openFlows = new Set();
 function flowTab() {
-  const cur = scOf(ST.s);
+  const cur = scOf(ST.s), here = openOv || current;
   $('rv-flows').innerHTML = Object.entries(SC).filter(([k]) => k !== 'ops').map(([k, v]) => {
     const steps = STATES.map((x, i) => [x, i]).filter(([x]) => x.sc === k);
-    const head = `<a class="rv-fl${k === cur ? ' on' : ''}" data-gd="sc" data-k="${k}"><b>${v.t}</b><span>${FLOW_INFO[k]}</span><em>${k === cur ? '진행 중' : steps.length + '단계 · 시작'}</em></a>`;
-    if (k !== cur) return head;
+    const on = k === cur, open = on || openFlows.has(k);
+    const head = `<div class="rv-fl${on ? ' on' : ''}"><a class="tt" data-gd="tog" data-k="${k}"><b>${open ? '▾' : '▸'} ${v.t}</b><span>${FLOW_INFO[k]}</span></a>`
+      + (on ? '<em>진행 중</em>' : `<a class="go" data-gd="sc" data-k="${k}">시작</a>`) + '</div>';
+    if (!open) return head;
     return head + '<ol class="rv-steps">' + steps.map(([x, i]) => {
-      const cls = i < ST.s ? 'ok' : i === ST.s ? 'now' : '';
-      const fl = i === ST.s && x.flow && x.flow[1] ? `<a class="rv-fx" href="${FLOW_URL[x.flow[1]]}" target="_blank" rel="noopener">${x.flow[2]} Flow 화면 ↗</a>` : '';
-      return `<li class="${cls}"><a data-gd="st" data-n="${i}"><b>${stCode(i)}</b><span>${x.t}</span></a>${i === ST.s ? `<p>${stepGoal()}</p>${fl}` : ''}</li>`;
+      const cls = !on ? '' : i < ST.s ? 'ok' : i === ST.s ? 'now' : '';
+      const fl = on && i === ST.s && x.flow && x.flow[1] ? `<a class="rv-fx" href="${FLOW_URL[x.flow[1]]}" target="_blank" rel="noopener">${x.flow[2]} Flow 화면 ↗</a>` : '';
+      const chips = (x.scr || []).filter(c => screens[c]).map(c => `<a class="${screens[c].node ? '' : 'nf'}${on && i === ST.s && c === here ? ' cur' : ''}" data-gd="scr" data-n="${i}" data-c="${c}" title="${esc(screens[c].name).replace(/"/g, '&quot;')}${screens[c].node ? '' : ' · Figma에 없음'}">${c}</a>`).join('');
+      return `<li class="${cls}"><a data-gd="st" data-n="${i}"><b>${stCode(i)}</b><span>${x.t}</span></a>${on && i === ST.s ? `<p>${stepGoal()}</p>${fl}` : ''}<div class="rv-chips">${chips}</div></li>`;
     }).join('') + '</ol>'
-      + `<div class="rv-fo"><label><input type="checkbox" data-gd="hint"${ST.hint ? ' checked' : ''}>다음 버튼 강조</label><a data-gd="sc" data-k="${k}">처음부터 다시</a><a data-gd="sc" data-k="ops">흐름 끝내기</a></div>`;
-  }).join('') + '<div class="rv-fl off"><b>투자자(Standard, Personal)</b><span>신청부터 첫 요청까지</span><em>준비 중</em></div>';
+      + (on ? `<div class="rv-fo"><label><input type="checkbox" data-gd="hint"${ST.hint ? ' checked' : ''}>다음 버튼 강조</label><a data-gd="sc" data-k="${k}">처음부터 다시</a><a data-gd="end">흐름 끝내기</a></div>` : '');
+  }).join('') + '<div class="rv-fl off"><span class="tt"><b>▸ 투자자(Standard, Personal)</b><span>신청부터 첫 요청까지</span></span><em>준비 중</em></div>'
+    + '<p class="rv-lg"><i></i>점선 = Figma에 없는 화면</p>';
 }
 function hints() {
   document.querySelectorAll('.gd-hl').forEach(e => e.classList.remove('gd-hl'));
@@ -3592,6 +3604,11 @@ function fastForward() {
   guide(); dot();
 }
 function startScenario(n) { setState(n); go(STATES[n].start); guide(); dot(); }
+function openScreen(c) {
+  $('rv-list').classList.remove('show');
+  viaGo = true;
+  if (location.hash === '#' + c) { viaGo = false; route(); } else location.hash = c;
+}
 function onGd(e) {
   const a = e.target.closest('[data-gd]');
   if (!a || a.tagName === 'INPUT') return;
@@ -3600,6 +3617,9 @@ function onGd(e) {
   if (k === 'ff') fastForward();
   else if (k === 'sc') { $('rv-list').classList.remove('show'); startScenario(SC[a.dataset.k].from); }
   else if (k === 'st') { $('rv-list').classList.remove('show'); startScenario(+a.dataset.n); }
+  else if (k === 'scr') { if (+a.dataset.n !== ST.s) setState(+a.dataset.n); openScreen(a.dataset.c); }
+  else if (k === 'tog') { if (scOf(ST.s) !== a.dataset.k) { openFlows.has(a.dataset.k) ? openFlows.delete(a.dataset.k) : openFlows.add(a.dataset.k); flowTab(); } }
+  else if (k === 'end') { $('rv-list').classList.remove('show'); setState(9); render(current); }
 }
 $('rv-tag').addEventListener('click', onGd);
 $('rv-list').addEventListener('click', onGd);
@@ -3629,7 +3649,9 @@ function render(code) {
   }
   setTag(code);
   window.scrollTo(0, 0);
-  if (STATES[ST.s].opsOk && code === 'IB1e' && !ST.task) { ST.task = true; saveST(); }
+  ST.at = code;
+  if (STATES[ST.s].opsOk && code === 'IB1e' && !ST.task) ST.task = true;
+  saveST();
   guide(); dot();
   return true;
 }
@@ -3723,9 +3745,9 @@ function buildList() {
     const a = e.target.closest('#rv-screens a');
     if (a && a.classList.contains('todo')) { e.preventDefault(); toast(a.querySelector('b').textContent + ': 이 프로토타입에 없는 화면'); }
     else if (a) {
-      const c = a.querySelector('b').textContent;
-      box.classList.remove('show');
-      if (screens[c] && screens[c].overlay && location.hash === '#' + c) { e.preventDefault(); route(); }
+      e.preventDefault();
+      if (scOf(ST.s) !== 'ops') setState(9);
+      openScreen(a.querySelector('b').textContent);
     }
   });
 }
@@ -3734,7 +3756,7 @@ function showTab(tab) {
   box.dataset.view = tab;
   box.querySelectorAll('[data-tab]').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
   box.scrollTop = 0;
-  if (tab === 'flows') { flowTab(); return; }
+  if (tab === 'flows') { flowTab(); const now = box.querySelector('.rv-steps li.now'); if (now) now.scrollIntoView({ block: 'center' }); return; }
   const code = openOv || current;
   box.querySelectorAll('#rv-screens a').forEach(a => a.classList.toggle('cur', a.getAttribute('href') === '#' + code));
   const cur = box.querySelector('#rv-screens a.cur');
@@ -3748,7 +3770,7 @@ $('rv-open').addEventListener('click', () => {
 
 function route() {
   const code = location.hash.slice(1);
-  if (!viaGo) syncState(screens[code] ? code : BUNDLE.start);
+  if (firstRoute) { firstRoute = false; if (scOf(ST.s) !== 'ops' && code !== ST.at) setState(9); }
   viaGo = false;
   if (screens[code] && screens[code].overlay) { if (!current || screens[code].base) render(screens[code].base || BUNDLE.start); openOverlay(code); return; }
   render(code) || render(BUNDLE.start);
