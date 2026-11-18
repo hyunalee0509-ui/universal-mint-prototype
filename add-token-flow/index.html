@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Add Token</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 <style>
 :root{
@@ -16,7 +16,7 @@
   --danger:#b31942; --discard:#b3123a;
   --pos-bg:#e3f4ea; --pos:#1d7a48; --prog-bg:#e6effb; --prog:#2a5db0;
   --neu-bg:#eef0f2; --crit-bg:#fbe8ec; --att-bg:#fdf1dc; --att:#9a5b00;
-  --ok-banner:#e6f4ec;
+  --ok-banner:#e6f4ec; --crit-banner:#fdf0f2; --att-banner:#fdf6e7; --prog-banner:#eef3fa;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -54,7 +54,7 @@ a{color:inherit}
 .mono{width:28px;height:28px;border-radius:10px;background:var(--brand);display:grid;place-items:center;flex:none}
 .switch b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
 .switch span{color:var(--muted)}
-main{flex:1;min-width:0;padding:32px 32px 64px;display:flex;flex-direction:column;gap:24px}
+main{flex:1;min-width:0;padding:32px 32px 120px;display:flex;flex-direction:column;gap:24px}
 
 /* type + bits */
 .back{height:32px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--brand);border:0;background:none;padding:0;align-self:flex-start}
@@ -64,6 +64,7 @@ h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
 .small{font-size:12px}
 .req{color:var(--danger)}
 .opt{color:var(--muted);font-weight:500}
+.err{font-size:12px;color:var(--danger)}
 .eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.2px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .card-h{padding:20px 24px 16px}
@@ -77,13 +78,16 @@ h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
 .ico svg{width:16px;height:16px}
 .ico.ok{background:var(--pos-bg);color:var(--pos);border-radius:999px}
 
-.btn{height:36px;padding:0 16px;border-radius:10px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--strong);white-space:nowrap}
+.btn{height:36px;padding:0 16px;border-radius:10px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--strong);white-space:nowrap}
 .btn:hover{background:var(--bg-subtle)}
 .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
 .btn.primary:hover{background:#00356b}
-.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn.danger:hover{background:#951437}
+.btn:disabled,.btn[aria-disabled=true]{opacity:.45;cursor:not-allowed}
 .btn svg{width:16px;height:16px}
-.link{border:0;background:none;padding:0;font-size:13px;font-weight:500;color:var(--brand)}
+.btn.wide{width:100%}
+.link{border:0;background:none;padding:0;font-size:13px;font-weight:500;color:var(--brand);text-align:left}
 .link.danger{color:var(--discard);font-weight:600}
 .link:hover{text-decoration:underline}
 
@@ -97,11 +101,18 @@ h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
 .field{display:flex;flex-direction:column;gap:8px}
 .label{font-size:13px;font-weight:500}
 .input{height:44px;width:100%;border:1px solid var(--border);border-radius:10px;padding:0 14px;background:var(--surface);font-size:14px}
+textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 .input::placeholder{color:var(--muted)}
 .input:focus,.select:focus{outline:2px solid #9bb7d6;outline-offset:0;border-color:var(--brand)}
+.input.bad,.select.bad{border-color:var(--danger)}
+.input.ro{display:flex;align-items:center;background:var(--bg-subtle);color:var(--muted)}
 .select{appearance:none;height:44px;width:100%;border:1px solid var(--border);border-radius:10px;padding:0 40px 0 14px;background:var(--surface) url(assets/chevron-down.svg) no-repeat right 14px center/16px;font-size:14px}
+.select:disabled{background-color:var(--bg-subtle);color:var(--muted)}
 .hint{font-size:12px;color:var(--muted)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.suffix{position:relative}
+.suffix .input{padding-right:150px}
+.suffix span{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);pointer-events:none}
 
 /* steps */
 .steps{display:flex;align-items:center;gap:12px;padding:20px 24px}
@@ -114,12 +125,12 @@ h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
 .step.done .nm{color:var(--strong)}
 .step.cur .nm{color:var(--strong);font-weight:600}
 .step .meta{font-size:13px;color:var(--muted);line-height:1.25}
+.step.flag .meta{color:var(--danger)}
 .conn{flex:1;height:2px;background:var(--border);min-width:12px}
 .conn.on{background:var(--brand)}
 .step.done:hover .nm{text-decoration:underline}
 
 .rhead{display:flex;align-items:center;gap:16px}
-.rhead img.tk,.rhead .tk{width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none}
 .footer{display:flex;align-items:center;gap:12px;padding-top:8px}
 
 /* segmented */
@@ -139,21 +150,23 @@ h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
 .chk.on{background:var(--brand);border-color:var(--brand)}
 .chk.on::after{content:"";width:8px;height:4px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
 .tile{width:32px;height:32px;border-radius:8px;background:var(--bg-subtle);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--strong);flex:none}
+.coin{width:14px;height:14px;border-radius:50%}
 
-/* type cards */
 .typecards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .typecard{border:1px solid var(--border);border-radius:10px;padding:16px;background:#fff;text-align:left;display:flex;gap:12px}
 .typecard.sel{border-color:var(--brand);background:#f3f6fa;box-shadow:inset 0 0 0 1px var(--brand)}
+.typecard.sel .radio{border:4px solid var(--brand)}
 .typecard b{display:block;font-weight:600}
 
-/* upload */
 .thumb{width:64px;height:64px;border-radius:12px;border:1px dashed var(--border-strong);background:var(--bg-subtle) center/cover no-repeat;flex:none}
 .thumb.has{border-style:solid;border-color:var(--border)}
 .drop{border:1px dashed var(--border-strong);border-radius:10px;padding:14px;display:flex;justify-content:center;gap:6px;font-size:13px;background:#fff;cursor:pointer;width:100%}
 .drop.over{border-color:var(--brand);background:var(--brand-tint)}
 .file{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.empty{padding:28px 24px;border-top:1px solid var(--border);text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.empty b{font-weight:600}
+.empty p{margin:0 0 6px;font-size:13px;color:var(--muted);max-width:460px}
 
-/* chips */
 .chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .chip{height:26px;border-radius:999px;background:var(--neu-bg);display:inline-flex;align-items:center;gap:6px;padding:0 6px 0 10px;font-size:12px;font-weight:500}
 .chip small{color:var(--muted);font-weight:400}
@@ -166,12 +179,11 @@ h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
 .menu button:hover{background:var(--bg-subtle)}
 .menu small{display:block;color:var(--muted);font-size:12px}
 
-/* summary list */
 .sum{display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:center;padding:14px 24px;border-top:1px solid var(--border)}
 .sum .k{color:var(--muted);font-size:13px}
 .sum .v{font-size:13px;font-weight:500}
+.sum .v.flag{color:var(--danger)}
 
-/* list table */
 .thead,.trow{display:grid;grid-template-columns:2.2fr 1.3fr .8fr 2fr 1.2fr 24px;gap:12px;align-items:center;padding:0 24px}
 .thead{height:36px;border-top:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase}
 .trow{height:58px;border-top:1px solid var(--border);cursor:pointer}
@@ -191,42 +203,69 @@ h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
 
 /* banners */
 .banner{display:flex;gap:14px;align-items:center;background:var(--ok-banner);border-radius:10px;padding:16px 20px}
-.banner .c{width:28px;height:28px;border-radius:999px;background:#fff;display:grid;place-items:center;color:var(--pos)}
+.banner .c{width:28px;height:28px;border-radius:999px;background:#fff;display:grid;place-items:center;color:var(--pos);flex:none}
 .banner .c svg{width:16px;height:16px}
 .banner b{display:block;font-weight:600}
 .banner span{font-size:13px;color:var(--muted)}
+.banner.crit{background:var(--crit-banner)} .banner.crit .c{color:var(--danger)}
+.banner.att{background:var(--att-banner)} .banner.att .c{color:var(--att)}
+.banner.prog{background:var(--prog-banner)} .banner.prog .c{color:var(--prog)}
+.banner.neu{background:#eef0f2} .banner.neu .c{color:var(--muted)}
+
+/* tooltip */
+.tipwrap{position:relative}
+.tip{position:absolute;right:0;top:calc(100% + 8px);width:280px;background:var(--brand-strong);color:#fff;border-radius:10px;padding:12px 14px;font-size:12px;z-index:30;box-shadow:0 8px 24px rgba(5,13,24,.25)}
+.tip b{display:block;font-size:13px;margin-bottom:2px}
+.tip::before{content:"";position:absolute;right:28px;top:-5px;width:10px;height:10px;background:var(--brand-strong);transform:rotate(45deg)}
 
 /* modal */
 .scrim{position:fixed;inset:0;background:rgba(5,13,24,.35);display:grid;place-items:center;z-index:50;padding:16px}
-.modal{width:min(460px,100%);background:#fff;border-radius:14px;box-shadow:0 20px 48px rgba(5,13,24,.2);overflow:hidden}
+.modal{width:min(480px,100%);background:#fff;border-radius:14px;box-shadow:0 20px 48px rgba(5,13,24,.2);overflow:hidden}
 .modal .mh{padding:22px 24px 14px}
 .modal .mh h3{margin:0 0 4px;font-size:20px;font-weight:600}
 .modal .mh p{margin:0;font-size:13px;color:var(--muted)}
 .mrow{display:grid;grid-template-columns:136px 1fr;padding:11px 24px;border-top:1px solid var(--border);font-size:13px}
 .mrow .k{color:var(--muted)}
 .mrow .v{font-weight:500}
+.mbody{padding:4px 24px 16px;display:flex;flex-direction:column;gap:8px}
 .msign{display:flex;gap:12px;align-items:center;background:var(--bg-subtle);border-top:1px solid var(--border);padding:16px 24px}
+.msign.bad{background:var(--crit-banner)}
+.msign.bad .ico{color:var(--danger)}
 .mfoot{display:flex;justify-content:flex-end;gap:8px;padding:14px 24px;border-top:1px solid var(--border)}
-.spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .8s linear infinite}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .8s linear infinite;display:inline-block}
+.spin.dark{border-color:rgba(0,66,133,.2);border-top-color:var(--brand)}
 @keyframes sp{to{transform:rotate(1turn)}}
 
 /* request progress */
 .rp{display:flex;align-items:center;gap:14px;padding:18px 24px}
-.rp .s{display:flex;gap:10px;align-items:center}
+.rp .s{display:flex;gap:10px;align-items:center;flex:none}
 .rp .s b{display:block;font-weight:500;font-size:14px;line-height:1.25}
 .rp .s span{font-size:12px;color:var(--muted)}
-.ring{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--faint);flex:none;display:grid;place-items:center;background:#fff}
+.ring{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--faint);flex:none;display:grid;place-items:center;background:#fff;font-size:13px;font-weight:700;line-height:1}
 .ring.done{background:var(--brand);border-color:var(--brand)}
 .ring.done img{width:13px}
 .ring.cur{border:2px solid var(--brand)}
 .ring.cur::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.ring.stop{border-color:var(--danger);color:var(--danger)}
+.ring.stopn{border-color:var(--muted);color:var(--muted)}
 .cols{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
 
-/* stats */
 .stats{display:grid;grid-template-columns:repeat(3,1fr)}
 .stats>div{padding:20px 16px;border-left:1px solid var(--border)}
 .stats>div:first-child{border-left:0}
 .stats .big{font-size:28px;font-weight:500;margin:6px 0 10px}
+
+/* tasks */
+.tasks{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}
+.tasks>*,.cols>*{min-width:0}
+.rp{overflow-x:auto}
+.titem{display:flex;gap:10px;width:100%;text-align:left;border:0;border-top:1px solid var(--border);background:none;padding:12px 16px;align-items:flex-start}
+.titem:first-child{border-top:0}
+.titem:hover{background:var(--bg-subtle)}
+.titem.on{background:#f3f6fa;box-shadow:inset 3px 0 0 var(--brand)}
+.titem b{display:block;font-weight:500;font-size:13px}
+.titem span{font-size:12px;color:var(--muted)}
+.titem time{margin-left:auto;font-size:12px;color:var(--muted);flex:none}
 
 /* notifications */
 .notif{position:fixed;top:56px;right:24px;width:360px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 16px 40px rgba(5,13,24,.16);z-index:40;overflow:hidden}
@@ -236,21 +275,29 @@ h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
 .nitem.unread{background:#f3f6fa}
 .nitem b{display:block;font-weight:500;font-size:13px}
 .nitem span{font-size:12px;color:var(--muted)}
-.nitem time{margin-left:auto;font-size:12px;color:var(--muted)}
+.nitem time{margin-left:auto;font-size:12px;color:var(--muted);flex:none}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--brand-strong);color:#fff;border-radius:10px;padding:12px 18px;font-size:13px;z-index:60;box-shadow:0 8px 24px rgba(5,13,24,.25)}
 
-/* prototype-only control */
-.proto{position:fixed;right:16px;bottom:16px;z-index:45;background:#fff;border:1px dashed var(--brand);border-radius:12px;padding:10px 12px;font-size:12px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 18px rgba(5,13,24,.1)}
-.proto b{color:var(--brand)}
+/* prototype-only control panel (not product UI) */
+.proto{position:fixed;right:16px;bottom:16px;z-index:45;width:300px;background:#fff;border:1.5px dashed var(--brand);border-radius:12px;box-shadow:0 6px 18px rgba(5,13,24,.12);font-family:"IBM Plex Sans KR","DM Sans",sans-serif;font-size:12px}
+.proto .ph{display:flex;align-items:center;gap:8px;padding:10px 12px;border:0;background:none;width:100%;text-align:left}
+.proto .ph b{color:var(--brand);font-size:12px}
+.proto .pb{padding:0 12px 12px;display:flex;flex-direction:column;gap:10px}
+.proto .pl{font-size:11px;color:var(--muted);margin-bottom:4px}
+.proto .seg button{font-size:11px;height:28px}
+.proto .select{height:34px;font-size:12px;font-family:inherit}
+.proto .btn{height:30px;font-size:11px;padding:0 10px;font-family:inherit}
+.proto .pnote{font-size:11px;color:var(--muted);line-height:1.45}
+.proto.min .pb{display:none}
 
 @media (max-width:900px){
   .side{display:none}
   .body{padding:0 8px 8px}
-  main{padding:20px 16px 48px}
-  .steps{overflow-x:auto}
+  main{padding:20px 16px 140px}
+  .steps,.rp{overflow-x:auto}
   .step .meta{display:none}
-  .grid2,.typecards,.cols,.rolerow{grid-template-columns:1fr}
+  .grid2,.typecards,.cols,.rolerow,.tasks{grid-template-columns:1fr}
   .sum{grid-template-columns:1fr auto}
   .sum .k{grid-column:1/-1}
   .who{display:none}
@@ -260,201 +307,357 @@ h1{margin:0;font-size:32px;font-weight:700;line-height:1.2}
   .stats{grid-template-columns:1fr}
   .stats>div{border-left:0;border-top:1px solid var(--border)}
   .notif{right:8px;left:8px;width:auto}
+  .proto{left:8px;right:8px;width:auto}
 }
 </style>
 </head>
 <body>
 <header class="top">
   <div class="brand"><img src="assets/logo.png" alt="">Universal Mint</div>
-  <button class="bell" data-act="bell" aria-label="Notifications"><i data-lucide="bell" style="width:18px;height:18px;color:#5a6472"></i><img class="dot" id="unread" src="assets/unread.svg" alt="" hidden></button>
+  <button class="bell" data-a="bell" aria-label="Notifications"><i data-lucide="bell" style="width:18px;height:18px;color:#5a6472"></i><img class="dot" id="unread" src="assets/unread.svg" alt="" hidden></button>
   <div class="vdiv"></div>
-  <div class="acct"><div class="avatar">JU</div><div class="who"><b>Juya Kim</b><span>juya.k@bharvest.io</span></div><img src="assets/chevron-down.svg" width="14" alt=""></div>
+  <div class="acct"><div class="avatar" id="ini">JU</div><div class="who"><b id="pname">Juya Kim</b><span id="pmail">juya.k@bharvest.io</span></div><img src="assets/chevron-down.svg" width="14" alt=""></div>
 </header>
 <div class="body"><div class="panel">
   <aside class="side">
     <nav>
-      <button class="nav" data-go="home"><img src="assets/nav-home.svg" alt="">Home</button>
-      <button class="nav" data-soon><img src="assets/nav-inbox.svg" alt="">My tasks<span class="count">5</span></button>
-      <button class="nav" data-soon><img src="assets/nav-inbox.svg" alt="">Requests</button>
-      <button class="nav" data-soon><img src="assets/nav-proposals.svg" alt="">Proposals</button>
-      <button class="nav" data-go="tokens"><img src="assets/nav-tokens.svg" alt="">Tokens</button>
-      <button class="nav" data-soon><img src="assets/nav-disclosures.svg" alt="">Disclosures</button>
+      <button class="nav" data-a="go" data-v="home" data-nav="home"><img src="assets/nav-home.svg" alt="">Home</button>
+      <button class="nav" data-a="go" data-v="tasks" data-nav="tasks"><img src="assets/nav-inbox.svg" alt="">My tasks<span class="count" id="taskcount">4</span></button>
+      <button class="nav" data-a="soon"><img src="assets/nav-inbox.svg" alt="">Requests</button>
+      <button class="nav" data-a="soon"><img src="assets/nav-proposals.svg" alt="">Proposals</button>
+      <button class="nav" data-a="go" data-v="tokens" data-nav="tokens"><img src="assets/nav-tokens.svg" alt="">Tokens</button>
+      <button class="nav" data-a="soon"><img src="assets/nav-disclosures.svg" alt="">Disclosures</button>
     </nav>
     <div class="org">
       <div class="glabel">Organization</div>
-      <button class="nav" data-soon><img src="assets/nav-members.svg" alt="">Members</button>
-      <button class="nav" data-soon><img src="assets/nav-rules.svg" alt="">Approval rules</button>
-      <button class="nav" data-soon><img src="assets/nav-custodians.svg" alt="">Custodians</button>
-      <button class="nav" data-soon><img src="assets/nav-credentials.svg" alt="">Credentials</button>
-      <button class="nav" data-soon><img src="assets/nav-audit.svg" alt="">Audit log</button>
-      <button class="nav" data-soon><img src="assets/nav-profile.svg" alt="">Profile &amp; wallets</button>
+      <button class="nav" data-a="soon"><img src="assets/nav-members.svg" alt="">Members</button>
+      <button class="nav" data-a="soon"><img src="assets/nav-rules.svg" alt="">Approval rules</button>
+      <button class="nav" data-a="soon"><img src="assets/nav-custodians.svg" alt="">Custodians</button>
+      <button class="nav" data-a="soon"><img src="assets/nav-credentials.svg" alt="">Credentials</button>
+      <button class="nav" data-a="soon"><img src="assets/nav-audit.svg" alt="">Audit log</button>
+      <button class="nav" data-a="soon"><img src="assets/nav-profile.svg" alt="">Profile &amp; wallets</button>
     </div>
     <div class="switch"><div class="mono"><img src="assets/org.svg" width="16" alt=""></div><div class="grow"><b>Ault Global Commodities</b><span>Issuer</span></div><img src="assets/chevron-down.svg" width="14" alt=""></div>
   </aside>
   <main id="app"></main>
 </div></div>
 <div id="layer"></div>
-<div class="proto" id="proto" hidden></div>
+<div class="proto" id="proto"></div>
 
 <script>
+/* ================= data ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const today = new Date();
-const fmt = d => d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
-const kb = n => n > 1e6 ? (n/1048576).toFixed(1)+' MB' : Math.max(1, Math.round(n/1024))+' KB';
+const fmt = d => d ? new Date(d).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+const fmtT = d => fmt(d) + ', ' + new Date(d).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+const mb = n => n >= 1048576 ? Math.round(n/1048576*10)/10 + ' MB' : Math.max(1, Math.round(n/1024)) + ' KB';
+const clone = o => JSON.parse(JSON.stringify(o));
 
+const PEOPLE = {
+  juya: {name:'Juya Kim', ini:'JU', mail:'juya.k@bharvest.io'},
+  joe:  {name:'Joe Miller', ini:'JM', mail:'joe.m@ault.com'},
+};
+const GOVERNANCE = ['Juya Kim','Joe Miller','Jason Lee','David Park']; // 2 of 4
 const MEMBERS = [
   {id:'gov', name:'Governance', meta:'2 of 4', sub:'Approval group'},
-  {id:'juya', name:'Juya Kim', sub:'Member'},
-  {id:'joe', name:'Joe Miller', sub:'Member'},
-  {id:'jason', name:'Jason Lee', sub:'Member'},
-  {id:'david', name:'David Park', sub:'Member'},
+  {id:'juya', name:'Juya Kim', sub:'Member'}, {id:'joe', name:'Joe Miller', sub:'Member'},
+  {id:'jason', name:'Jason Lee', sub:'Member'}, {id:'david', name:'David Park', sub:'Member'},
   {id:'colossus', name:'Colossus', sub:'Another organization'},
 ];
-const ROLES = [
-  ['am','Account manager',false,'Confirms redemption amounts, delivery details, and fees with the investor.'],
-  ['mint','Mint approver',true,'Approves minting for issuance requests.'],
-  ['burn','Burn approver',true,'Approves burning for redemption requests.'],
-  ['op','Operator',false,'Arranges reserve transfers and asset release, and uploads proof of delivery.'],
-];
+const TOKENS = {
+  agp:  {sym:'AGP', name:'Ault Platinum', vault:'Ault Treasury, Vault 1', addr:'0x8f3a…c21b', dec:6, color:'#b3bac4', kind:'commodity', asset:'Platinum', unit:'oz', desc:'Allocated platinum bars in segregated storage. 1 token = 1 oz.'},
+  apd:  {sym:'APD', name:'Ault Palladium', vault:'Ault Operations, Vault 2', addr:'0x41c0…9e07', dec:6, color:'#c9b48f', kind:'commodity', asset:'Palladium', unit:'oz', desc:'Allocated palladium bars in segregated storage. 1 token = 1 oz.'},
+  bmax: {sym:'BMAX', name:'BMAX', vault:'Ault Treasury, Vault 3', addr:'0x5b21…7d4e', dec:8, color:'#f0a23b', kind:'custom', asset:'Bitcoin', unit:'BTC', desc:'Bitcoin held in a segregated custody account. 1 token = 1 BTC.'},
+};
+// What changes between a metal token and a custom token (Figma AD-C)
+const TERMS = {
+  commodity: {issue:'Issue', redeem:'Redeem', issueReqs:'Issue requests', redeemReqs:'Redeem requests', per1:'issue', per2:'redemption', words:'Issue and Redeem',
+    roleSub:'Who handles issuance and redemption requests for this token.',
+    roles:{am:'Confirms redemption amounts, delivery details, and fees with the investor.', mint:'Approves minting for issuance requests.', burn:'Approves burning for redemption requests.', op:'Arranges reserve transfers and asset release, and uploads proof of delivery.'},
+    diffRule:'Use different rules for redemption', firstAction:'Issue your first tokens'},
+  custom: {issue:'Mint', redeem:'Burn', issueReqs:'Mint requests', redeemReqs:'Burn requests', per1:'mint', per2:'burn', words:'Mint and Burn',
+    roleSub:'Who handles mint and burn requests for this token.',
+    roles:{am:'Confirms burn amounts, delivery details, and fees with the investor.', mint:'Approves minting for mint requests.', burn:'Approves burning for burn requests.', op:'Checks transfer evidence for mints, and records the BTC payout after each burn.'},
+    diffRule:'Use different rules for burns', firstAction:'Mint your first tokens'},
+};
+const CUSTODIANS = {
+  commodity: [
+    {id:'tw', ini:'TW', name:'The Wyoming Reserve', where:'Wyoming, manual check', por:true, note:'Requests will use manual settlement to issue and FedEx delivery to redeem.', issueVia:'Manual settlement', redeemVia:'FedEx delivery'},
+    {id:'sb', ini:'SB', name:'Seoul Bullion Vault', where:'Korea, API', issueVia:'Manual settlement', redeemVia:'FedEx delivery'},
+  ],
+  custom: [
+    {id:'ad', ini:'AD', name:'Anchorage Digital', where:'custody account, manual check', por:true, note:'Mint requests file a Bitcoin transfer as evidence. Burns pay out BTC from this custody account.', issueVia:'Bitcoin transfer as evidence', redeemVia:'BTC payout after the burn'},
+    {id:'bg', ini:'BG', name:'BitGo Trust', where:'API', issueVia:'Bitcoin transfer as evidence', redeemVia:'BTC payout after the burn'},
+  ],
+};
+const ROLES = [['am','Account manager',false],['mint','Mint approver',true],['burn','Burn approver',true],['op','Operator',false]];
 const STEPS = ['Token','Details','Backing','Investor terms','Operations','Review'];
 const STEP_OF = {ad1:0, ad2:1, ad3:2, ad4:3, ad5:4, ad5b:4, ad6:5};
+const STEP_SCREEN = ['ad1','ad2','ad3','ad4','ad5','ad6'];
+const NEXT = {ad1:'ad2', ad2:'ad3', ad3:'ad4', ad4:'ad5', ad5:'ad5b', ad5b:'ad6'};
+const PREV = {ad2:'ad1', ad3:'ad2', ad4:'ad3', ad5:'ad4', ad5b:'ad5', ad6:'ad5b'};
+const STATIC_TASKS = [
+  ['Confirm deposit, 2nd check','ISS-0012, 5,000 ASLV. Jason Lee confirmed','3d'],
+  ['Approve issuance','ISS-0011, 1,200 ASLV. 1 of 2 approved','3h'],
+  ['Confirm the requester by call','RED-0004, 300 ASLV','2h'],
+  ['Accept an approval group invite','Treasury signers, from Jason Lee','40m'],
+];
 
-const fresh = () => ({
-  kind:'commodity', tokenSrc:'fireblocks', token:'agp',
-  img:'', imgUrl:'', name:'Ault Platinum', desc:'Allocated platinum bars in segregated storage. 1 token = 1 oz.', docs:[],
-  custodians:{tw:true}, holder:'Ault Global Commodities', acct:'', por:null, showCombo:false,
-  who:'any', size:100,
-  issueVia:'Manual settlement', redeemVia:'FedEx delivery', issueFee:'No fee', redeemFee:'No fee', excluded:'none', terms:'2 required, 1 optional',
-  roles:{am:['gov'], mint:['gov'], burn:['gov'], op:['gov']},
-  treasury:'op', feeWallet:'', agreements:'Off',
-  executor:'Fireblocks', credential:'treasury', vault:'Vault 1', note:'', burnOther:false,
-  reached:0,
-});
-
-const S = {
-  screen:'tokens', d:fresh(), draftSaved:false,
-  listing:null,       // null | 'review' | 'live'
-  submittedAt:null, liveAt:null,
-  modal:null, signing:false, notifOpen:false, unread:false, menu:null, justSubmitted:false,
+const fresh = (kind='commodity') => {
+  const tk = kind==='custom' ? 'bmax' : 'agp', t = TOKENS[tk], c0 = CUSTODIANS[kind][0];
+  return {
+    kind, tokenSrc:'fireblocks', token:tk, addr:'', read:null,
+    img:'', imgUrl:'', imgErr:false, name:t.name, desc:t.desc, docs:[],
+    custodians:{[c0.id]:true}, holder:'Ault Global Commodities', acct:'', por:null, porErr:null, porFlag:false, showCombo:false,
+    who:'any', size:100, issueFee:'', redeemFee:'', excluded:'none', terms:'2 required, 1 optional',
+    roles:{am:['gov'], mint:['gov'], burn:['gov'], op:['gov']},
+    treasury:'op', feeWallet:'', agreements:'Off',
+    executor:'Fireblocks', credential:'treasury', vault:'Vault 1', burnOther:false, burnVault:'Vault 2', vaultId:'', assetId:'', note:'',
+    reviewFiles:[], reached:0, from:null,
+  };
 };
 
-function go(screen, extra){ Object.assign(S, {screen, menu:null}, extra||{}); if (STEP_OF[screen]!=null) S.d.reached = Math.max(S.d.reached, STEP_OF[screen]); render(); window.scrollTo(0,0); }
-function toast(msg){ const t = document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 2600); }
+const S = {
+  screen:'tokens', persona:'juya', d:fresh(), draftSaved:false,
+  reqs:[], cur:null, seq:0,
+  rule:'direct', scenario:'none',          // prototype controls
+  once:{},                                  // one-shot failures already shown
+  modal:null, mf:{}, signing:false, signErr:false,
+  notes:[], notifOpen:false, menu:null, tip:false, done1:false, done2:false,
+  errs:{}, fromReview:false, task:null, taskTab:'todo', protoMin:true, refused:false,
+};
 
-/* ---------- shared pieces ---------- */
+/* ================= helpers ================= */
+const me = () => PEOPLE[S.persona];
+const tkOf = d => TOKENS[d.token] || TOKENS.agp;
+const sym = (d=S.d) => d.tokenSrc==='self' && d.read?.sym ? d.read.sym : tkOf(d).sym;
+const T = (d=S.d) => TERMS[d.kind];
+const custList = (d=S.d) => CUSTODIANS[d.kind];
+const custNames = (d=S.d) => custList(d).filter(c=>d.custodians[c.id]).map(c=>c.name);
+const porCust = (d=S.d) => custList(d).find(c=>c.por && d.custodians[c.id]);
+const rolePeople = (d=S.d) => { const s=new Set(); Object.values(d.roles).flat().forEach(x=>s.add(x)); return [...s].map(id=>MEMBERS.find(m=>m.id===id).name); };
+const feeSet = (d=S.d) => (+d.issueFee>0) || (+d.redeemFee>0);
+const getR = (id=S.cur) => S.reqs.find(r=>r.id===id);
+const scen = k => S.scenario===k;
 const badge = (tone, txt) => `<span class="badge b-${tone}">${esc(txt)}</span>`;
-const tokenImg = (size) => S.d.img ? `<img class="tk" src="${esc(S.d.img)}" alt="" style="width:${size}px;height:${size}px;border-radius:12px;object-fit:cover">` : `<img src="assets/token-sample-${size===44?44:56}.svg" width="${size}" height="${size}" alt="">`;
-const sym = () => S.d.token==='apd' ? 'APD' : 'AGP';
+const err = (key, msg) => msg ? `<span class="err" id="err-${key}">${esc(msg)}</span>` : '';
+const bad = key => S.errs[key] ? 'bad' : '';
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 2600); }
+function note(to, icon, title, sub, go, id){ S.notes.unshift({to, icon, title, sub, go, id, at:Date.now(), read:false}); }
+function tokenImg(d, size){
+  if (d.img) return `<img src="${esc(d.img)}" alt="" width="${size}" height="${size}" style="border-radius:12px;object-fit:cover;flex:none">`;
+  return `<img src="assets/token-sample-${size===44?44:56}.svg" width="${size}" height="${size}" alt="" style="flex:none">`;
+}
+function banner(tone, title, body, extra=''){
+  const icon = {ok:'check', crit:'alert-circle', att:'alert-triangle', prog:'clock', neu:'undo-2'}[tone];
+  return `<div class="banner ${tone==='ok'?'':tone}" role="status"><span class="c"><i data-lucide="${icon}"></i></span><div class="grow"><b>${esc(title)}</b><span>${body}</span></div>${extra}</div>`;
+}
+function sel(bind, opts, val, extra=''){ return `<select class="select ${bad(bind)}" data-bind="${bind}" ${extra}>${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${v===val?'selected':''}>${esc(l)}</option>`}).join('')}</select>`; }
+function go(screen, extra){
+  Object.assign(S, {screen, menu:null, tip:false, errs:{}}, extra||{});
+  if (STEP_OF[screen]!=null) S.d.reached = Math.max(S.d.reached, STEP_OF[screen]);
+  if (screen==='ad6') S.fromReview = false;
+  render(); window.scrollTo(0,0);
+}
 
+/* ================= draft chrome ================= */
 function stepMeta(i){
-  const d = S.d;
-  return [ `${sym()}, Mainnet`, d.docs.length ? `${d.docs.length} document${d.docs.length>1?'s':''}` : 'No documents',
-    custNames()[0]?.replace(/^The /,'') || '', `${d.size} ${sym()} steps`, `${rolePeople().length} role${rolePeople().length>1?'s':''}`, '' ][i];
+  const d = S.d, pr = rolePeople(d).length;
+  return [ `${sym(d)}, Mainnet`, d.docs.length ? `${d.docs.length} document${d.docs.length>1?'s':''}` : 'No documents',
+    d.porFlag && !d.por ? 'Needs a new custody statement' : (custNames(d)[0]||'').replace(/^The /,''),
+    `${d.size} ${sym(d)} steps`, `${pr} role${pr>1?'s':''}`, ''][i];
 }
 function steps(cur){
   let h = '<div class="card"><div class="steps">';
   STEPS.forEach((n,i)=>{
-    const done = i < cur, on = i===cur;
-    if (i) h += `<div class="conn ${i<=cur?'on':''}"></div>`;
-    h += `<button class="step ${done?'done':''} ${on?'cur':''}" ${done?`data-step="${i}"`:'disabled'}>
+    const reach = i <= S.d.reached && i !== cur, done = i < cur || reach;
+    const flag = i===2 && S.d.porFlag && !S.d.por;
+    if (i) h += `<div class="conn ${i<=Math.max(cur,0)?'on':''}"></div>`;
+    h += `<button class="step ${done?'done':''} ${i===cur?'cur':''} ${flag?'flag':''}" ${done?`data-a="step" data-v="${i}"`:'disabled'}>
       <span class="dotn">${done?'<img src="assets/check.svg" alt="">':i+1}</span>
       <span><span class="nm">${n}</span>${done?`<span class="meta" style="display:block">${esc(stepMeta(i))}</span>`:''}</span></button>`;
   });
   return h + '</div></div>';
 }
-function rhead(title, sub, right=''){
-  return `<div class="rhead">${tokenImg(56)}<div class="grow"><h1>${esc(title)}</h1><div class="sub">${esc(sub)}</div></div>${right}</div>`;
+function rhead(d, title, sub, right=''){
+  return `<div class="rhead">${tokenImg(d,56)}<div class="grow"><h1>${esc(title)}</h1><div class="sub">${esc(sub)}</div></div>${right}</div>`;
 }
 function draftHead(){
-  return S.d.reached>=1 || S.screen!=='ad1' ? rhead(S.d.name||'New token', `${sym()}, draft saved in this browser`) : rhead('New token','Listing draft, saved in this browser');
-}
-function footer(next, {back=true, label='Continue', disabled=false}={}){
-  return `<div class="footer"><button class="link" data-act="save">Save and exit</button><button class="link danger" data-act="discard">Discard draft</button><span class="grow"></span>
-  ${back?'<button class="btn" data-act="back">Back</button>':''}<button class="btn primary" data-next="${next}" ${disabled?'disabled':''}>${label}</button></div>`;
-}
-const wrap = (cur, body, next, opts) => `<button class="back" data-go="tokens">← Your tokens</button>${draftHead()}${steps(cur)}${body}${footer(next, opts)}`;
-
-function custNames(){ const m={tw:'The Wyoming Reserve', sb:'Seoul Bullion Vault'}; return Object.keys(S.d.custodians).filter(k=>S.d.custodians[k]).map(k=>m[k]); }
-function rolePeople(){ const s=new Set(); Object.values(S.d.roles).flat().forEach(x=>s.add(x)); return [...s].map(id=>MEMBERS.find(m=>m.id===id).name); }
-function summaryRows(edit){
   const d = S.d;
+  return S.screen==='ad1' && d.reached===0 ? rhead(d,'New token','Listing draft, saved in this browser') : rhead(d, d.name||'New token', `${sym(d)}, draft saved in this browser`);
+}
+function footer(next, {back=true, label='Continue', disabled=false, danger=false}={}){
+  if (S.fromReview && next!=='submit') label = 'Back to review';
+  return `<div class="footer"><button class="link" data-a="save">Save and exit</button><button class="link danger" data-a="discard">Discard draft</button><span class="grow"></span>
+  ${back?'<button class="btn" data-a="back">Back</button>':''}<button class="btn ${danger?'danger':'primary'}" data-a="next" data-v="${next}" ${disabled?'disabled':''}>${label}</button></div>`;
+}
+const wrap = (cur, body, next, opts) => `<button class="back" data-a="go" data-v="tokens">← Your tokens</button>${draftHead()}${steps(cur)}${body}${footer(next, opts)}`;
+
+function summaryRows(d, edit, flagBacking){
   const rows = [
-    ['Token', `${d.name} (${sym()}) on Ault Mainnet`, 'ad1'],
+    ['Token', `${d.name} (${sym(d)}) on Ault Mainnet`, 'ad1'],
     ['Investors see', `${d.name}, ${d.docs.length ? d.docs.length+' public document'+(d.docs.length>1?'s':'') : 'no public documents'}`, 'ad2'],
-    ['Backed by', custNames().join(', '), 'ad3'],
-    ['Investor terms', `${d.who==='any'?'Any KYC-verified investor':'Only investors you approve'}, steps of ${d.size} ${sym()}`, 'ad4'],
-    ['Roles', rolePeople().join(', '), 'ad5'],
+    ['Backed by', custNames(d).join(', ') + (flagBacking ? '. Custody statement flagged' : (d.porFlag && !d.por ? '. Upload a new custody statement' : '')), 'ad3', flagBacking || (d.porFlag && !d.por)],
+    ['Investor terms', `${d.who==='any'?'Any KYC-verified investor':'Only investors you approve'}, steps of ${d.size} ${sym(d)}`, 'ad4'],
+    ['Roles', rolePeople(d).join(', '), 'ad5'],
     ['Signing', `${d.vault} by ${d.executor}`, 'ad5b'],
-    ['Wallets', d.feeWallet ? 'Treasury wallet, fee wallet' : 'Treasury wallet', 'ad5'],
+    ['Wallets', feeSet(d) ? 'Treasury wallet, fee wallet' : 'Treasury wallet', 'ad5'],
   ];
-  return rows.map(([k,v,s])=>`<div class="sum"><span class="k">${k}</span><span class="v">${esc(v)}</span>${edit?`<button class="link" data-go="${s}">Edit</button>`:'<span></span>'}</div>`).join('');
+  return rows.map(([k,v,s,f])=>`<div class="sum"><span class="k">${k}</span><span class="v ${f?'flag':''}">${esc(v)}</span>${edit?`<button class="link" data-a="edit" data-v="${s}">Edit</button>`:'<span></span>'}</div>`).join('');
 }
 
-/* ---------- screens ---------- */
+/* ================= validation (Figma AD1x–AD5x) ================= */
+const ADDR_RE = /^0x[0-9a-fA-F]{40}$/;
+const FEE_RE = /^\d*(\.\d{0,6})?$/;
+function validate(screen){
+  const d = S.d, e = {};
+  if (screen==='ad1'){
+    if (d.tokenSrc==='self'){
+      if (!d.addr) e.addr = 'Enter the contract address.';
+      else if (!ADDR_RE.test(d.addr)) e.addr = 'Must be a 0x-prefixed 40-character address';
+      else if (d.read?.state!=='ok') e.addr = d.read?.state==='reading' ? 'Wait until the contract is read.' : (d.read?.msg || 'Read the contract first.');
+    } else if (scen('fbFail') || scen('noFbTokens')) e.token = 'Pick a token to continue.';
+  }
+  if (screen==='ad2'){
+    if (!d.name.trim()) e.name = 'Add a public name. Investors see it on the token page.';
+  }
+  if (screen==='ad3'){
+    if (scen('custFail') || scen('noCustodian')) e.cust = 'Pick a custodian to continue.';
+    else if (!custNames(d).length) e.cust = 'Select at least one custodian.';
+    else if (porCust(d) && !d.por) e.por = 'Upload the proof of reserve to continue.';
+  }
+  if (screen==='ad4'){
+    if (!(Number(d.size)>0)) e.size = 'Enter a size above 0.';
+    ['issueFee','redeemFee'].forEach(k=>{ if (!FEE_RE.test(d[k])) e[k] = 'USDT counts in 6 decimals. Use up to 6 decimal places.'; });
+  }
+  if (screen==='ad5'){
+    if (!d.roles.mint.length) e.mint = 'Add at least one.';
+    if (!d.roles.burn.length) e.burn = 'Add at least one.';
+    if (feeSet(d) && !d.feeWallet) e.feeWallet = 'Choose the wallet fees are paid to, or set both fees to 0.';
+  }
+  if (screen==='ad5b'){
+    if (scen('noVault')) e.vault = `No vault in this workspace holds ${sym(d)}_AULT. Create its wallet in a Fireblocks vault first.`;
+    if (scen('noAsset')) e.vault = 'No Fireblocks asset is linked to this token’s contract. Add the asset in Fireblocks, then try again.';
+    if (scen('fbNoAnswer')){ if (!d.vaultId.trim()) e.vaultId = 'Enter the vault account ID.'; if (!d.assetId.trim()) e.assetId = 'Enter the asset ID.'; }
+  }
+  return e;
+}
+function reviewBlocked(){
+  return scen('kycTodo') || scen('waitingPlatform') || scen('kybExpired') || (porCust() && !S.d.por);
+}
+
+/* ================= screens ================= */
 const V = {};
 
 V.tokens = () => {
-  const reqRows = [];
-  if (S.draftSaved) reqRows.push(`<div class="lrow" data-go="ad1"><div class="idn"><span class="tile">DFT</span><div><b>${esc(S.d.name||'Untitled token')}</b><span>Draft saved in this browser only</span></div></div><div>${badge('neu','Draft')}</div><div style="text-align:right"><button class="btn" data-go="ad${S.d.reached>=5?6:[1,2,3,4,5][S.d.reached]}">Continue</button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
-  if (S.listing==='review') reqRows.push(`<div class="lrow ${S.justSubmitted?'hl':''}" data-go="ad7"><div class="idn"><span class="tile">${sym()}</span><div><b>${esc(S.d.name)}</b><span>Submitted ${fmt(S.submittedAt)}</span></div></div><div>${badge('prog','In platform review')}</div><div></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
-  reqRows.push(`<div class="lrow" data-soon><div class="idn"><span class="tile">APD</span><div><b>Ault Palladium</b><span>Custody agreement expired</span></div></div><div>${badge('crit','Rejected')}</div><div style="text-align:right"><button class="btn" data-soon>Start a new draft</button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
+  const d = S.d, rows = [];
+  const draftStep = STEP_SCREEN[Math.min(d.reached,5)];
+  if (S.draftSaved) rows.push(`<div class="lrow" data-a="go" data-v="${draftStep}"><div class="idn"><span class="tile">DFT</span><div><b>${esc(d.name||'Untitled token')}</b><span>Draft saved in this browser only</span></div></div><div>${badge('neu','Draft')}</div><div style="display:flex;gap:8px;justify-content:flex-end;align-items:center"><button class="btn" data-a="go" data-v="${draftStep}">Continue</button><button class="link" style="color:var(--muted)" aria-label="Delete draft" data-a="deleteDraft"><i data-lucide="trash-2" style="width:16px"></i></button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
+  [...S.reqs].reverse().filter(r=>r.status!=='live').forEach(r=>{
+    const m = {
+      org:['prog','Org approval',`Waiting on Governance, ${r.approvals.length} of 2`],
+      review:['prog','In platform review',`Submitted ${fmt(r.at.submitted)}`],
+      rejected:['crit','Rejected','Custody statement flagged'],
+      withdrawn:['neu','Withdrawn',`Withdrawn ${fmt(r.at.withdrawn)} by ${r.by}`],
+      orgRejected:['crit','Rejected', r.platformRefused ? 'Refused by the platform' : `Rejected by ${r.rejBy}`],
+      propWithdrawn:['neu','Withdrawn',`Proposal withdrawn ${fmt(r.at.withdrawn)}`],
+    }[r.status];
+    const act = r.status==='rejected' ? `<button class="btn" data-a="restart" data-v="${r.id}">Start a new draft</button>` : '';
+    rows.push(`<div class="lrow ${r.id===S.cur&&r.fresh?'hl':''}" data-a="openReq" data-v="${r.id}"><div class="idn"><span class="tile">${esc(sym(r.d))}</span><div><b>${esc(r.d.name)}</b><span>${esc(m[2])}</span></div></div><div>${badge(m[0],m[1])}</div><div style="text-align:right">${act}</div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
+  });
+  rows.push(`<div class="lrow" data-a="soon"><div class="idn"><span class="tile">APD</span><div><b>Ault Palladium</b><span>Custody agreement expired</span></div></div><div>${badge('crit','Rejected')}</div><div style="text-align:right"><button class="btn" data-a="soon">Start a new draft</button></div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`);
   const listed = [
-    S.listing==='live' ? ['AGP', S.d.name, sym(), 'Active', '0', 100, '0 / 0', 'ad8'] : null,
-    ['ASLV','Ault Silver','ASLV','Active','5,000',100,'+3,200 / −600'],
-    ['BMAX','BMAX','Bitcoin','Active','1,200',100,'+500 / 0'],
-  ].filter(Boolean);
+    ...S.reqs.filter(r=>r.status==='live').map(r=>({img:tokenImg(r.d,28), name:r.d.name, s:sym(r.d), st:['pos','Active'], sup:'0', res:100, pend:'0 / 0', id:r.id})),
+    {coin:'#b3bac4', name:'Ault Silver', s:'ASLV', st:['pos','Active'], sup:'5,000', res:100, pend:'+3,200 / −600'},
+    {coin:'#d9b44a', name:'Ault Gold', s:'AGLD', st:['att','Suspended'], sup:'800', res:100, pend:'0 / 0'},
+  ];
+  const locked = scen('noRights');
+  const addBtn = locked
+    ? `<div class="tipwrap"><button class="btn primary" aria-disabled="true" aria-describedby="addtip" data-a="tip"><i data-lucide="lock"></i>Add token</button>${S.tip?`<div class="tip" id="addtip" role="tooltip"><b>You can’t add tokens</b>Listing a token needs listing rights for Ault Global Commodities. Ask Joe Miller.</div>`:''}</div>`
+    : `<button class="btn primary" data-a="addToken">Add token</button>`;
   return `
-  <div style="display:flex;align-items:flex-start;gap:16px"><div class="grow"><h1>Tokens</h1><div class="sub" style="margin-top:6px">Manage your tokens and follow listing requests.</div></div>
-  <button class="btn primary" data-go="ad0">Add token</button></div>
-  <div class="tabs"><button class="tab on">Your tokens <span class="n">${listed.length+reqRows.length}</span></button><button class="tab" data-soon>All listed <span class="n">12</span></button></div>
+  <div style="display:flex;align-items:flex-start;gap:16px"><div class="grow"><h1>Tokens</h1><div class="sub" style="margin-top:6px">Manage your tokens and follow listing requests.</div></div>${addBtn}</div>
+  ${scen('noKyc') ? banner('att','Confirm your identity before listing a token','You can see your organization’s tokens and requests. Listing needs your own KYC.','<button class="btn" data-a="soon">Verify identity</button>') : ''}
+  <div class="tabs"><button class="tab on">Your tokens <span class="n">${listed.length+rows.length}</span></button><button class="tab" data-a="soon">All listed <span class="n">12</span></button></div>
   <div class="card"><div class="card-h" style="padding-bottom:12px"><h2 style="font-size:16px">Listed <span class="muted" style="font-weight:400">${listed.length}</span></h2></div>
     <div class="thead"><span>Token</span><span>Status</span><span style="text-align:right">Supply</span><span>Reserve</span><span style="text-align:right">Pending</span><span></span></div>
-    ${listed.map(r=>`<div class="trow" ${r[7]?`data-go="${r[7]}"`:'data-soon'}><div class="idn">${r[0]==='AGP'?tokenImg(28).replace(/width="56" height="56"/,'width="28" height="28"'):`<span class="tile" style="border-radius:999px">${r[0]==='BMAX'?'<span style="width:12px;height:12px;border-radius:50%;background:#f0a23b"></span>':'<span style="width:12px;height:12px;border-radius:50%;background:#b3bac4"></span>'}</span>`}<div><b>${esc(r[1])}</b><span>${esc(r[2])}</span></div></div>
-      <div>${badge('pos',r[3])}</div><div style="text-align:right;font-size:15px">${r[4]}</div><div style="display:flex;align-items:center;gap:10px"><span class="bar"><i style="width:${r[5]}%"></i></span><span class="small">${r[5]}%</span></div><div class="muted small" style="text-align:right">${r[6]}</div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`).join('')}
+    ${listed.map(r=>`<div class="trow" ${r.id?`data-a="openToken" data-v="${r.id}"`:'data-a="soon"'}><div class="idn">${r.img||`<span class="tile" style="border-radius:999px"><span class="coin" style="background:${r.coin}"></span></span>`}<div><b>${esc(r.name)}</b><span>${esc(r.s)}</span></div></div>
+      <div>${badge(...r.st)}</div><div style="text-align:right;font-size:15px">${r.sup}</div><div style="display:flex;align-items:center;gap:10px"><span class="bar"><i style="width:${r.res}%"></i></span><span class="small">${r.res}%</span></div><div class="muted small" style="text-align:right">${r.pend}</div><i data-lucide="chevron-right" class="muted" style="width:16px"></i></div>`).join('')}
   </div>
-  <div class="card"><div class="card-h" style="padding-bottom:12px"><h2 style="font-size:16px">Listing requests <span class="muted" style="font-weight:400">${reqRows.length}</span></h2></div>${reqRows.join('')}</div>`;
+  <div class="card"><div class="card-h" style="padding-bottom:12px"><h2 style="font-size:16px">Listing requests <span class="muted" style="font-weight:400">${rows.length}</span></h2></div>${rows.join('')}</div>`;
 };
 
-V.ad0 = () => `
-  <button class="back" data-go="tokens">← Your tokens</button>
+V.ad0 = () => {
+  const kyb = scen('kybExpired');
+  return `
+  <button class="back" data-a="go" data-v="tokens">← Your tokens</button>
   <div><h1>Add a token</h1><div class="sub" style="margin-top:6px">You can start a draft now. It saves in this browser.</div></div>
   <div class="card">
-    <div style="padding:16px 24px"><div class="eyebrow">Before you can submit</div><div style="display:flex;align-items:baseline;gap:12px;margin-top:6px"><span style="font-size:32px;font-weight:500;line-height:1">3</span><span class="small muted">Left before you can submit</span></div></div>
-    <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><div class="grow"><div class="t">Verify your identity</div><div class="d">You, about 5 minutes</div></div><button class="btn" data-soon>Verify</button></div>
+    <div style="padding:16px 24px"><div class="eyebrow">Before you can submit</div><div style="display:flex;align-items:baseline;gap:12px;margin-top:6px"><span style="font-size:32px;font-weight:500;line-height:1">${kyb?2:3}</span><span class="small muted">Left before you can submit</span></div>
+      ${kyb?'<div class="small" style="margin-top:10px;color:var(--att)">Your business verification expired on Oct 20. You can keep drafting. Submitting waits for the renewal.</div>':''}</div>
+    ${kyb ? `
+    <div class="row"><span class="ico"><i data-lucide="shield-alert"></i></span><div class="grow"><div class="t">Renew your business verification (KYB)</div><div class="d">Expired Oct 20. Renewal usually takes 1 to 2 business days</div></div><button class="btn" data-a="soon">Renew</button></div>
+    <div class="row"><span class="ico"><i data-lucide="key-round"></i></span><div class="grow"><div class="t">Issuer permission</div><div class="d">Paused until your business is verified again</div></div>${badge('att','Paused')}</div>
+    <div class="row"><span class="ico ok"><i data-lucide="check"></i></span><div class="grow"><div class="t">3 already done</div><div class="d">Your identity, passkey, treasury wallet</div></div><button class="link" data-a="toggle" data-v="done1">${S.done1?'Hide':'Show'}</button></div>`
+    : `
+    <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><div class="grow"><div class="t">Verify your identity</div><div class="d">You, about 5 minutes</div></div><button class="btn" data-a="soon">Verify</button></div>
     <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><div class="grow"><div class="t">Verify your business (KYB)</div><div class="d">Usually 1 to 2 business days</div></div>${badge('prog','In review')}</div>
     <div class="row"><span class="ico"><i data-lucide="key-round"></i></span><div class="grow"><div class="t">Issuer permission</div><div class="d">Granted after your business is verified</div></div>${badge('neu','Waiting')}</div>
-    <div class="row"><span class="ico ok"><i data-lucide="check"></i></span><div class="grow"><div class="t">2 already done</div><div class="d">Passkey, treasury wallet</div></div><button class="link" data-toggle="done1">${S.done1?'Hide':'Show'}</button></div>
-    ${S.done1?`<div class="row" style="padding-left:64px"><div class="grow"><div class="t">Passkey</div><div class="d">Added on this device</div></div>${badge('pos','Done')}</div><div class="row" style="padding-left:64px"><div class="grow"><div class="t">Treasury wallet</div><div class="d">Operation wallet, 0x25AB…297C</div></div>${badge('pos','Done')}</div>`:''}
+    <div class="row"><span class="ico ok"><i data-lucide="check"></i></span><div class="grow"><div class="t">2 already done</div><div class="d">Passkey, treasury wallet</div></div><button class="link" data-a="toggle" data-v="done1">${S.done1?'Hide':'Show'}</button></div>`}
+    ${S.done1?(kyb?[['Your identity','Verified'],['Passkey','Added on this device'],['Treasury wallet','Operation wallet, 0x25AB…297C']]:[['Passkey','Added on this device'],['Treasury wallet','Operation wallet, 0x25AB…297C']]).map(([t,s])=>`<div class="row" style="padding-left:64px"><div class="grow"><div class="t">${t}</div><div class="d">${s}</div></div>${badge('pos','Done')}</div>`).join(''):''}
   </div>
   <div class="card">
     <div style="padding:16px 24px 12px"><div class="eyebrow">For this token</div></div>
     <div class="row"><span class="ico"><i data-lucide="file-text"></i></span><div class="grow"><div class="t">Proof of reserve</div><div class="d">Some custodians require it</div></div></div>
-    <div class="row"><span class="ico ok"><i data-lucide="check"></i></span><div class="grow"><div class="t">3 ready</div><div class="d">Fireblocks, tokens and vaults, custodians</div></div><button class="link" data-toggle="done2">${S.done2?'Hide':'Show'}</button></div>
-    ${S.done2?['Fireblocks connected','2 tokens and vaults found','2 custodians hold platinum'].map(t=>`<div class="row" style="padding-left:64px"><div class="grow t">${t}</div>${badge('pos','Ready')}</div>`).join(''):''}
+    <div class="row"><span class="ico ok"><i data-lucide="check"></i></span><div class="grow"><div class="t">3 ready</div><div class="d">Fireblocks, tokens and vaults, custodians</div></div><button class="link" data-a="toggle" data-v="done2">${S.done2?'Hide':'Show'}</button></div>
+    ${S.done2?['Fireblocks connected','Tokens and vaults found','Custodians registered'].map(t=>`<div class="row" style="padding-left:64px"><div class="grow t">${t}</div>${badge('pos','Ready')}</div>`).join(''):''}
   </div>
-  <div class="footer"><button class="btn" data-go="tokens">Cancel</button><span class="grow"></span><button class="btn primary" data-act="start">Start token draft</button></div>`;
+  <div class="footer"><button class="btn" data-a="go" data-v="tokens">Cancel</button><span class="grow"></span><button class="btn primary" data-a="start">Start token draft</button></div>`;
+};
 
 V.ad1 = () => {
   const d = S.d;
-  const tok = [
-    ['agp','Ault Platinum (AGP)','Ault Treasury, Vault 1','0x8f3a…c21b on Ault Mainnet, 6 decimals','#b3bac4'],
-    ['apd','Ault Palladium (APD)','Ault Operations, Vault 2','0x41c0…9e07 on Ault Mainnet, 6 decimals','#c9b48f'],
-  ];
+  const list = Object.entries(TOKENS).filter(([,t])=>t.kind===d.kind);
+  let body;
+  if (d.tokenSrc==='self') body = selfRegister();
+  else if (scen('fbFail')) body = `<div class="empty"><span class="ico" style="background:var(--crit-bg);color:var(--danger)"><i data-lucide="cloud-off"></i></span><b>Couldn’t load tokens from Fireblocks</b><p>Your Fireblocks workspace didn’t answer, so we can’t show the tokens you can list. Try again, or register the token yourself with its contract address.</p><div style="display:flex;gap:12px;align-items:center"><button class="btn" data-a="retry">Try again</button><button class="link" data-a="soon">Check connection in Credentials ↗</button></div></div>`;
+  else if (scen('noFbTokens')) body = `<div class="empty"><span class="ico"><i data-lucide="inbox"></i></span><b>No tokens to list from Fireblocks</b><p>Every token in your Fireblocks vaults is listed already, or none is deployed yet. Register a newly deployed token with its contract address.</p><button class="btn" data-a="src" data-v="self">Register it yourself</button></div>`;
+  else body = list.map(([id,t])=>`<button class="opt-row ${d.token===id?'sel':''}" data-a="token" data-v="${id}"><span class="radio"></span><span class="tile"><span class="coin" style="background:${t.color}"></span></span><span class="grow"><b style="font-weight:500">${t.name} (${t.sym})</b><span class="small muted" style="display:block">${t.vault}</span>${d.token===id?`<span class="small muted">${t.addr} on Ault Mainnet, ${t.dec} decimals</span>`:''}</span></button>`).join('')
+    + (d.kind==='commodity' ? `<div class="opt-row dis"><span class="radio" style="border-color:#e6e8eb"></span><span class="tile"><span class="coin" style="background:#dfe2e6"></span></span><span class="grow"><span style="display:block">Ault Silver (ASLV)</span><span class="small">Already listed</span></span>${badge('neu','Listed')}</div>` : '');
   return wrap(0, `
   <div class="card"><div class="card-h"><h2>What kind of token is it? <span class="req">*</span></h2></div>
-    <div class="card-b"><div class="typecards">
-      <button class="typecard ${d.kind==='commodity'?'sel':''}" data-kind="commodity"><span class="radio" style="${d.kind==='commodity'?'border:4px solid var(--brand)':''}"></span><span><b>Commodity</b><span class="small muted">Metal held at a custodian</span><br><span class="small muted">Requests are called Issue and Redeem</span></span></button>
-      <button class="typecard ${d.kind==='custom'?'sel':''}" data-kind="custom"><span class="radio" style="${d.kind==='custom'?'border:4px solid var(--brand)':''}"></span><span><b>Custom token</b><span class="small muted">Any other asset you back</span><br><span class="small muted">Requests are called Mint and Burn</span></span></button>
-    </div><div class="hint">This choice sets which custodians you can pick (only those that hold this type) and the words on requests (${d.kind==='custom'?'Mint and Burn':'Issue and Redeem'}).</div></div>
+    <div class="card-b"><div class="typecards" role="radiogroup">
+      <button class="typecard ${d.kind==='commodity'?'sel':''}" role="radio" aria-checked="${d.kind==='commodity'}" data-a="kind" data-v="commodity"><span class="radio"></span><span><b>Commodity</b><span class="small muted">Metal held at a custodian</span><br><span class="small muted">Requests are called Issue and Redeem</span></span></button>
+      <button class="typecard ${d.kind==='custom'?'sel':''}" role="radio" aria-checked="${d.kind==='custom'}" data-a="kind" data-v="custom"><span class="radio"></span><span><b>Custom token</b><span class="small muted">Any other asset you back</span><br><span class="small muted">Requests are called Mint and Burn</span></span></button>
+    </div><div class="hint">This choice sets which custodians you can pick (only those that hold this type) and the words on requests (${T().words}).</div></div>
   </div>
   <div class="card"><div class="card-h"><h2>Which token are you listing? <span class="req">*</span></h2></div>
-    <div class="card-b" style="padding-bottom:16px"><div class="seg"><button class="${d.tokenSrc==='fireblocks'?'on':''}" data-src="fireblocks">From Fireblocks</button><button class="${d.tokenSrc==='self'?'on':''}" data-src="self">Register it yourself</button></div></div>
-    ${d.tokenSrc==='fireblocks' ? tok.map(t=>`<button class="opt-row ${d.token===t[0]?'sel':''}" data-token="${t[0]}"><span class="radio"></span><span class="tile"><span style="width:14px;height:14px;border-radius:50%;background:${t[4]}"></span></span><span class="grow"><b style="font-weight:500">${t[1]}</b><span class="small muted" style="display:block">${t[2]}</span>${d.token===t[0]?`<span class="small muted">${t[3]}</span>`:''}</span></button>`).join('')
-      + `<div class="opt-row dis"><span class="radio" style="border-color:#e6e8eb"></span><span class="tile"><span style="width:14px;height:14px;border-radius:50%;background:#dfe2e6"></span></span><span class="grow"><span style="display:block">Ault Silver (ASLV)</span><span class="small">Already listed</span></span>${badge('neu','Listed')}</div>`
-      : `<div class="card-b"><div class="field"><label class="label" for="addr">Contract address <span class="req">*</span></label><input class="input" id="addr" placeholder="0x…" data-bind="addr" value="${esc(d.addr||'')}"><span class="hint">This prototype covers the Fireblocks path. Switch back to continue.</span></div></div>`}
-  </div>`, 'ad2', {back:false, disabled: d.tokenSrc!=='fireblocks'});
+    <div class="card-b" style="padding-bottom:16px"><div class="seg"><button class="${d.tokenSrc==='fireblocks'?'on':''}" data-a="src" data-v="fireblocks">From Fireblocks</button><button class="${d.tokenSrc==='self'?'on':''}" data-a="src" data-v="self">Register it yourself</button></div>${err('token', S.errs.token)}</div>
+    ${body}
+  </div>`, 'ad2', {back:false});
 };
+
+function selfRegister(){
+  const d = S.d, r = d.read, st = r?.state;
+  const v = (k, fallback) => st==='ok' ? esc(r[k]) : (st==='reading' ? 'Reading…' : fallback);
+  let status = '';
+  if (st==='reading') status = `<span class="hint" style="display:flex;gap:8px;align-items:center"><span class="spin dark"></span>Reading the contract on Ault Mainnet…</span>`;
+  else if (st==='ok') status = `<span class="hint" style="color:var(--pos)">Read from the contract.</span>`;
+  else if (st==='netFail') status = `<span class="err">${esc(r.msg)} <button class="link small" data-a="readAgain">Try again</button></span>`;
+  else if (st) status = `<span class="err">${esc(r.msg)}</span>`;
+  const showFmtErr = S.errs.addr && !st;
+  return `<div class="card-b">
+    <div class="field"><span class="label">Network <span class="req">*</span></span>${sel('network',['Ault Mainnet'],'Ault Mainnet')}</div>
+    <div class="field"><label class="label" for="addr">Contract address <span class="req">*</span></label>
+      <input class="input ${(showFmtErr||(st&&st!=='ok'&&st!=='reading'))?'bad':''}" id="addr" placeholder="0x…" data-bind="addr" value="${esc(d.addr)}" autocomplete="off" spellcheck="false" style="font-family:ui-monospace,Menlo,monospace;font-size:13px">
+      ${showFmtErr ? err('addr', S.errs.addr) : status}</div>
+    <div class="grid2">
+      <div class="field"><span class="label">Symbol</span><div class="input ro">${v('sym','Not read')}</div></div>
+      <div class="field"><span class="label">On-chain name</span><div class="input ro">${v('name','')}</div></div>
+      <div class="field"><span class="label">Decimals</span><div class="input ro">${v('dec','')}</div></div>
+      <div class="field"><span class="label">Contract template</span><div class="input ro">Fireblocks ERC-20F, can freeze and seize</div></div>
+    </div></div>`;
+}
 
 V.ad2 = () => {
   const d = S.d;
@@ -466,289 +669,634 @@ V.ad2 = () => {
         <div class="thumb ${d.img?'has':''}" style="${d.img?`background-image:url('${esc(d.img)}')`:''}"></div>
         <div class="grow" style="display:flex;flex-direction:column;gap:6px">
           <div style="display:flex;gap:12px"><label class="btn"><img src="assets/upload.svg" width="16" alt="">Upload image<input type="file" accept="image/png,image/jpeg" hidden data-file="img"></label>
-          <input class="input" style="height:36px" placeholder="Paste image URL" data-bind="imgUrl" value="${esc(d.imgUrl)}"></div>
-          <span class="hint">Square PNG or JPG, 256 × 256 recommended.${d.img?' <button class="link small" data-act="clearimg">Remove image</button>':''}</span>
+          <input class="input ${d.imgErr?'bad':''}" style="height:36px" placeholder="Paste image URL" data-bind="imgUrl" value="${esc(d.imgUrl)}" aria-label="Image URL"></div>
+          ${d.imgErr ? err('imgUrl','We couldn\'t load an image from this URL. Check the link or upload a file instead.') : `<span class="hint">Square PNG or JPG, 256 × 256 recommended.${d.img?' <button class="link small" data-a="clearImg">Remove image</button>':''}</span>`}
         </div></div></div>
-    <div class="field"><label class="label" for="pn">Public name <span class="req">*</span></label><input class="input" id="pn" data-bind="name" value="${esc(d.name)}" maxlength="40"></div>
+    <div class="field"><label class="label" for="pn">Public name <span class="req">*</span></label><input class="input ${bad('name')}" id="pn" data-bind="name" value="${esc(d.name)}" placeholder="e.g. Ault Platinum" maxlength="40">${err('name', S.errs.name)}</div>
     <div class="field"><label class="label" for="ds">One-line description <span class="opt">(optional)</span></label><input class="input" id="ds" data-bind="desc" value="${esc(d.desc)}" maxlength="120"></div>
     <div class="field"><span class="label">Public documents <span class="opt">(optional)</span></span>
       <span class="hint">Upload a whitepaper, summary or terms. They become public once the token is listed.</span>
-      ${d.docs.map((f,i)=>`<div class="file"><span class="ico"><i data-lucide="file-text"></i></span><span class="grow"><span style="display:block;font-weight:500;font-size:13px">${esc(f.name)}</span><span class="hint">${kb(f.size)}</span></span><button class="link danger" data-rmdoc="${i}">Remove</button></div>`).join('')}
+      ${d.docs.map((f,i)=>`<div class="file"><span class="ico"><i data-lucide="file-text"></i></span><span class="grow"><span style="display:block;font-weight:500;font-size:13px">${esc(f.name)}</span><span class="hint">${mb(f.size)}</span></span><button class="link danger" data-a="rmDoc" data-v="${i}">Remove</button></div>`).join('')}
       <label class="drop" data-drop="docs"><b style="font-weight:500">Add document</b><span class="muted">or drop here</span><input type="file" multiple accept=".pdf,.doc,.docx,.png,.jpg" hidden data-file="docs"></label>
     </div>
    </div></div>
   <div class="card"><div class="card-h" style="padding-bottom:12px"><div class="eyebrow">How investors see it</div></div>
-    <div class="card-b" style="gap:12px;padding-bottom:20px"><div class="idn">${tokenImg(44)}<div><b style="font-size:16px;font-weight:600" id="pv-name">${esc(d.name||'Token name')}</b><span>${sym()} by Ault Global Commodities</span></div></div>
-    <div class="small muted" style="font-size:13px" id="pv-desc">${esc(d.desc)}</div></div></div>`, 'ad3', {disabled:!d.name.trim()});
+    <div class="card-b" style="gap:12px;padding-bottom:20px"><div class="idn">${tokenImg(d,44)}<div><b style="font-size:16px;font-weight:600" id="pv-name">${esc(d.name||'Token name')}</b><span>${sym()} by Ault Global Commodities</span></div></div>
+    <div class="small muted" style="font-size:13px" id="pv-desc">${esc(d.desc)}</div></div></div>`, 'ad3');
 };
 
 V.ad3 = () => {
-  const d = S.d, tw = d.custodians.tw, sb = d.custodians.sb;
-  const any = tw || sb;
-  const ready = any && (!tw || d.por);
+  const d = S.d, t = tkOf(d), list = custList(d);
+  let body;
+  if (scen('custFail')) body = `<div class="empty"><span class="ico" style="background:var(--crit-bg);color:var(--danger)"><i data-lucide="cloud-off"></i></span><b style="color:var(--danger)">Couldn't load custodians</b><p>Check your connection and try again. Your draft is kept.</p><button class="btn" data-a="retry">Try again</button></div>`;
+  else if (scen('noCustodian')) body = `<div class="empty"><span class="ico"><i data-lucide="warehouse"></i></span><b>No custodian holds ${t.asset.toLowerCase()} yet</b><p>Register the vault that keeps your ${t.asset.toLowerCase()} under Custodians, and say which assets it takes. Your draft stays here.</p><button class="link" data-a="soon">Go to Custodians ↗</button></div>`;
+  else body = list.map(c => {
+    const on = !!d.custodians[c.id];
+    let extra = '';
+    if (on && c.por) extra = `
+      <div style="background:#f3f6fa;padding:0 24px 16px 68px"><div class="grid2">
+        <div class="field"><label class="label" for="ah">Account holder name <span class="opt">(optional)</span></label><input class="input" id="ah" data-bind="holder" value="${esc(d.holder)}"></div>
+        <div class="field"><label class="label" for="an">Account number <span class="opt">(optional)</span></label><input class="input" id="an" data-bind="acct" placeholder="As shown on the custody agreement" value="${esc(d.acct)}"></div></div></div>
+      <div style="background:#f3f6fa;border-top:1px solid var(--border);padding:14px 24px">
+        <div style="display:flex;gap:12px;align-items:center"><span class="ico" style="background:#fff"><i data-lucide="file-text"></i></span><span class="grow"><b style="font-weight:500">Proof of reserve <span class="req">*</span></b>
+          <span class="hint" style="display:block">${d.por?`${esc(d.por.name)}, ${mb(d.por.size)}. Public after listing`:(d.porFlag?'The reviewer flagged the last file. Upload a corrected one.':'Public after listing')}</span></span>
+        ${d.por?'<button class="link danger" data-a="rmPor">Remove</button>':(d.porErr?'':'<label class="btn">Upload<input type="file" hidden accept=".pdf,.png,.jpg" data-file="por"></label>')}</div>
+        ${d.porErr?`<div style="margin:8px 0 0 40px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="err">${esc(d.porErr)}</span><label class="link" style="cursor:pointer">Choose another file<input type="file" hidden accept=".pdf,.png,.jpg" data-file="por"></label><button class="link danger" data-a="rmPor">Remove</button></div>`:''}
+        ${err('por', S.errs.por)}
+        <div class="hint" style="margin:8px 0 0 40px">${c.note}</div></div>`;
+    return `<button class="opt-row ${on?'sel':''}" role="checkbox" aria-checked="${on}" data-a="cust" data-v="${c.id}"><span class="chk ${on?'on':''}"></span><span class="tile">${c.ini}</span><span class="grow"><b style="font-weight:600">${c.name}</b><span class="small muted" style="display:block">${t.asset}, ${c.where}</span></span></button>${extra}`;
+  }).join('')
+  + (d.kind==='commodity' ? `${d.showCombo?`<div class="opt-row dis"><span class="chk" style="border-color:#e6e8eb"></span><span class="tile" style="color:var(--faint)">BS</span><span class="grow"><span style="display:block;font-weight:600">Brink’s Salt Lake</span><span class="small">${t.asset}, Utah. Settles differently, so it can’t be picked with The Wyoming Reserve</span></span></div>`:''}
+    <div class="row" style="padding:12px 24px"><span class="grow small muted">1 custodian can't be combined</span><button class="link" data-a="combo">${d.showCombo?'Hide':'Show'}</button></div>` : '');
   return wrap(2, `
-  <div class="card"><div class="card-h"><h2>Who holds the asset? <span class="req">*</span></h2><div class="hint" style="margin-top:2px">Select one or more.</div></div>
-    <button class="opt-row ${tw?'sel':''}" data-cust="tw"><span class="chk ${tw?'on':''}"></span><span class="tile">TW</span><span class="grow"><b style="font-weight:600">The Wyoming Reserve</b><span class="small muted" style="display:block">Platinum, Wyoming, manual check</span></span></button>
-    ${tw?`<div style="background:#f3f6fa;padding:0 24px 16px 68px"><div class="grid2">
-      <div class="field"><label class="label" for="ah">Account holder name <span class="opt">(optional)</span></label><input class="input" id="ah" data-bind="holder" value="${esc(d.holder)}"></div>
-      <div class="field"><label class="label" for="an">Account number <span class="opt">(optional)</span></label><input class="input" id="an" data-bind="acct" placeholder="As shown on the custody agreement" value="${esc(d.acct)}"></div></div></div>
-    <div style="background:#f3f6fa;border-top:1px solid var(--border);padding:14px 24px 14px 24px">
-      <div style="display:flex;gap:12px;align-items:center"><span class="ico" style="background:#fff"><i data-lucide="file-text"></i></span><span class="grow"><b style="font-weight:500">Proof of reserve <span class="req">*</span></b><span class="hint" style="display:block">${d.por?`${esc(d.por.name)}, ${kb(d.por.size)}. Public after listing`:'Public after listing'}</span></span>
-      ${d.por?'<button class="link danger" data-act="rmpor">Remove</button>':'<label class="btn">Upload<input type="file" hidden accept=".pdf,.png,.jpg" data-file="por"></label>'}</div>
-      <div class="hint" style="margin:8px 0 0 44px">Requests will use manual settlement to issue and FedEx delivery to redeem.</div></div>`:''}
-    <button class="opt-row ${sb?'sel':''}" data-cust="sb"><span class="chk ${sb?'on':''}"></span><span class="tile">SB</span><span class="grow"><b style="font-weight:600">Seoul Bullion Vault</b><span class="small muted" style="display:block">Platinum, Korea, API</span></span></button>
-    ${d.showCombo?`<div class="opt-row dis"><span class="chk" style="border-color:#e6e8eb"></span><span class="tile" style="color:var(--faint)">BS</span><span class="grow"><span style="display:block;font-weight:600">Brink’s Salt Lake</span><span class="small">Platinum, Utah. Settles differently, so it can’t be picked with The Wyoming Reserve</span></span></div>`:''}
-    <div class="row" style="padding:12px 24px"><span class="grow small muted">1 custodian can't be combined</span><button class="link" data-act="combo">${d.showCombo?'Hide':'Show'}</button></div>
-  </div>`, 'ad4', {disabled:!ready});
+  <div class="card"><div class="card-h"><h2>Who holds the asset? <span class="req">*</span></h2><div class="hint" style="margin-top:2px">Select one or more.</div>${err('cust', S.errs.cust)}</div>${body}</div>`, 'ad4');
 };
 
-function sel(bind, opts, val){ return `<select class="select" data-bind="${bind}">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${v===val?'selected':''}>${esc(l)}</option>`}).join('')}</select>`; }
-
 V.ad4 = () => {
-  const d = S.d, s = sym();
-  const n = Number(d.size)||0;
+  const d = S.d, s = sym(), t = T(), n = Number(d.size)||0;
+  const c = custList(d).find(x=>d.custodians[x.id]) || custList(d)[0];
+  const fee = (k, label, per) => `<div class="field"><label class="label" for="${k}">${label} <span class="opt">(optional)</span></label><div class="suffix"><input class="input ${!FEE_RE.test(d[k])||S.errs[k]?'bad':''}" id="${k}" inputmode="decimal" data-bind="${k}" placeholder="No fee" value="${esc(d[k])}"><span>USDT per ${per}</span></div>${!FEE_RE.test(d[k]) ? err(k,'USDT counts in 6 decimals. Use up to 6 decimal places.') : ''}</div>`;
   return wrap(3, `
   <div class="card"><div class="card-h"><h2>Who can request, and how much?</h2></div>
    <div class="card-b">
     <div class="field"><span class="label">Who can request <span class="req">*</span></span>
-      <div class="seg"><button class="${d.who==='any'?'on':''}" data-who="any">Any KYC-verified investor</button><button class="${d.who==='approved'?'on':''}" data-who="approved">Only investors I approve</button></div>
-      <button class="link small" style="align-self:flex-start;font-size:12px" data-soon>Use different rules for redemption</button></div>
+      <div class="seg"><button class="${d.who==='any'?'on':''}" data-a="who" data-v="any">Any KYC-verified investor</button><button class="${d.who==='approved'?'on':''}" data-a="who" data-v="approved">Only investors I approve</button></div>
+      <button class="link small" style="align-self:flex-start;font-size:12px" data-a="soon">${t.diffRule}</button></div>
     <div class="field"><label class="label" for="rs">Request size <span class="req">*</span></label>
-      <div style="display:flex;gap:8px;align-items:center"><div style="position:relative;width:210px"><input class="input" id="rs" type="number" min="1" step="1" data-bind="size" value="${esc(d.size)}" style="height:36px;padding-right:48px"><span class="small muted" style="position:absolute;right:12px;top:8px">${s}</span></div>
-      ${[1,10,100].map(v=>`<button class="btn" style="padding:0 10px;${n===v?'background:var(--brand-tint);border-color:var(--brand);color:var(--brand)':''}" data-size="${v}">${v}</button>`).join('')}</div>
-      <span class="hint" id="size-hint">${n>0?`Investors request ${n}, ${n*2}, ${n*3} ${s}…`:'<span class="req">Enter a size above 0.</span>'}</span></div>
+      <div style="display:flex;gap:8px;align-items:center"><div style="position:relative;width:210px"><input class="input ${bad('size')}" id="rs" type="number" min="1" step="1" data-bind="size" value="${esc(d.size)}" style="height:36px;padding-right:56px"><span class="small muted" style="position:absolute;right:12px;top:8px">${s}</span></div>
+      ${[1,10,100].map(v=>`<button class="btn" style="padding:0 10px;${n===v?'background:var(--brand-tint);border-color:var(--brand);color:var(--brand)':''}" data-a="size" data-v="${v}">${v}</button>`).join('')}</div>
+      <span class="hint" id="size-hint">${n>0?`Investors request ${n}, ${n*2}, ${n*3} ${s}…`:''}</span>${err('size', S.errs.size)}</div>
    </div></div>
   <div class="card"><div class="card-h" style="padding-bottom:8px"><div class="eyebrow">Filled in for you</div><div class="hint" style="margin-top:6px">We set these from your Backing choice. Change anything right here.</div></div>
    <div class="card-b">
     <div class="grid2">
-      <div class="field"><span class="label">Issue requests</span>${sel('issueVia',['Manual settlement'],d.issueVia)}</div>
-      <div class="field"><span class="label">Redeem requests</span>${sel('redeemVia',['FedEx delivery'],d.redeemVia)}</div>
-      <div class="field"><span class="label">Issue fee <span class="opt">(optional)</span></span>${sel('issueFee',['No fee','0.1%','0.25%','0.5%'],d.issueFee)}</div>
-      <div class="field"><span class="label">Redeem fee <span class="opt">(optional)</span></span>${sel('redeemFee',['No fee','0.1%','0.25%','0.5%'],d.redeemFee)}</div>
+      <div class="field"><span class="label">${t.issueReqs}</span>${sel('issueVia',[c.issueVia],c.issueVia)}</div>
+      <div class="field"><span class="label">${t.redeemReqs}</span>${sel('redeemVia',[c.redeemVia],c.redeemVia)}</div>
+      ${fee('issueFee', `${t.issue} fee`, t.per1)}
+      ${fee('redeemFee', `${t.redeem} fee`, t.per2)}
     </div>
     <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Excluded investors <span class="opt">(optional)</span></span>${sel('excluded',[['none','None. Add investors to exclude'],['jason','Jason Lee, Member'],['colossus','Colossus, Another organization']],d.excluded)}</div>
-    <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Terms investors accept</span>${sel('terms',['2 required, 1 optional'],d.terms)}<span class="hint">Backing &amp; custody acknowledgement, Redemption policy (required). Reserve attestation updates (optional).</span></div>
-   </div></div>`, 'ad5', {disabled:!(n>0)});
+    <div class="field" style="max-width:calc(50% + 14px)"><span class="label">Terms investors accept</span>${sel('terms',['2 required, 1 optional'],d.terms)}<span class="hint">Backing &amp; custody acknowledgement and Redemption policy are required. Reserve attestation updates is optional.</span></div>
+   </div></div>`, 'ad5');
 };
 
 V.ad5 = () => {
-  const d = S.d;
-  const feeNeeded = d.issueFee!=='No fee' || d.redeemFee!=='No fee';
-  const okRoles = d.roles.mint.length && d.roles.burn.length;
+  const d = S.d, t = T();
+  const fee = feeSet(d);
   return wrap(4, `
-  <div class="card"><div class="card-h"><h2>Request roles</h2><div class="hint" style="margin-top:12px">Who handles issuance and redemption requests for this token.</div></div>
-   <div class="card-b">${ROLES.map(([k,n,req,desc])=>`
-    <div class="rolerow"><div><div class="label">${n}${req?' <span class="req">*</span>':''}</div><div class="hint">${desc}</div></div>
-     <div class="chips" style="position:relative">${d.roles[k].map(id=>{const m=MEMBERS.find(x=>x.id===id);return `<span class="chip">${esc(m.name)}${m.meta?` <small>${m.meta}</small>`:''}<button aria-label="Remove ${esc(m.name)}" data-rmrole="${k}:${id}">×</button></span>`}).join('')}
-      <button class="addchip" data-addrole="${k}">+ Add</button>
-      ${S.menu===k?`<div class="menu" style="top:32px;left:0">${MEMBERS.filter(m=>!d.roles[k].includes(m.id)).map(m=>`<button data-pick="${k}:${m.id}"><span class="grow">${esc(m.name)}<small>${esc(m.sub)}${m.meta?', '+m.meta:''}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">Everyone is already added.</div>'}</div>`:''}
-      ${req&&!d.roles[k].length?'<span class="small req" style="width:100%">Add at least one.</span>':''}</div></div>`).join('')}
+  <div class="card"><div class="card-h"><h2>Request roles</h2><div class="hint" style="margin-top:12px">${t.roleSub}</div></div>
+   <div class="card-b">${ROLES.map(([k,n,req])=>`
+    <div class="rolerow"><div><div class="label">${n}${req?' <span class="req">*</span>':''}</div><div class="hint">${t.roles[k]}</div></div>
+     <div class="chips" style="position:relative">${d.roles[k].map(id=>{const m=MEMBERS.find(x=>x.id===id);return `<span class="chip">${esc(m.name)}${m.meta?` <small>${m.meta}</small>`:''}<button aria-label="Remove ${esc(m.name)}" data-a="rmRole" data-v="${k}:${id}">×</button></span>`}).join('')}
+      <button class="addchip" data-a="addRole" data-v="${k}" aria-expanded="${S.menu===k}">+ Add</button>
+      ${S.menu===k?`<div class="menu" style="top:32px;left:0">${MEMBERS.filter(m=>!d.roles[k].includes(m.id)).map(m=>`<button data-a="pick" data-v="${k}:${m.id}"><span class="grow">${esc(m.name)}<small>${esc(m.sub)}${m.meta?', '+m.meta:''}</small></span></button>`).join('')||'<div class="hint" style="padding:8px">Everyone is already added.</div>'}</div>`:''}
+      ${S.errs[k] && !d.roles[k].length ? `<span class="err" style="width:100%">${S.errs[k]}</span>` : ''}</div></div>`).join('')}
    </div></div>
   <div class="card"><div class="card-h" style="padding-bottom:12px"><div class="eyebrow">Wallets and agreements</div></div>
    <div class="card-b" style="max-width:calc(50% + 48px)">
     <div class="field"><span class="label">Treasury wallet <span class="req">*</span></span>${sel('treasury',[['op','Operation wallet, 0x25AB…297C (Default)'],['fee','Fee wallet, 0x9C1D…4E20']],d.treasury)}</div>
-    <div class="field"><span class="label">Fee wallet${feeNeeded?' <span class="req">*</span>':''}</span>${sel('feeWallet',[['',feeNeeded?'Select a wallet':'Select a wallet. Needed with a fee'],['op','Operation wallet, 0x25AB…297C'],['fee','Fee wallet, 0x9C1D…4E20']],d.feeWallet)}${feeNeeded&&!d.feeWallet?'<span class="small req">Choose a fee wallet. A fee is set.</span>':''}</div>
-    <div class="field"><span class="label">Signed agreements <span class="opt">(optional)</span></span>${sel('agreements',['Off','Issuance','Redemption','Issuance and redemption'],d.agreements)}</div>
-   </div></div>`, 'ad5b', {disabled: !okRoles || (feeNeeded && !d.feeWallet)});
+    <div class="field"><span class="label">Fee wallet (USDT)${fee?' <span class="req">*</span>':''}</span>${sel('feeWallet',[['',fee?'Select a wallet':'Select a wallet. Needed with a fee'],['op','Operation wallet, 0x25AB…297C'],['fee','Fee wallet, 0x9C1D…4E20']],d.feeWallet)}${err('feeWallet', S.errs.feeWallet)}</div>
+    <div class="field"><span class="label">Signed agreements <span class="opt">(optional)</span></span>${sel('agreements',['Off','Issuance','Redemption','Issuance and redemption'],scen('docusignOff')?'Off':d.agreements, scen('docusignOff')?'disabled':'')}
+      ${scen('docusignOff')?'<span class="hint">Connect DocuSign on the Credentials page to enable agreement requirements.</span>':''}</div>
+   </div></div>`, 'ad5b');
 };
 
 V.ad5b = () => {
-  const d = S.d;
+  const d = S.d, s = sym();
+  const fromFb = scen('noVault') || scen('noAsset') || scen('fbNoAnswer');
+  const vaultField = scen('fbNoAnswer') ? `
+    <span class="err">The Fireblocks workspace didn’t answer. Check the credential, or enter the IDs by hand.</span>
+    <div class="field"><label class="label" for="vid">Vault account ID <span class="req">*</span></label><input class="input ${bad('vaultId')}" id="vid" data-bind="vaultId" value="${esc(d.vaultId)}" placeholder="The Fireblocks vault that signs">${err('vaultId', S.errs.vaultId)}</div>
+    <div class="field"><label class="label" for="aid">Asset ID <span class="req">*</span></label><input class="input ${bad('assetId')}" id="aid" data-bind="assetId" value="${esc(d.assetId)}" placeholder="The on-chain token this operates on">${err('assetId', S.errs.assetId)}</div>`
+    : `
+    <div class="field"><span class="label">Vault account <span class="req">*</span></span>${(scen('noVault')||scen('noAsset')) ? `<select class="select bad" disabled><option>Select a vault account</option></select>
+      <span class="err">${scen('noVault')?`No vault in this workspace holds ${s}_AULT. Create its wallet in a Fireblocks vault first.`:'No Fireblocks asset is linked to this token’s contract. Add the asset in Fireblocks, then try again.'} <button class="link small" data-a="retry">Try again</button></span>`
+      : sel('vault',[['Vault 1','Vault 1, Ault Treasury'],['Vault 2','Vault 2, Ault Operations']],d.vault)}</div>
+    <div class="field"><span class="label">Asset</span><div class="input ro">${scen('noAsset')?'Not linked':s+'_AULT'}</div></div>`;
   return wrap(4, `
-  <div class="card"><div class="card-h"><h2>Who signs on-chain?</h2><div class="hint" style="margin-top:12px">Set from the token you picked. Change them here if a different vault signs.</div></div>
+  <div class="card"><div class="card-h"><h2>Who signs on-chain?</h2><div class="hint" style="margin-top:12px">${fromFb?'We read these from Fireblocks. Change them here if a different vault should sign.':'Set from the token you picked. Change them here if a different vault signs.'}</div></div>
    <div class="card-b" style="max-width:calc(50% + 48px)">
     <div class="field"><span class="label">Executor <span class="req">*</span></span>${sel('executor',['Fireblocks'],d.executor)}</div>
     <div class="field"><span class="label">Credential <span class="req">*</span></span>${sel('credential',[['treasury','Ault Treasury, Mainnet signer'],['ops','Ault Ops, Testnet signer']],d.credential)}</div>
-    <div class="field"><span class="label">Vault account <span class="req">*</span></span>${sel('vault',[['Vault 1','Vault 1, Ault Treasury'],['Vault 2','Vault 2, Ault Operations']],d.vault)}</div>
-    <div class="field"><span class="label">Asset</span><div class="input" style="display:flex;align-items:center;background:var(--bg-subtle);color:var(--muted)">${sym()}_AULT</div></div>
-    <label style="display:flex;gap:10px;align-items:center;cursor:pointer"><span class="chk ${d.burnOther?'on':''}" data-act="burnother"></span><span class="label" data-act="burnother">Burn is signed by a different vault</span></label>
-    ${d.burnOther?`<div class="field" style="padding-left:26px"><span class="label">Burn vault account</span>${sel('burnVault',[['Vault 2','Vault 2, Ault Operations'],['Vault 1','Vault 1, Ault Treasury']],d.burnVault||'Vault 2')}</div>`:''}
-    <div class="field"><label class="label" for="tn">Transaction note <span class="opt">(optional)</span></label><input class="input" id="tn" data-bind="note" placeholder="e.g. ${sym()} listing" value="${esc(d.note)}"></div>
+    ${vaultField}
+    <button style="display:flex;gap:10px;align-items:center;border:0;background:none;padding:0" role="checkbox" aria-checked="${d.burnOther}" data-a="burnOther"><span class="chk ${d.burnOther?'on':''}"></span><span class="label">Burn is signed by a different vault</span></button>
+    ${d.burnOther?`<div class="field" style="padding-left:26px"><span class="label">Burn vault account</span>${sel('burnVault',[['Vault 2','Vault 2, Ault Operations'],['Vault 1','Vault 1, Ault Treasury']],d.burnVault)}</div>`:''}
+    <div class="field"><label class="label" for="tn">Transaction note <span class="opt">(optional)</span></label><input class="input" id="tn" data-bind="note" placeholder="e.g. ${s} listing" value="${esc(d.note)}"></div>
    </div></div>`, 'ad6');
 };
 
-V.ad6 = () => `
-  <button class="back" data-go="tokens">← Your tokens</button>${draftHead()}${steps(5)}
-  <div class="card"><div style="padding:16px 24px 12px"><div class="eyebrow">Ready to submit</div></div>
+function readyCard(){
+  if (scen('kycTodo')) return `<div class="card"><div style="padding:16px 24px 12px"><div class="eyebrow">Before you can submit</div></div>
+    <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><div class="grow"><div class="t">Verify your identity</div><div class="d">You, about 5 minutes</div></div><button class="btn" data-a="soon">Verify identity</button></div>
+    <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><div class="grow"><div class="t">KYB</div><div class="d">Platform, usually 1 to 2 days</div></div>${badge('prog','In review')}</div>
+    <div class="row"><span class="ico"><i data-lucide="key-round"></i></span><div class="grow"><div class="t">Issuer permission</div><div class="d">Platform, after KYB</div></div>${badge('neu','Waiting')}</div></div>`;
+  if (scen('waitingPlatform')) return `<div class="card"><div style="padding:16px 24px 12px"><div class="eyebrow">Waiting on the platform</div></div>
+    <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><div class="grow"><div class="t">KYB</div><div class="d">Platform, usually 1 to 2 days</div></div>${badge('prog','In review')}</div>
+    <div class="row"><span class="ico"><i data-lucide="key-round"></i></span><div class="grow"><div class="t">Issuer permission</div><div class="d">Platform, after KYB</div></div>${badge('neu','Waiting')}</div>
+    <div class="row hint" style="font-size:12px">We'll notify you when both are done. Come back in this browser, where your draft is saved.</div></div>`;
+  if (scen('kybExpired')) return `<div class="card"><div style="padding:16px 24px 12px"><div class="eyebrow">Before you can submit</div></div>
+    <div class="row"><span class="ico"><i data-lucide="shield-alert"></i></span><div class="grow"><div class="t">KYB</div><div class="d">Expired Oct 20. Renewal usually takes 1 to 2 business days</div></div><button class="btn" data-a="soon">Renew</button></div>
+    <div class="row"><span class="ico"><i data-lucide="key-round"></i></span><div class="grow"><div class="t">Issuer permission</div><div class="d">Paused until your business is verified again</div></div>${badge('att','Paused')}</div></div>`;
+  return `<div class="card"><div style="padding:16px 24px 12px"><div class="eyebrow">Ready to submit</div></div>
     <div class="row"><span class="ico"><i data-lucide="shield-check"></i></span><span class="grow t">KYB</span>${badge('pos','Verified')}</div>
-    <div class="row"><span class="ico"><i data-lucide="key-round"></i></span><span class="grow t">Issuer permission</span>${badge('pos','Granted')}</div></div>
-  <div class="card"><div class="card-h"><h2>What you're submitting</h2></div>${summaryRows(true)}
-    <div style="padding:14px 24px;border-top:1px solid var(--border)">${S.d.reviewFiles?.length?S.d.reviewFiles.map(f=>`<div class="small" style="margin-bottom:6px"><i data-lucide="paperclip" style="width:13px;height:13px;vertical-align:-2px"></i> ${esc(f.name)} <span class="muted">${kb(f.size)}, reviewers only</span></div>`).join(''):''}
+    <div class="row"><span class="ico"><i data-lucide="key-round"></i></span><span class="grow t">Issuer permission</span>${badge('pos','Granted')}</div></div>`;
+}
+
+V.ad6 = () => {
+  const d = S.d, org = S.rule==='org';
+  let top = '';
+  if (S.refused) top = banner('crit','The listing request was refused', `Asset ${esc(sym())}_AULT is already linked to another token. Pick a different asset in Operations, then submit again.`, '<button class="btn" data-a="edit" data-v="ad5b">Open Operations</button>');
+  else if (d.from?.type==='rejected') top = banner('att','Started from your rejected request', `We copied what you submitted on ${fmt(d.from.at)}. The platform flagged Backing: the account number on the custody statement doesn't match the reserve account. Fix it, then submit again.`);
+  else if (d.from?.type==='orgRejected') top = banner('att','Your last proposal was rejected', `${esc(d.from.by)}, ${fmt(d.from.at)}: “${esc(d.from.reason)}” We filled in what you proposed. Change anything before you sign.`);
+  return `<button class="back" data-a="go" data-v="tokens">← Your tokens</button>${top}${draftHead()}${steps(5)}
+  ${readyCard()}
+  <div class="card"><div class="card-h"><h2>What you're submitting</h2></div>${summaryRows(d, true)}
+    <div style="padding:14px 24px;border-top:1px solid var(--border)">${d.reviewFiles.map(f=>`<div class="small" style="margin-bottom:6px"><i data-lucide="paperclip" style="width:13px;height:13px;vertical-align:-2px"></i> ${esc(f.name)} <span class="muted">${mb(f.size)}, reviewers only</span></div>`).join('')}
     <label class="link" style="cursor:pointer;font-size:12px">+ Add files for reviewers (optional)<input type="file" multiple hidden data-file="reviewFiles"></label></div></div>
-  ${footer('submit',{label:'Submit for review'})}`;
+  ${footer('submit',{label: org ? 'Propose for approval' : 'Submit for review', disabled: reviewBlocked()})}`;
+};
+
+/* ---- request detail (AD7, AD7b, AD7w, AD7x, AD8x, PR1–PR5) ---- */
+function reqProgress(r){
+  const org = r.path==='org', s = r.status;
+  const items = [];
+  if (org) items.push(['Proposed', `${fmt(r.at.proposed)} by ${r.by}`], ['Org approval', s==='org' ? `${r.approvals.length} of 2, Governance` : (r.at.orgApproved ? `Approved ${fmt(r.at.orgApproved)}` : 'Governance, 2 of 4')]);
+  else items.push(['Submitted', `${fmt(r.at.submitted)} by ${r.by}`]);
+  items.push(['Platform review', org && !r.at.submitted ? 'After org approval' : '1 to 2 business days'], ['Live','Opens in Your tokens']);
+  const base = org ? 1 : 0; // index of the stage after "submitted/proposed"
+  let cur, stop = null;
+  if (s==='org') cur = 1;
+  else if (s==='review') cur = base+1;
+  else if (s==='live') cur = items.length;
+  else if (s==='rejected') { cur = base+1; stop='stop'; }
+  else if (s==='withdrawn') { cur = base+1; stop='stopn'; }
+  else if (s==='orgRejected') { cur = 1; stop='stop'; }
+  else if (s==='propWithdrawn') { cur = 1; stop='stopn'; }
+  return `<div class="card"><div class="rp">${items.map(([b,sp],i)=>{
+    const cls = i<cur ? 'done' : i===cur ? (stop||'cur') : '';
+    const inner = cls==='done' ? '<img src="assets/check.svg" alt="">' : (cls==='stop'||cls==='stopn') ? '×' : '';
+    return `${i?`<div class="conn ${i<=cur&&!(stop&&i===cur)?'on':''}" style="flex:1"></div>`:''}<div class="s"><span class="ring ${cls}">${inner}</span><div><b style="${i>cur?'color:var(--muted)':''}">${b}</b><span>${esc(sp)}</span></div></div>`;
+  }).join('')}</div></div>`;
+}
+function others(by){ const o = GOVERNANCE.filter(n=>n!==by); return o.slice(0,-1).join(', ') + ' or ' + o.at(-1); }
 
 V.ad7 = () => {
-  const live = S.listing==='live';
-  return `<button class="back" data-go="tokens">← Your tokens</button>
-  ${S.justSubmitted?`<div class="banner"><span class="c"><i data-lucide="check"></i></span><div><b>Submitted for review</b><span>We'll notify you when the platform decides. Usually 1 to 2 business days.</span></div></div>`:''}
-  ${rhead(S.d.name, `Listing request, submitted ${fmt(S.submittedAt)}`, live?badge('pos','Approved'):badge('prog','In review'))}
-  <div class="card"><div class="rp">
-    <div class="s"><span class="ring done"><img src="assets/check.svg" alt=""></span><div><b>Submitted</b><span>${fmt(S.submittedAt)} by Juya Kim</span></div></div><div class="conn on" style="flex:1"></div>
-    <div class="s"><span class="ring ${live?'done':'cur'}">${live?'<img src="assets/check.svg" alt="">':''}</span><div><b>Platform review</b><span>1 to 2 business days</span></div></div><div class="conn ${live?'on':''}" style="flex:1"></div>
-    <div class="s"><span class="ring ${live?'done':''}">${live?'<img src="assets/check.svg" alt="">':''}</span><div><b style="${live?'':'color:var(--muted)'}">Live</b><span>Opens in Your tokens</span></div></div>
-  </div></div>
+  const r = getR(); if (!r) return V.tokens();
+  const d = r.d, nm = d.name, mine = r.by===me().name, s = r.status;
+  const myTurn = s==='org' && !mine && GOVERNANCE.includes(me().name) && !r.approvals.includes(me().name);
+  let top = '', sub = '', bdg = '', side = '';
+  const sideCard = (title, text, btn) => `<div class="card" style="padding:16px"><div class="eyebrow">${title}</div><p class="small muted" style="margin:6px 0 12px">${text}</p>${btn}</div>`;
+  if (s==='org'){
+    sub = `Listing proposal, signed by ${r.by}, ${fmt(r.at.proposed)}`;
+    if (myTurn){
+      bdg = badge('prog','Your turn');
+      top = banner('prog','Your turn: approve this listing proposal', `${esc(r.by)} proposed it. One more approval sends it to the platform for review.`);
+      side = `<div class="card" style="padding:16px"><div class="eyebrow">Governance, 2 of 4</div><p class="small muted" style="margin:6px 0 12px">${esc(me().name)} (you). Approving sends the listing request to the platform.</p><div style="display:flex;gap:8px"><button class="btn wide" data-a="reject" data-v="${r.id}">Reject</button><button class="btn primary wide" data-a="approve" data-v="${r.id}">Approve</button></div></div>`;
+    } else {
+      bdg = badge('prog','Org approval');
+      top = banner('prog','Proposal sent', `Waiting for 1 more approval from Governance: ${esc(others(r.by))}. The listing request goes to the platform once approved.`);
+      side = mine ? sideCard('Need a change?','Withdraw the proposal before it is approved. Nothing is sent to the platform.',`<button class="btn wide" data-a="withdrawProp" data-v="${r.id}">Withdraw proposal</button>`) : '';
+    }
+  } else if (s==='review'){
+    bdg = badge('prog','In review');
+    if (r.path==='org'){
+      sub = `Listing request, proposed ${fmt(r.at.proposed)}, approved by Governance ${fmt(r.at.orgApproved)}`;
+      if (mine) top = banner('ok','Your organization approved it', `Governance approved your proposal on ${fmt(r.at.orgApproved)}, so the listing request went to the platform. Review usually takes 1 to 2 business days.`);
+    } else {
+      sub = `Listing request, submitted ${fmt(r.at.submitted)}`;
+      if (r.fresh) top = banner('ok','Submitted for review',"We'll notify you when the platform decides. Usually 1 to 2 business days.");
+    }
+    side = mine ? sideCard('Need a change?','Withdraw it, then submit a new request.',`<button class="btn wide" data-a="withdrawReq" data-v="${r.id}">Withdraw request</button>`) : '';
+  } else if (s==='live'){
+    bdg = badge('pos','Listed'); sub = `Listing request, submitted ${fmt(r.at.submitted)}, listed ${fmt(r.at.decided)}`;
+    if (r.race) top = banner('att','Your withdrawal didn’t go through', `The platform listed ${esc(nm)} on ${fmtT(r.at.decided)}, just before your withdrawal arrived. Nothing was withdrawn.`);
+    side = r.race ? sideCard('What now?', `${esc(nm)} is live. To stop it, suspend or delist it from the token page.`, `<button class="btn wide" data-a="openToken" data-v="${r.id}">Open ${esc(nm)}</button>`)
+                  : sideCard('Listed', `${esc(nm)} is live in Your tokens.`, `<button class="btn primary wide" data-a="openToken" data-v="${r.id}">Open token</button>`);
+  } else if (s==='rejected'){
+    bdg = badge('crit', r.race ? 'Rejected' : 'Not approved');
+    sub = r.race ? `Listing request, submitted ${fmt(r.at.submitted)}, rejected ${fmt(r.at.decided)}` : `Listing request, decided ${fmt(r.at.decided)}`;
+    if (r.race){
+      top = banner('att','Your withdrawal didn’t go through', `The platform rejected ${esc(nm)} on ${fmtT(r.at.decided)}, just before your withdrawal arrived. Nothing was withdrawn.`);
+      side = sideCard('What now?','See why it was rejected, then start a new draft.',`<button class="btn wide" data-a="seeDecision" data-v="${r.id}">See the decision</button>`);
+    } else {
+      top = banner('crit','Not approved: custody statement',"The account number on the custody statement doesn't match the reserve account. Start a new draft, fix it, and submit again.");
+      side = mine ? sideCard('Try again','Start a new draft with these values. Change what the reviewer flagged, then submit again.',`<button class="btn primary wide" data-a="restart" data-v="${r.id}">Start a new draft</button>`) : '';
+    }
+  } else if (s==='withdrawn'){
+    bdg = badge('neu','Withdrawn'); sub = `Listing request, submitted ${fmt(r.at.submitted)}, withdrawn ${fmt(r.at.withdrawn)}`;
+    top = banner('neu','You withdrew this listing request', `Withdrawn ${fmt(r.at.withdrawn)} by ${esc(r.by)}.${r.reason?` Reason: ${esc(r.reason)}`:''} The platform didn’t decide on it.`);
+    side = mine ? sideCard('List it again','Start a new draft. Nothing from this request carries over.','<button class="btn wide" data-a="startNew">Start a new draft</button>') : '';
+  } else if (s==='orgRejected'){
+    bdg = badge('crit','Rejected'); sub = `Listing proposal, signed by ${r.by}, ${fmt(r.at.proposed)}`;
+    top = r.platformRefused
+      ? banner('crit','The platform refused the listing request', `${esc(r.rejBy)}'s approval was the last one, but the request was not sent. ${esc(r.rejReason)} ${mine ? 'Fix the draft and propose again.' : esc(r.by)+' needs to fix the draft and propose again.'}`)
+      : banner('crit',`Proposal rejected by ${r.rejBy}, ${fmt(r.at.decided)}`, `Reason: ${esc(r.rejReason)} Nothing was sent to the platform.`);
+    side = mine ? sideCard('What now?','Start a new proposal with these details. Change anything before you sign.',`<button class="btn primary wide" data-a="restart" data-v="${r.id}">Edit and propose again</button>`) : '';
+  } else if (s==='propWithdrawn'){
+    bdg = badge('neu','Withdrawn'); sub = `Listing proposal, signed ${fmt(r.at.proposed)}, withdrawn ${fmt(r.at.withdrawn)}`;
+    top = banner('neu','You withdrew this proposal', `Withdrawn ${fmt(r.at.withdrawn)} by ${esc(r.by)}, before Governance approved it. Nothing was sent to the platform.`);
+    side = mine ? sideCard('Propose it again','Start a new draft. Nothing from this proposal carries over.','<button class="btn wide" data-a="startNew">Start a new draft</button>') : '';
+  }
+  const docs = [[porCust(d) ? (d.por ? d.por.name : 'Custody statement') : null,'Public after listing'], ...d.docs.map(f=>[f.name,'Public after listing']), ...d.reviewFiles.map(f=>[f.name,'Reviewers only']), ['KYB pack','Reviewers only']].filter(x=>x[0]);
+  return `<button class="back" data-a="go" data-v="${S.backTo||'tokens'}">← ${S.backTo==='tasks'?'My tasks':'Your tokens'}</button>
+  ${top}
+  ${rhead(d, nm, sub, bdg)}
+  ${reqProgress(r)}
   <div class="cols">
-    <div class="card"><div class="card-h"><h2>What you submitted</h2></div>${summaryRows(false)}</div>
+    <div class="card"><div class="card-h"><h2>${s==='org'&&!mine?`What ${esc(r.by)} proposed`:'What you submitted'}</h2></div>${summaryRows(d, false, s==='rejected'&&!r.race)}</div>
     <div style="display:flex;flex-direction:column;gap:16px">
       <div class="card"><div style="padding:16px 16px 4px"><div class="eyebrow">Documents</div></div>
-        ${[...(S.d.por?[[S.d.por.name.replace(/\.[^.]+$/,'')||'Custody statement','Public after listing']]:[['Custody statement','Public after listing']]), ...S.d.docs.map(f=>[f.name,'Public after listing']), ...(S.d.reviewFiles||[]).map(f=>[f.name,'Reviewers only']), ['KYB pack','Reviewers only']].map(([n,s])=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 16px"><span class="ico" style="background:var(--brand-tint);color:var(--brand)"><i data-lucide="file-text"></i></span><div class="grow"><div style="font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n)}</div><div class="hint">${s}</div></div></div>`).join('')}
+        ${docs.map(([n,s2])=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 16px"><span class="ico" style="background:var(--brand-tint);color:var(--brand)"><i data-lucide="file-text"></i></span><div class="grow"><div style="font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n)}</div><div class="hint">${s2}</div></div></div>`).join('')}
         <div style="height:8px"></div></div>
-      ${live?`<div class="card" style="padding:16px"><div class="eyebrow">Listed</div><p class="small muted" style="margin:6px 0 12px">${esc(S.d.name)} is live in Your tokens.</p><button class="btn primary" style="width:100%;justify-content:center" data-go="ad8">Open token</button></div>`
-      :`<div class="card" style="padding:16px"><div class="eyebrow">Need a change?</div><p class="small muted" style="margin:6px 0 12px">Withdraw it, then submit a new request.</p><button class="btn" style="width:100%;justify-content:center" data-soon>Withdraw request</button></div>`}
+      ${side}
     </div>
   </div>`;
 };
 
-V.ad8 = () => `
-  <button class="back" data-go="tokens">← Tokens</button>
-  <div class="banner"><span class="c"><i data-lucide="check"></i></span><div><b>${esc(S.d.name)} is live</b><span>Listed ${fmt(S.liveAt)}. Issue your first tokens to put ${sym()} in circulation.</span></div></div>
-  <div class="rhead">${tokenImg(56)}<div class="grow"><h1>${esc(S.d.name)}</h1><div class="chips" style="margin-top:8px">${badge('pos','Active')}${badge('neu','Platinum')}${badge('neu','Ault Mainnet')}${badge('neu','Permissioned ERC-20')}</div></div>
-    <button class="btn" data-soon><i data-lucide="upload"></i>Redeem</button><button class="btn primary" data-soon><i data-lucide="download"></i>Issue</button></div>
-  <div class="tabs">${['Overview','Investors','Reserve','Disclosures','Settings'].map((t,i)=>`<button class="tab ${i?'':'on'}" ${i?'data-soon':''}>${t}</button>`).join('')}</div>
+V.ad8 = () => {
+  const r = getR(); if (!r) return V.tokens();
+  const d = r.d, t = tkOf(d), tm = T(d), s = sym(d);
+  return `
+  <button class="back" data-a="go" data-v="tokens">← Tokens</button>
+  ${banner('ok', `${d.name} is live`, `Listed ${fmt(r.at.decided)}. ${tm.firstAction} to put ${esc(s)} in circulation.`)}
+  <div class="rhead">${tokenImg(d,56)}<div class="grow"><h1>${esc(d.name)}</h1><div class="chips" style="margin-top:8px">${badge('pos','Active')}${badge('neu',t.asset)}${badge('neu','Ault Mainnet')}${badge('neu','Permissioned ERC-20')}</div></div>
+    <button class="btn" data-a="soon"><i data-lucide="upload"></i>${tm.redeem}</button><button class="btn primary" data-a="soon"><i data-lucide="download"></i>${tm.issue}</button></div>
+  <div class="tabs">${['Overview','Investors','Reserve','Disclosures','Settings'].map((x,i)=>`<button class="tab ${i?'':'on'}" ${i?'data-a="soon"':''}>${x}</button>`).join('')}</div>
   <div class="card stats">
-    <div><div class="eyebrow">Supply</div><div class="big">0</div><div class="small muted">No ${sym()} issued yet</div></div>
-    <div><div class="eyebrow">Reserve</div><div class="big">0 oz</div><div class="small muted">Nothing deposited at ${esc(custNames()[0])} yet</div></div>
-    <div><div class="eyebrow">Investors</div><div class="big">0</div><div class="small muted">${S.d.who==='any'?'Open to KYC-verified investors':'Only investors you approve'}</div></div>
+    <div><div class="eyebrow">Supply</div><div class="big">0</div><div class="small muted">No ${esc(s)} ${d.kind==='custom'?'minted':'issued'} yet</div></div>
+    <div><div class="eyebrow">Reserve</div><div class="big">0 ${t.unit}</div><div class="small muted">Nothing deposited at ${esc(custNames(d)[0])} yet</div></div>
+    <div><div class="eyebrow">Investors</div><div class="big">0</div><div class="small muted">${d.who==='any'?'Open to KYC-verified investors':'Only investors you approve'}</div></div>
   </div>
   <div class="grid2" style="align-items:start">
-    <div class="card"><div class="card-h" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>Status</h2><div class="hint">What needs a look on this token.</div></div><button class="link small" data-soon>View as investor →</button></div>
-      ${[['Requests in progress','None yet'],['Waiting on you','0'],['Contract','0x8f3a…c21b'],['Last attestation','None yet']].map(([k,v])=>`<div class="sum" style="grid-template-columns:1fr auto"><span class="k">${k}</span><span class="v" style="font-weight:400">${v}</span></div>`).join('')}</div>
+    <div class="card"><div class="card-h" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>Status</h2><div class="hint">What needs a look on this token.</div></div><button class="link small" data-a="soon">View as investor →</button></div>
+      ${[['Requests in progress','None yet'],['Waiting on you','0'],['Contract', d.tokenSrc==='self' ? d.addr.slice(0,6)+'…'+d.addr.slice(-4) : t.addr],['Last attestation','None yet']].map(([k,v])=>`<div class="sum" style="grid-template-columns:1fr auto"><span class="k">${k}</span><span class="v" style="font-weight:400">${esc(v)}</span></div>`).join('')}</div>
     <div class="card"><div class="card-h"><h2>Recent disclosures</h2><div class="hint">No disclosures yet.</div></div></div>
   </div>`;
+};
 
-V.home = () => `
+V.home = () => {
+  const live = S.reqs.filter(r=>r.status==='live');
+  const toks = [...live.map(r=>[r.d.name, sym(r.d), '100%', '0', r.id]), ['Ault Silver','ASLV','100%','5,000'], ['Ault Gold','AGLD','100%','800']];
+  const n = myTasks().length;
+  return `
   <div><h1>Home</h1><div class="sub" style="margin-top:6px">Your organization at a glance.</div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;padding:16px 24px"><span style="font-size:28px;font-weight:500">5</span><div class="grow"><b style="font-weight:500">waiting on you</b><div class="hint">Oldest 3 days</div></div><button class="btn" data-soon>Open My tasks</button></div>
-  <div class="card"><div class="card-h" style="display:flex;justify-content:space-between"><h2 style="font-size:16px">Your tokens <span class="muted" style="font-weight:400">${S.listing==='live'?4:3}</span></h2><button class="link small" data-go="tokens">All tokens</button></div>
-    ${[...(S.listing==='live'?[[S.d.name,sym(),'100%','0','ad8']]:[]),['Ault Silver','ASLV','100%','5,000'],['BMAX','Bitcoin','98%','1,200'],['Ault Gold','AGLD','100%','800']].map(r=>`<div class="row" ${r[4]?`data-go="${r[4]}" style="cursor:pointer"`:''}><div class="grow idn"><div><b>${esc(r[0])}</b><span>${r[1]}</span></div></div><span class="small muted" style="width:60px">${r[2]}</span><span style="width:60px;text-align:right">${r[3]}</span></div>`).join('')}</div>`;
+  <div class="card" style="display:flex;align-items:center;gap:12px;padding:16px 24px"><span style="font-size:28px;font-weight:500">${n}</span><div class="grow"><b style="font-weight:500">waiting on you</b><div class="hint">Oldest 3 days</div></div><button class="btn" data-a="go" data-v="tasks">Open My tasks</button></div>
+  <div class="card"><div class="card-h" style="display:flex;justify-content:space-between"><h2 style="font-size:16px">Your tokens <span class="muted" style="font-weight:400">${toks.length}</span></h2><button class="link small" data-a="go" data-v="tokens">All tokens</button></div>
+    ${toks.map(r=>`<div class="row" ${r[4]?`data-a="openToken" data-v="${r[4]}" style="cursor:pointer"`:''}><div class="grow idn"><div><b>${esc(r[0])}</b><span>${esc(r[1])}</span></div></div>${r[0]==='Ault Gold'?badge('att','Suspended'):''}<span class="small muted" style="width:60px;text-align:right">${r[2]}</span><span style="width:60px;text-align:right">${r[3]}</span></div>`).join('')}</div>`;
+};
 
-/* ---------- modal + notifications ---------- */
+/* ---- My tasks (E1) ---- */
+function myTasks(){
+  const name = me().name;
+  const listing = S.reqs.filter(r=>r.status==='org' && r.by!==name && !r.approvals.includes(name))
+    .map(r=>({id:'r'+r.id, rid:r.id, title:'Approve a listing proposal', sub:`${r.d.name} (${sym(r.d)}), from ${r.by}`, ago:'now'}));
+  return [...listing, ...STATIC_TASKS.map((t,i)=>({id:'s'+i, title:t[0], sub:t[1], ago:t[2]}))];
+}
+V.tasks = () => {
+  const todo = myTasks();
+  const done = S.reqs.filter(r=>r.decidedBy===me().name).map(r=>({id:'d'+r.id, rid:r.id, title: r.status==='orgRejected' && !r.platformRefused ? 'Rejected a listing proposal' : 'Approved a listing proposal', sub:`${r.d.name} (${sym(r.d)}), from ${r.by}`, ago:fmt(r.at.decided||r.at.orgApproved)}));
+  const list = S.taskTab==='todo' ? todo : done;
+  if (!list.find(t=>t.id===S.task)) S.task = list[0]?.id || null;
+  const t = list.find(x=>x.id===S.task);
+  let detail = `<div class="card" style="padding:40px 24px;text-align:center" class="muted"><span class="hint">Pick a task to see it here.</span></div>`;
+  if (t && t.rid){
+    const r = getR(t.rid), d = r.d, open = r.status==='org' && S.taskTab==='todo';
+    detail = `<div style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;gap:12px;align-items:flex-start"><div class="grow"><h2 style="margin:0;font-size:22px">${open?'Approve a listing proposal':esc(t.title)}</h2><div class="sub">List ${esc(d.name)} (${esc(sym(d))}). Proposed by ${esc(r.by)}, ${fmt(r.at.proposed)}</div></div>${open?badge('att','Waiting on you'):badge('neu','Done')}</div>
+      ${reqProgress(r)}
+      ${open?`<div class="card"><div class="card-h" style="padding-bottom:4px"><div class="eyebrow">Your turn</div><h2 style="margin-top:4px;font-size:18px">Check what ${esc(r.by.split(' ')[0])} proposed, then decide</h2></div>
+        <div class="sum" style="grid-template-columns:140px 1fr"><span class="k">Token</span><span class="v">${esc(d.name)} (${esc(sym(d))}) on Ault Mainnet</span></div>
+        <div class="sum" style="grid-template-columns:140px 1fr"><span class="k">Investor terms</span><span class="v">${d.who==='any'?'Any KYC-verified investor':'Only investors you approve'}, steps of ${d.size} ${esc(sym(d))}</span></div>
+        <div class="sum" style="grid-template-columns:140px 1fr"><span class="k">Backed by</span><span class="v">${esc(custNames(d).join(', '))}${d.por?', proof of reserve attached':''}</span></div>
+        <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center"><span class="grow hint">One more approval sends it to the platform for review.</span><button class="btn" data-a="reject" data-v="${r.id}">Reject</button><button class="btn primary" data-a="approve" data-v="${r.id}">Approve proposal</button></div></div>`:''}
+      <div class="card"><div class="card-h" style="padding-bottom:8px"><div class="eyebrow">Details</div></div>
+        ${[['Signing',`${d.vault} by ${d.executor}`],['Roles',rolePeople(d).join(', ')],['Template','Fireblocks ERC-20F'],['Token',`${d.name} (${sym(d)})`]].map(([k,v])=>`<div class="sum" style="grid-template-columns:140px 1fr"><span class="k">${k}</span><span class="v">${esc(v)}</span></div>`).join('')}
+        <div style="padding:12px 24px;border-top:1px solid var(--border)"><button class="link" data-a="openReq" data-v="${r.id}" data-back="tasks">Open the full proposal →</button></div></div>
+    </div>`;
+  } else if (t) detail = `<div class="card" style="padding:24px"><h2 style="margin:0 0 4px;font-size:18px">${esc(t.title)}</h2><div class="hint">${esc(t.sub)}</div><p class="small muted">This task isn’t part of the Add Token prototype.</p></div>`;
+  return `<div><h1>My tasks</h1></div>
+  <div class="tabs"><button class="tab ${S.taskTab==='todo'?'on':''}" data-a="taskTab" data-v="todo">To do <span class="n">${todo.length}</span></button><button class="tab ${S.taskTab==='done'?'on':''}" data-a="taskTab" data-v="done">Done <span class="n">${done.length}</span></button></div>
+  <div class="tasks"><div class="card">${list.map(x=>`<button class="titem ${x.id===S.task?'on':''}" data-a="task" data-v="${x.id}"><span class="grow"><b>${esc(x.title)}</b><span>${esc(x.sub)}</span></span><time>${esc(x.ago)}</time></button>`).join('') || '<div class="hint" style="padding:16px">Nothing here yet.</div>'}</div>${detail}</div>`;
+};
+
+/* ================= modals ================= */
+function signRow(who){
+  if (S.signErr) return `<div class="msign bad"><span class="ico" style="background:#fff"><i data-lucide="x-circle"></i></span><div><b style="font-weight:600">Your passkey didn't sign</b><div class="hint">Nothing was submitted. Try again, or use the device that holds your passkey.</div></div></div>`;
+  if (scen('passkeyOther') && !S.once.passkeyOther) return `<div class="msign"><span class="ico" style="background:#fff"><i data-lucide="smartphone"></i></span><div class="grow"><b style="font-weight:600">Your passkey is on another device</b><div class="hint">Use your phone or the computer that holds it. Your browser shows a QR code to scan. Nothing is submitted until you sign.</div></div></div>`;
+  return `<div class="msign"><span class="ico" style="background:#fff"><i data-lucide="key-round"></i></span><div><b style="font-weight:600">${S.signing?'Waiting for your passkey…':'Sign with your passkey'}</b><div class="hint">${esc(who)}, for Ault Global Commodities</div></div></div>`;
+}
+function signBtn(label, act, danger){
+  if (S.signErr) return `<button class="btn primary" data-a="${act}">Try again</button>`;
+  if (scen('passkeyOther') && !S.once.passkeyOther) return `<button class="btn primary" data-a="otherDevice" data-v="${act}">Use another device</button>`;
+  return `<button class="btn ${danger?'danger':'primary'}" data-a="${act}" ${S.signing?'disabled':''}>${S.signing?'<span class="spin"></span>Signing':label}</button>`;
+}
+const mrows = rows => rows.map(([k,v])=>`<div class="mrow"><span class="k">${k}</span><span class="v">${esc(v)}</span></div>`).join('');
+const modalWrap = (inner, label) => `<div class="scrim" data-a="closeModal"><div class="modal" role="dialog" aria-modal="true" aria-label="${esc(label)}">${inner}</div></div>`;
+const cancelBtn = (txt='Cancel') => `<button class="btn" data-a="closeModal" ${S.signing?'disabled':''}>${txt}</button>`;
+
 function modalHTML(){
-  if (S.modal==='submit') return `<div class="scrim" data-act="closemodal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
-    <div class="mh"><h3 id="mt">Submit ${esc(S.d.name)} for review?</h3><p>The platform checks your settings and documents before the token can take requests.</p></div>
-    <div class="mrow"><span class="k">Review</span><span class="v">Usually 1 to 2 business days</span></div>
-    <div class="mrow"><span class="k">Before a decision</span><span class="v">You can withdraw it</span></div>
-    <div class="mrow"><span class="k">After approval</span><span class="v">${esc(S.d.name)} opens for requests</span></div>
-    <div class="msign"><span class="ico" style="background:#fff"><i data-lucide="key-round"></i></span><div><b style="font-weight:600">${S.signing?'Waiting for your passkey…':'Sign with your passkey'}</b><div class="hint">Juya Kim, for Ault Global Commodities</div></div></div>
-    <div class="mfoot"><button class="btn" data-act="closemodal" ${S.signing?'disabled':''}>Cancel</button><button class="btn primary" data-act="sign" ${S.signing?'disabled':''}>${S.signing?'<span class="spin"></span>Signing':'Sign and submit'}</button></div>
-  </div></div>`;
-  if (S.modal==='discard') return `<div class="scrim" data-act="closemodal"><div class="modal" role="dialog" aria-modal="true">
-    <div class="mh"><h3>Discard this draft?</h3><p>Everything you entered for ${esc(S.d.name||'this token')} is removed from this browser.</p></div>
-    <div class="mfoot"><button class="btn" data-act="closemodal">Keep editing</button><button class="btn primary" style="background:var(--danger);border-color:var(--danger)" data-act="discardok">Discard draft</button></div></div></div>`;
+  const m = S.modal; if (!m) return '';
+  const d = S.d, r = m.rid ? getR(m.rid) : null;
+  if (m.type==='submit'){
+    const org = S.rule==='org';
+    return modalWrap(`<div class="mh"><h3>${org?'Propose':'Submit'} ${esc(d.name)} for review?</h3><p>${org?'Your organization needs 2 of 4 approvals before the listing request is sent to the platform.':'The platform checks your settings and documents before the token can take requests.'}</p></div>
+      ${org ? mrows([['Who approves','Governance, 2 of 4. Your signature counts as 1.'],['Then','Sent to the platform for review once approved'],['Until then','You can withdraw the proposal']])
+            : mrows([['Review','Usually 1 to 2 business days'],['Before a decision','You can withdraw it'],['After approval',`${d.name} opens for requests`]])}
+      ${signRow(me().name)}<div class="mfoot">${cancelBtn()}${signBtn(org?'Sign and propose':'Sign and submit','signSubmit')}</div>`, 'Submit');
+  }
+  if (m.type==='withdrawReq') return modalWrap(`<div class="mh"><h3>Withdraw the ${esc(r.d.name)} listing request?</h3><p>The platform stops reviewing it. This can’t be undone. To list ${esc(r.d.name)} later, submit a new request.</p></div>
+      <div class="mbody"><label class="label" for="wr">Reason <span class="opt">(optional)</span></label><textarea class="input" id="wr" data-mf="reason" placeholder="e.g. Custody agreement is being renewed. We’ll submit again next month.">${esc(S.mf.reason||'')}</textarea><span class="hint">The platform sees this with the withdrawn request.</span></div>
+      ${signRow(me().name)}<div class="mfoot">${cancelBtn('Keep request')}${signBtn('Sign and withdraw','signWithdraw',true)}</div>`, 'Withdraw request');
+  if (m.type==='withdrawProp') return modalWrap(`<div class="mh"><h3>Withdraw this proposal?</h3><p>Governance members can no longer approve it, and nothing is sent to the platform. To list ${esc(r.d.name)} later, start a new draft.</p></div>
+      <div class="mfoot">${cancelBtn('Keep proposal')}<button class="btn danger" data-a="confirmWithdrawProp">Withdraw proposal</button></div>`, 'Withdraw proposal');
+  if (m.type==='approve') return modalWrap(`<div class="mh"><h3>Approve this listing proposal?</h3><p>Yours is the 2nd of 2 approvals. The listing request goes to the platform for review.</p></div>
+      ${signRow(me().name)}<div class="mfoot">${cancelBtn('Keep reviewing')}${signBtn('Sign and approve','signApprove')}</div>`, 'Approve proposal');
+  if (m.type==='reject') return modalWrap(`<div class="mh"><h3>Reject this listing proposal?</h3><p>${esc(r.by)} sees your reason and can propose again. Nothing goes to the platform.</p></div>
+      <div class="mbody"><label class="label" for="rr">Reason <span class="req">*</span></label><textarea class="input ${S.errs.rejReason?'bad':''}" id="rr" data-mf="rejReason" placeholder="e.g. Wait for the Q4 audit before listing.">${esc(S.mf.rejReason||'')}</textarea>${S.errs.rejReason?err('rejReason','Add a reason. Everyone in Governance sees it.'):'<span class="hint">Everyone in Governance sees this reason.</span>'}</div>
+      ${signRow(me().name)}<div class="mfoot">${cancelBtn('Keep reviewing')}${signBtn('Sign and reject','signReject',true)}</div>`, 'Reject proposal');
+  if (m.type==='platformRefused') return modalWrap(`<div class="mh"><h3 style="color:var(--danger)">The platform refused the listing request</h3><p>It was not sent. Reason from the platform: a contract address is 0x followed by 40 hex characters. ${esc(r.by)} needs to fix the draft and propose again.</p></div>
+      <div class="mfoot"><button class="btn primary" data-a="closeModal">Close</button></div>`, 'Refused');
+  if (m.type==='discard') return modalWrap(`<div class="mh"><h3>Discard this draft?</h3><p>Everything you entered for ${esc(d.name||'this token')} is removed from this browser.</p></div>
+      <div class="mfoot">${cancelBtn('Keep editing')}<button class="btn danger" data-a="discardOk">Discard draft</button></div>`, 'Discard');
+  if (m.type==='deleteDraft') return modalWrap(`<div class="mh"><h3>Delete this draft?</h3><p>${esc(d.name||'Untitled token')} and its attached files are removed from this device.</p></div>
+      <div class="mfoot">${cancelBtn('Keep draft')}<button class="btn danger" data-a="discardOk">Delete draft</button></div>`, 'Delete draft');
+  if (m.type==='newOverDraft') return modalWrap(`<div class="mh"><h3>Start a new token?</h3><p>You have an unfinished draft (${esc(d.name||'Untitled token')}). Starting a new token deletes that draft and its attached files from this device.</p></div>
+      <div class="mfoot"><button class="btn" data-a="continueDraft">Continue the draft</button><button class="btn danger" data-a="replaceDraft">Delete draft and start new</button></div>`, 'Start new');
+  if (m.type==='kyc') return modalWrap(`<div class="mh"><h3>Confirm your identity before listing a token</h3><p>Listing needs your own KYC. It takes about 3 minutes.</p></div>
+      <div class="mfoot">${cancelBtn('Close')}<button class="btn primary" data-a="soon">Verify identity</button></div>`, 'Verify identity');
   return '';
 }
 function notifHTML(){
   if (!S.notifOpen) return '';
-  const items = [
-    ...(S.listing==='live'?[['check',`${S.d.name} is listed`,'Approved by the platform. Issue your first tokens.','now','ad8',true]]:[]),
-    ...(S.listing==='review'?[['file-text',`${S.d.name} submitted`,'In platform review','now','ad7']]:[]),
-    ['users-round','Joe Miller approved ISS-0011','ISS-0011, 1 of 2 approved','40m'],
-    ['coins','800 BMAX minted','ISS-0010 for Juno Partners','2h'],
-    ['check','Proposal passed','PRP-0004, member role change','1d'],
-    ['truck','Redemption delivered','RED-0002, 150 ASLV to Minji Park','2d'],
-  ];
-  return `<div class="notif" role="dialog" aria-label="Notifications"><h4>Notifications</h4>${items.map(([ic,t,s,tm,go,un])=>`<button class="nitem ${un?'unread':''}" ${go?`data-go="${go}"`:'data-soon'}><span class="ico"><i data-lucide="${ic}"></i></span><span class="grow"><b>${esc(t)}</b><span>${esc(s)}</span></span><time>${tm}</time></button>`).join('')}</div>`;
+  const mine = S.notes.filter(n=>n.to===S.persona);
+  const stat = [['users-round','Joe Miller approved ISS-0011','ISS-0011, 1 of 2 approved','40m'],['coins','800 BMAX minted','ISS-0010 for Juno Partners','2h'],['check','Proposal passed','PRP-0004, member role change','1d'],['truck','Redemption delivered','RED-0002, 150 ASLV to Minji Park','2d']];
+  return `<div class="notif" role="dialog" aria-label="Notifications"><h4>Notifications</h4>
+    ${mine.map((n,i)=>`<button class="nitem ${n.seen?'':'unread'}" data-a="openNote" data-v="${S.notes.indexOf(n)}"><span class="ico"><i data-lucide="${n.icon}"></i></span><span class="grow"><b>${esc(n.title)}</b><span>${esc(n.sub)}</span></span><time>now</time></button>`).join('')}
+    ${stat.map(([ic,t,s,tm])=>`<button class="nitem" data-a="soon"><span class="ico"><i data-lucide="${ic}"></i></span><span class="grow"><b>${t}</b><span>${s}</span></span><time>${tm}</time></button>`).join('')}</div>`;
 }
 
-/* ---------- render ---------- */
+/* ================= prototype control panel (Korean, not product UI) ================= */
+const SCENARIOS = [
+  ['시작 전 막힘', [['noRights','상장 권한 없음 (YT1c, AD0a)'],['noKyc','내 인증(KYC) 미완료 (YT2, AD0a2)'],['kybExpired','조직 KYB 만료 (AD0b)']]],
+  ['단계에서 막힘', [['noFbTokens','Fireblocks에 상장할 토큰 없음 (AD1g)'],['addrListed','직접 등록: 이미 상장된 계약 (AD1c2)'],['noCustodian','이 자산의 보관기관 없음 (AD3a)'],['docusignOff','DocuSign 미연결 (AD5k)'],['kycTodo','Review: 내가 할 일 남음 (AD6)'],['waitingPlatform','Review: 플랫폼 인증 대기 (AD6a)'],['passkeyOther','패스키가 다른 기기에만 (AD6e3)']]],
+  ['외부, 서버 실패', [['fbFail','Fireblocks 토큰 불러오기 실패 (AD1e)'],['addrNoAnswer','직접 등록: 주소 응답 없음 (AD1d)'],['addrNetFail','직접 등록: 네트워크 실패 (AD1i)'],['custFail','보관기관 목록 실패 (AD3y)'],['noVault','자산 보유 vault 없음 (AD5c)'],['noAsset','계약에 연결된 자산 없음 (AD5c2)'],['fbNoAnswer','Fireblocks 응답 없음 (AD5e2)'],['serverRefused','제출: 서버가 거절 (ADE1)'],['passkeyFail','패스키 서명 실패 (AD6e2)'],['platformRefused','마지막 승인 뒤 플랫폼 거절 (PR2z)']]],
+  ['결과 경합', [['raceLive','철회 직전 플랫폼이 승인 (AD7x)'],['raceRejected','철회 직전 플랫폼이 거절 (AD7x2)']]],
+];
+function protoHTML(){
+  const inReview = S.reqs.filter(r=>r.status==='review');
+  return `<button class="ph" data-a="protoMin" aria-expanded="${!S.protoMin}"><b>프로토타입 설정</b><span class="grow"></span><i data-lucide="${S.protoMin?'chevron-up':'chevron-down'}" style="width:14px"></i></button>
+  <div class="pb">
+    <div><div class="pl">보는 사람</div><div class="seg"><button class="${S.persona==='juya'?'on':''}" data-a="persona" data-v="juya">Juya Kim (제안)</button><button class="${S.persona==='joe'?'on':''}" data-a="persona" data-v="joe">Joe Miller (승인)</button></div></div>
+    <div><div class="pl">상장 규칙</div><div class="seg"><button class="${S.rule==='direct'?'on':''}" data-a="rule" data-v="direct">바로 제출</button><button class="${S.rule==='org'?'on':''}" data-a="rule" data-v="org">조직 승인 2 of 4</button></div></div>
+    <div><div class="pl">상황</div><select class="select" data-proto="scenario"><option value="none">정상</option>${SCENARIOS.map(([g,items])=>`<optgroup label="${g}">${items.map(([v,l])=>`<option value="${v}" ${S.scenario===v?'selected':''}>${l}</option>`).join('')}</optgroup>`).join('')}</select></div>
+    ${inReview.length?`<div><div class="pl">플랫폼 심사 (포털 밖)</div><div style="display:flex;gap:6px"><button class="btn primary" data-a="platform" data-v="approve">승인</button><button class="btn" data-a="platform" data-v="reject">거절</button></div></div>`:''}
+    <div class="pnote">입력 오류는 직접 입력해서 확인할 수 있습니다. 실패 상황은 한 번만 일어나고, 다시 시도하면 넘어갑니다.</div>
+    <button class="btn" data-a="reset">처음부터</button>
+  </div>`;
+}
+
+/* ================= render ================= */
 function render(){
-  $('#app').innerHTML = V[S.screen]();
+  const a = document.activeElement, fid = a && a.id, ss = a && a.selectionStart, se = a && a.selectionEnd;
+  $('#app').innerHTML = (V[S.screen]||V.tokens)();
   $('#layer').innerHTML = modalHTML() + notifHTML();
-  $('#unread').hidden = !S.unread;
-  document.querySelectorAll('.side .nav').forEach(b=>b.classList.toggle('on', b.dataset.go===(S.screen==='home'?'home':'tokens') && !b.hasAttribute('data-soon')));
-  const p = $('#proto');
-  p.hidden = !(S.listing==='review' && ['ad7','tokens'].includes(S.screen));
-  p.innerHTML = '<b>Prototype</b><span class="muted">Platform review is outside the portal.</span><button class="btn primary" data-act="approve">Approve listing</button>';
+  const p = $('#proto'); p.classList.toggle('min', S.protoMin); p.innerHTML = protoHTML();
+  $('#unread').hidden = !S.notes.some(n=>n.to===S.persona && !n.seen);
+  $('#ini').textContent = me().ini; $('#pname').textContent = me().name; $('#pmail').textContent = me().mail;
+  $('#taskcount').textContent = myTasks().length;
+  const navOn = S.screen==='home' ? 'home' : S.screen==='tasks' ? 'tasks' : 'tokens';
+  document.querySelectorAll('.side .nav').forEach(b=>b.classList.toggle('on', b.dataset.nav===navOn));
   if (window.lucide) lucide.createIcons();
+  if (fid){ const el = document.getElementById(fid); if (el){ el.focus(); try{ el.setSelectionRange(ss,se); }catch(_){} } }
 }
 
-/* ---------- events ---------- */
-function next(to){
-  if (to==='submit'){ S.modal='submit'; render(); return; }
-  go(to);
+/* ================= actions ================= */
+function newReq(){
+  const r = {id:++S.seq, d:clone(S.d), by:me().name, path:S.rule, status:S.rule==='org'?'org':'review', approvals:[], at:{}, fresh:true};
+  if (r.path==='org'){ r.at.proposed = Date.now(); r.approvals.push(me().name); }
+  else r.at.submitted = Date.now();
+  S.reqs.forEach(x=>x.fresh=false);
+  S.reqs.push(r); S.cur = r.id; S.draftSaved = false; S.d = fresh(S.d.kind);
+  if (r.path==='org') note(S.persona==='juya'?'joe':'juya','users-round',`${r.by} proposed listing ${r.d.name}`,'Your approval is needed. 1 of 2 approved','task',r.id);
+  return r;
 }
-const PREV = {ad2:'ad1', ad3:'ad2', ad4:'ad3', ad5:'ad4', ad5b:'ad5', ad6:'ad5b'};
-const STEP_SCREEN = ['ad1','ad2','ad3','ad4','ad5','ad6'];
+function sign(then){
+  S.signing = true; S.signErr = false; render();
+  setTimeout(()=>{
+    S.signing = false;
+    if (scen('passkeyFail') && !S.once.passkeyFail){ S.once.passkeyFail = true; S.signErr = true; render(); return; }
+    then();
+  }, 1300);
+}
+function closeModal(){ S.modal=null; S.signErr=false; S.mf={}; S.errs={}; }
+function startNew(){
+  if (scen('noKyc')){ S.modal={type:'kyc'}; render(); return; }
+  if (S.draftSaved){ S.modal={type:'newOverDraft'}; render(); return; }
+  go('ad0');
+}
+function restartFrom(r){
+  const d = clone(r.d);
+  d.reached = 5;
+  if (r.status==='rejected'){ d.por = null; d.porFlag = true; d.from = {type:'rejected', at:r.at.submitted}; }
+  else d.from = {type:'orgRejected', at:r.at.decided, by:r.rejBy, reason:r.rejReason};
+  S.d = d; S.draftSaved = true; S.rule = r.path; go('ad6');
+}
+function startRead(){
+  const d = S.d; clearTimeout(startRead.t);
+  d.read = {state:'reading'}; render();
+  startRead.t = setTimeout(()=>{
+    const custom = d.kind==='custom';
+    if (scen('addrNoAnswer') && !S.once.addr) { S.once.addr=1; d.read = {state:'noAnswer', msg:'Nothing answered at that address on this network. Check the address, or the network it was deployed to.'}; }
+    else if (scen('addrNetFail') && !S.once.addr) { S.once.addr=1; d.read = {state:'netFail', msg:'Couldn’t reach Ault Mainnet, so nothing was read. Check your connection, then try again.'}; }
+    else if (scen('addrListed')) d.read = {state:'listed', msg:'This contract is already listed as Ault Silver (ASLV). Open it from Your tokens instead.'};
+    else { d.read = {state:'ok', sym: custom?'BMAX':'AGP', name: custom?'BMAX':'Ault Platinum', dec: custom?8:6}; d.name = d.read.name; }
+    if (S.screen==='ad1') render();
+  }, 1200);
+}
+
+const A = {
+  soon(){ toast('Not part of this prototype'); },
+  go(v){ S.notifOpen=false; S.backTo=null; go(v); },
+  step(v){ go(STEP_SCREEN[+v]); },
+  edit(v){ S.fromReview = true; go(v); S.fromReview = true; render(); },
+  toggle(v){ S[v]=!S[v]; render(); },
+  tip(){ S.tip=!S.tip; render(); },
+  addToken(){ startNew(); },
+  start(){ S.d = fresh(); S.draftSaved = false; S.refused=false; go('ad1'); },
+  continueDraft(){ closeModal(); go(STEP_SCREEN[Math.min(S.d.reached,5)]); },
+  replaceDraft(){ closeModal(); S.draftSaved=false; S.d=fresh(); go('ad0'); },
+  startNew(){ startNew(); },
+  next(v){
+    if (v==='submit'){ S.modal={type:'submit'}; render(); return; }
+    const e = validate(S.screen);
+    if (Object.keys(e).length){ S.errs = e; render(); const f = document.querySelector('.bad, .err'); f && f.scrollIntoView({block:'center', behavior:'smooth'}); return; }
+    go(S.fromReview ? 'ad6' : v);
+  },
+  back(){ go(PREV[S.screen]||'tokens'); },
+  save(){ S.draftSaved=true; go('tokens'); toast('Draft saved in this browser'); },
+  discard(){ S.modal={type:'discard'}; render(); },
+  deleteDraft(){ S.modal={type:'deleteDraft'}; render(); },
+  discardOk(){ closeModal(); S.draftSaved=false; S.d=fresh(); go('tokens'); toast('Draft deleted'); },
+  closeModal(v,t,e){ if (t.classList.contains('scrim') && e.target!==t) return; if (S.signing) return; closeModal(); render(); },
+  kind(v){ if (S.d.kind===v) return; const keep = {reached:S.d.reached, tokenSrc:S.d.tokenSrc}; S.d = Object.assign(fresh(v), keep); render(); },
+  src(v){ S.d.tokenSrc=v; S.errs={}; render(); },
+  token(v){ const t=TOKENS[v]; Object.assign(S.d,{token:v, name:t.name, desc:t.desc}); render(); },
+  readAgain(){ startRead(); },
+  retry(){ S.scenario='none'; toast('Loaded'); render(); },
+  cust(v){ S.d.custodians[v]=!S.d.custodians[v]; delete S.errs.cust; render(); },
+  combo(){ S.d.showCombo=!S.d.showCombo; render(); },
+  rmPor(){ S.d.por=null; S.d.porErr=null; render(); },
+  clearImg(){ Object.assign(S.d,{img:'',imgUrl:'',imgErr:false}); render(); },
+  rmDoc(v){ S.d.docs.splice(+v,1); render(); },
+  who(v){ S.d.who=v; render(); },
+  size(v){ S.d.size=+v; delete S.errs.size; render(); },
+  addRole(v,t,e){ e.stopPropagation(); S.menu = S.menu===v?null:v; render(); },
+  pick(v){ const [k,id]=v.split(':'); S.d.roles[k].push(id); S.menu=null; render(); },
+  rmRole(v){ const [k,id]=v.split(':'); S.d.roles[k]=S.d.roles[k].filter(x=>x!==id); render(); },
+  burnOther(){ S.d.burnOther=!S.d.burnOther; render(); },
+  otherDevice(v){ S.once.passkeyOther = true; A[v](); },
+  signSubmit(){
+    sign(()=>{
+      if (scen('serverRefused') && !S.once.refused){ S.once.refused=true; S.refused=true; closeModal(); go('ad6'); return; }
+      S.refused=false; const r = newReq(); closeModal(); S.backTo=null; go('ad7');
+      toast(r.path==='org' ? 'Proposal sent to Governance' : 'Submitted for review');
+    });
+  },
+  openReq(v,t){ S.cur=+v; S.backTo = t.dataset.back||null; const r=getR(); if (r) r.fresh = r.fresh && r.status==='review'; S.notifOpen=false; go('ad7'); },
+  openToken(v){ S.cur=+v; S.notifOpen=false; go('ad8'); },
+  restart(v){ const r=getR(+v); if (S.draftSaved){ S.modal={type:'newOverDraft'}; render(); return; } restartFrom(r); },
+  seeDecision(v){ const r=getR(+v); r.race=false; render(); },
+  withdrawReq(v){ S.modal={type:'withdrawReq', rid:+v}; S.mf={}; render(); },
+  signWithdraw(){
+    const r = getR(S.modal.rid);
+    sign(()=>{
+      r.fresh=false;
+      if (scen('raceLive')){ r.status='live'; r.race=true; r.at.decided=Date.now(); }
+      else if (scen('raceRejected')){ r.status='rejected'; r.race=true; r.at.decided=Date.now(); }
+      else { r.status='withdrawn'; r.at.withdrawn=Date.now(); r.reason=(S.mf.reason||'').trim(); }
+      closeModal(); go('ad7');
+    });
+  },
+  withdrawProp(v){ S.modal={type:'withdrawProp', rid:+v}; render(); },
+  confirmWithdrawProp(){ const r=getR(S.modal.rid); r.status='propWithdrawn'; r.at.withdrawn=Date.now(); closeModal(); go('ad7'); },
+  approve(v){ S.modal={type:'approve', rid:+v}; render(); },
+  signApprove(){
+    const r = getR(S.modal.rid);
+    sign(()=>{
+      r.decidedBy = me().name; r.at.decided = Date.now();
+      if (scen('platformRefused')){
+        r.status='orgRejected'; r.platformRefused=true; r.rejBy=me().name; r.rejReason='Reason from the platform: a contract address is 0x followed by 40 hex characters.';
+        note(r.by==='Juya Kim'?'juya':'joe','alert-circle','The platform refused your listing request', `${r.d.name}. Fix the draft and propose again.`,'req',r.id);
+        S.modal={type:'platformRefused', rid:r.id}; render(); return;
+      }
+      r.approvals.push(me().name); r.status='review'; r.at.orgApproved=Date.now(); r.at.submitted=Date.now();
+      note(r.by==='Juya Kim'?'juya':'joe','check',`Governance approved ${r.d.name}`,'The listing request went to the platform','req',r.id);
+      closeModal(); S.taskTab='done'; S.task='d'+r.id; go('tasks'); toast('Approved. The listing request went to the platform.');
+    });
+  },
+  reject(v){ S.modal={type:'reject', rid:+v}; S.mf={}; render(); },
+  signReject(){
+    const r = getR(S.modal.rid), why = (S.mf.rejReason||'').trim();
+    if (!why){ S.errs={rejReason:1}; render(); document.getElementById('rr')?.focus(); return; }
+    sign(()=>{
+      r.status='orgRejected'; r.rejBy=me().name; r.rejReason=why; r.decidedBy=me().name; r.at.decided=Date.now();
+      note(r.by==='Juya Kim'?'juya':'joe','x-circle',`${me().name} rejected your listing proposal`, why,'req',r.id);
+      closeModal(); S.taskTab='done'; S.task='d'+r.id; go('tasks'); toast('Proposal rejected');
+    });
+  },
+  task(v){ S.task=v; render(); },
+  taskTab(v){ S.taskTab=v; S.task=null; render(); },
+  bell(v,t,e){ e.stopPropagation(); S.notifOpen=!S.notifOpen; if (S.notifOpen) S.notes.filter(n=>n.to===S.persona).forEach(n=>n.seenSoon=true); else S.notes.forEach(n=>{ if(n.seenSoon) n.seen=true; }); render(); },
+  openNote(v){
+    const n = S.notes[+v]; n.seen = true; S.notifOpen=false;
+    if (n.go==='task'){ S.taskTab='todo'; S.task='r'+n.id; go('tasks'); }
+    else if (n.go==='token'){ S.cur=n.id; go('ad8'); }
+    else { S.cur=n.id; S.backTo=null; go('ad7'); }
+  },
+  /* prototype panel */
+  protoMin(){ S.protoMin=!S.protoMin; render(); },
+  persona(v){ if (S.persona===v) return; S.persona=v; S.notifOpen=false; closeModal(); S.backTo=null; S.taskTab='todo'; S.task=null; go(myTasks().some(t=>t.rid) ? 'tasks' :(S.screen==='ad7'||S.screen==='ad8') ? S.screen : 'tokens'); toast(`${me().name}(으)로 보는 중`); },
+  rule(v){ S.rule=v; render(); },
+  platform(v){
+    const r = [...S.reqs].reverse().find(x=>x.status==='review'); if (!r) return;
+    r.fresh=false; r.at.decided=Date.now();
+    const to = r.by==='Juya Kim'?'juya':'joe';
+    if (v==='approve'){ r.status='live'; note(to,'check',`${r.d.name} is listed`, `Approved by the platform. ${T(r.d).firstAction}.`,'token',r.id); }
+    else { r.status='rejected'; note(to,'x-circle',`${r.d.name} listing was rejected`,'Custody statement flagged. See the decision.','req',r.id); }
+    S.persona = to; go('home'); toast(v==='approve'?'플랫폼이 승인했습니다. 종 알림을 확인하세요.':'플랫폼이 거절했습니다. 종 알림을 확인하세요.');
+  },
+  reset(){ location.reload(); },
+};
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-go],[data-next],[data-act],[data-step],[data-kind],[data-src],[data-token],[data-cust],[data-who],[data-size],[data-addrole],[data-rmrole],[data-pick],[data-rmdoc],[data-toggle],[data-soon]');
-  if (!t) { if (S.menu){S.menu=null;render();} if (S.notifOpen && !e.target.closest('.notif')){S.notifOpen=false;render();} return; }
-  const ds = t.dataset, d = S.d;
-  if (t.tagName==='LABEL' || t.closest('label')) { /* file pickers handle themselves */ if (!ds.act) return; }
-  if (ds.go){ e.stopPropagation(); S.notifOpen=false; if (ds.go==='ad8' || ds.go==='ad7') S.justSubmitted = S.justSubmitted && ds.go==='ad7'; go(ds.go); return; }
-  if (ds.next){ next(ds.next); return; }
-  if (ds.step){ go(STEP_SCREEN[+ds.step]); return; }
-  if (ds.kind){ d.kind=ds.kind; render(); return; }
-  if (ds.src){ d.tokenSrc=ds.src; render(); return; }
-  if (ds.token){ d.token=ds.token; d.name = ds.token==='apd'?'Ault Palladium':'Ault Platinum'; render(); return; }
-  if (ds.cust){ d.custodians[ds.cust]=!d.custodians[ds.cust]; render(); return; }
-  if (ds.who){ d.who=ds.who; render(); return; }
-  if (ds.size){ d.size=+ds.size; render(); return; }
-  if (ds.addrole){ e.stopPropagation(); S.menu = S.menu===ds.addrole?null:ds.addrole; render(); return; }
-  if (ds.pick){ const [k,id]=ds.pick.split(':'); d.roles[k].push(id); S.menu=null; render(); return; }
-  if (ds.rmrole){ const [k,id]=ds.rmrole.split(':'); d.roles[k]=d.roles[k].filter(x=>x!==id); render(); return; }
-  if (ds.rmdoc){ d.docs.splice(+ds.rmdoc,1); render(); return; }
-  if (ds.toggle){ S[ds.toggle]=!S[ds.toggle]; render(); return; }
-  if (ds.soon!==undefined && !ds.act){ toast('Not part of this prototype'); return; }
-  switch (ds.act){
-    case 'start': S.d=fresh(); S.draftSaved=false; go('ad1'); break;
-    case 'back': go(PREV[S.screen]||'tokens'); break;
-    case 'save': S.draftSaved=true; go('tokens'); toast('Draft saved in this browser'); break;
-    case 'discard': S.modal='discard'; render(); break;
-    case 'discardok': S.modal=null; S.draftSaved=false; S.d=fresh(); go('tokens'); toast('Draft discarded'); break;
-    case 'closemodal': if (t.classList.contains('scrim') && e.target!==t) break; if (!S.signing){ S.modal=null; render(); } break;
-    case 'combo': d.showCombo=!d.showCombo; render(); break;
-    case 'rmpor': d.por=null; render(); break;
-    case 'clearimg': d.img=''; d.imgUrl=''; render(); break;
-    case 'burnother': d.burnOther=!d.burnOther; render(); break;
-    case 'bell': e.stopPropagation(); S.notifOpen=!S.notifOpen; if (S.notifOpen) S.unread=false; render(); break;
-    case 'sign':
-      S.signing=true; render();
-      setTimeout(()=>{ S.signing=false; S.modal=null; S.listing='review'; S.draftSaved=false; S.submittedAt=new Date(); S.justSubmitted=true; go('ad7'); }, 1600);
-      break;
-    case 'approve':
-      S.listing='live'; S.liveAt=new Date(); S.unread=true; S.justSubmitted=false;
-      go('home'); toast(`${d.name} was approved. Check notifications.`); break;
+  const t = e.target.closest('[data-a]');
+  if (!t){
+    let dirty = false;
+    if (S.menu){ S.menu=null; dirty=true; }
+    if (S.tip){ S.tip=false; dirty=true; }
+    if (S.notifOpen && !e.target.closest('.notif')){ A.bell(null,null,{stopPropagation(){}}); return; }
+    if (dirty) render();
+    return;
   }
+  if (t.getAttribute('aria-disabled')==='true' && t.dataset.a!=='tip') return;
+  (A[t.dataset.a] || A.soon)(t.dataset.v, t, e);
 });
 
 document.addEventListener('input', e => {
-  const b = e.target.dataset.bind; if (!b) return;
-  const d = S.d;
-  d[b] = e.target.type==='number' ? e.target.value : e.target.value;
-  if (b==='imgUrl'){ d.img = /^https?:\/\/\S+$/.test(d.imgUrl) ? d.imgUrl : (d.img.startsWith('blob:')?d.img:''); }
-  // live updates without full re-render (keeps focus)
-  if (b==='name'){ const pv=$('#pv-name'); if (pv) pv.textContent = d.name || 'Token name'; const h=$('.rhead h1'); if(h) h.textContent = d.name || 'New token'; document.querySelector('[data-next]').disabled = !d.name.trim(); }
+  const el = e.target;
+  if (el.dataset.mf){ S.mf[el.dataset.mf] = el.value; if (S.errs[el.dataset.mf]){ delete S.errs[el.dataset.mf]; document.getElementById('err-'+el.dataset.mf)?.remove(); el.classList.remove('bad'); } return; }
+  const b = el.dataset.bind; if (!b || el.tagName==='SELECT') return;
+  const d = S.d; d[b] = el.value;
+  if (S.errs[b]){ delete S.errs[b]; document.getElementById('err-'+b)?.remove(); el.classList.remove('bad'); }
+  if (b==='name'){ const pv=$('#pv-name'); if (pv) pv.textContent = d.name || 'Token name'; const h=$('.rhead h1'); if (h) h.textContent = d.name || 'New token'; }
   if (b==='desc'){ const pv=$('#pv-desc'); if (pv) pv.textContent = d.desc; }
-  if (b==='size'){ const n=Number(d.size)||0; $('#size-hint').innerHTML = n>0?`Investors request ${n}, ${n*2}, ${n*3} ${sym()}…`:'<span class="req">Enter a size above 0.</span>'; document.querySelector('[data-next]').disabled = !(n>0); }
+  if (b==='size'){ const n=Number(d.size)||0; $('#size-hint').textContent = n>0?`Investors request ${n}, ${n*2}, ${n*3} ${sym()}…`:''; }
+  if (b==='issueFee' || b==='redeemFee'){ if (!e.isComposing) render(); }
+  if (b==='addr'){ d.read = null; const v = el.value.trim(); if (ADDR_RE.test(v)) startRead(); }
 });
 document.addEventListener('change', e => {
   const el = e.target;
-  if (el.dataset.bind && el.tagName==='SELECT'){ S.d[el.dataset.bind]=el.value; render(); return; }
-  if (el.dataset.bind==='size' || el.dataset.bind==='imgUrl'){ render(); return; }
+  if (el.dataset.proto==='scenario'){ S.scenario = el.value; S.once = {}; S.refused=false; S.tip=false; render(); toast(el.value==='none'?'정상 상황':'상황: '+el.options[el.selectedIndex].text); return; }
+  if (el.dataset.bind && el.tagName==='SELECT'){ S.d[el.dataset.bind]=el.value; delete S.errs[el.dataset.bind]; render(); return; }
+  if (el.dataset.bind==='imgUrl'){
+    const u = el.value.trim(), d = S.d;
+    if (!u){ d.imgErr=false; if (!d.img.startsWith('blob:')) d.img=''; render(); return; }
+    const img = new Image();
+    img.onload = () => { d.img = u; d.imgErr = false; render(); };
+    img.onerror = () => { d.imgErr = true; render(); };
+    img.src = u; return;
+  }
+  if (el.dataset.bind==='addr'){ const v=el.value.trim(); S.d.addr=v; if (v && !ADDR_RE.test(v)){ S.errs.addr='Must be a 0x-prefixed 40-character address'; render(); } return; }
+  if (el.dataset.bind==='size'){ render(); return; }
   const f = el.dataset.file; if (!f || !el.files.length) return;
-  const files = [...el.files];
-  takeFiles(f, files);
+  takeFiles(f, [...el.files]);
 });
 function takeFiles(kind, files){
-  const d = S.d, MAX = 20*1048576;
-  const ok = files.filter(x => x.size <= MAX);
+  const d = S.d;
+  if (kind==='por'){
+    const f = files[0];
+    if (f.size > 50*1048576){ d.por=null; d.porErr = `${f.name} is ${Math.round(f.size/1048576)} MB. The limit is 50 MB.`; render(); return; }
+    if (!/\.(pdf|png|jpe?g)$/i.test(f.name)){ d.por=null; d.porErr = `${f.name} isn't a PDF, PNG or JPG.`; render(); return; }
+    d.por = {name:f.name, size:f.size}; d.porErr=null; d.porFlag=false; delete S.errs.por; render(); return;
+  }
+  const ok = files.filter(x => x.size <= 20*1048576);
   if (ok.length < files.length) toast('Files must be 20 MB or smaller');
   if (!ok.length) return;
-  if (kind==='img'){ if (!/^image\//.test(ok[0].type)) return toast('Use a PNG or JPG image'); d.img = URL.createObjectURL(ok[0]); d.imgUrl=''; }
+  if (kind==='img'){ if (!/^image\//.test(ok[0].type)) return toast('Use a PNG or JPG image'); d.img = URL.createObjectURL(ok[0]); d.imgUrl=''; d.imgErr=false; }
   if (kind==='docs') d.docs.push(...ok.map(x=>({name:x.name,size:x.size})));
-  if (kind==='por') d.por = {name:ok[0].name, size:ok[0].size};
-  if (kind==='reviewFiles') d.reviewFiles = [...(d.reviewFiles||[]), ...ok.map(x=>({name:x.name,size:x.size}))];
+  if (kind==='reviewFiles') d.reviewFiles.push(...ok.map(x=>({name:x.name,size:x.size})));
   render();
 }
-// drag and drop on the document dropzone
 ['dragover','dragleave','drop'].forEach(ev => document.addEventListener(ev, e => {
   const z = e.target.closest?.('[data-drop]'); if (!z) return;
-  e.preventDefault();
-  z.classList.toggle('over', ev==='dragover');
+  e.preventDefault(); z.classList.toggle('over', ev==='dragover');
   if (ev==='drop') takeFiles(z.dataset.drop, [...e.dataTransfer.files]);
 }));
-document.addEventListener('keydown', e => { if (e.key==='Escape'){ if (S.modal && !S.signing){S.modal=null;render();} else if (S.notifOpen||S.menu){S.notifOpen=false;S.menu=null;render();} } });
+document.addEventListener('keydown', e => {
+  if (e.key!=='Escape') return;
+  if (S.modal && !S.signing){ closeModal(); render(); }
+  else if (S.notifOpen || S.menu || S.tip){ S.notifOpen=false; S.menu=null; S.tip=false; render(); }
+});
 
 render();
 </script>
