@@ -180,41 +180,49 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 #rv-figma.off { cursor: default; opacity: .7; }
 
 
-.gd { position: fixed; right: 16px; bottom: 68px; z-index: 52; width: 300px; max-width: calc(100vw - 32px); display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: #fff; border: 1px solid var(--border-default); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.16); font-size: 13px; color: #111827; }
-.gd.fold { width: auto; padding: 0; background: none; border: 0; box-shadow: none; }
-.gd-pill { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 999px; background: #fff; border: 1px solid var(--border-default); box-shadow: 0 4px 16px rgba(0,0,0,.12); font-size: 12px; color: #4b5563; white-space: nowrap; }
-.gd-pill b { font-weight: 700; color: #111827; }
-.gd-pill i { font-style: normal; color: #9ca3af; }
-.gd-hd { display: flex; align-items: center; justify-content: space-between; }
-.gd-seg { display: flex; padding: 2px; background: #f1f3f5; border-radius: 8px; }
-.gd-seg a { padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #6b7280; }
-.gd-seg a.on { background: #fff; color: #111827; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-.gd-x { width: 28px; height: 28px; border-radius: 6px; text-align: center; color: #6b7280; }
-.gd-x:hover { background: #f1f3f5; }
-.gd-st { font-size: 12px; font-weight: 600; color: #6b7280; }
-.gd-goal { font-size: 14px; font-weight: 600; line-height: 1.4; }
-.gd-ac { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.gd-ff { height: 32px; padding: 0 12px; border-radius: 8px; background: #1f2937; color: #fff; font-size: 13px; font-weight: 600; }
-.gd-ff:hover { background: #111827; }
-.gd-flow { font-size: 12px; color: var(--brand-default); }
-.gd-flow:hover { text-decoration: underline; }
-.gd-goals { list-style: none; display: flex; flex-direction: column; gap: 2px; padding-top: 8px; border-top: 1px solid #eef0f2; }
-.gd-goals li { display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 20px; color: #9ca3af; }
-.gd-goals li::before { content: ""; width: 14px; height: 14px; flex-shrink: 0; border: 1.5px solid #d1d5db; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
-.gd-goals li.ok { color: #374151; }
-.gd-goals li.ok::before { content: "✓"; border-color: var(--data-good); background: var(--data-good); color: #fff; }
-.gd-goals li.now { color: #111827; font-weight: 600; }
-.gd-goals li.now::before { border-color: #f59e0b; background: #fef3c7; }
-.gd-ft { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid #eef0f2; font-size: 12px; color: #6b7280; }
-.gd-ft label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
-.gd-ft a { text-decoration: underline; }
+#rv-flow { display: contents; }
+#rv-code { white-space: nowrap; }
+.rv-tag.flow #rv-name { max-width: 200px; }
+.rv-step { display: flex; align-items: baseline; gap: 6px; min-width: 0; color: rgba(255,255,255,.85); }
+.rv-step b { color: #fcd34d; flex-shrink: 0; }
+.rv-step span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+#rv-ff { height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.14); color: #fff; font-size: 13px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+#rv-ff:hover { background: rgba(255,255,255,.24); }
+.rv-tabs { position: sticky; top: 0; z-index: 2; display: flex; gap: 4px; padding: 8px 8px 0; background: #fff; border-bottom: 1px solid #e3e6ea; }
+.rv-tabs a { margin: 0; padding: 8px 12px 10px; border-radius: 0; border-bottom: 2px solid transparent; font-weight: 600; color: #6b7280; cursor: pointer; }
+.rv-tabs a:hover { background: none; color: #111827; }
+.rv-tabs a.on { color: #111827; border-bottom-color: #111827; }
+.rv-list[data-tab="flows"] #rv-screens, .rv-list[data-tab="screens"] #rv-flows { display: none; }
+.rv-list h4 { top: 43px; }
+.rv-list h4:first-child { border-top: 1px solid #e3e6ea; margin-top: 0; }
+#rv-flows { padding: 8px 0; }
+.rv-list .rv-fl { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: baseline; margin: 0 8px; padding: 10px 10px; border-radius: 8px; cursor: pointer; }
+.rv-fl b { width: auto; font-weight: 700; }
+.rv-list .rv-fl span { grid-column: 1; font-size: 12px; color: #6b7280; white-space: normal; }
+.rv-fl em { grid-column: 2; grid-row: 1; font-style: normal; font-size: 12px; color: var(--brand-default); }
+.rv-fl.on { background: #f7f8fa; }
+.rv-fl.on em { color: #b45309; font-weight: 600; }
+.rv-fl.off { margin: 0 8px; padding: 10px; opacity: .55; cursor: default; }
+.rv-fl.off em { color: #6b7280; }
+.rv-steps { list-style: none; margin: 4px 8px 0 20px; padding-left: 12px; border-left: 2px solid #eef0f2; }
+.rv-steps li a { margin: 0; padding: 4px 8px; gap: 8px; cursor: pointer; color: #9ca3af; }
+.rv-steps li a b { width: 38px; font-weight: 600; white-space: nowrap; }
+.rv-steps li.ok a { color: #374151; }
+.rv-steps li.ok a b::before { content: "✓ "; color: var(--data-good); }
+.rv-steps li.now a { background: #fef3c7; color: #111827; font-weight: 600; }
+.rv-steps li p { margin: 4px 8px 6px 54px; font-size: 12px; line-height: 1.45; color: #374151; }
+.rv-steps li .rv-fx { display: inline-block; margin: 0 0 6px 54px; padding: 0; font-size: 12px; color: var(--brand-default); }
+.rv-fo { display: flex; align-items: center; gap: 12px; margin: 8px 8px 8px 20px; padding: 8px; border-top: 1px solid #eef0f2; font-size: 12px; color: #6b7280; }
+.rv-fo label { display: flex; align-items: center; gap: 6px; margin-right: auto; cursor: pointer; }
+.rv-list .rv-fo a { display: inline; margin: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+.rv-list .rv-fo a:hover { background: none; color: #111827; }
 .gd-hl { outline: 2px solid #f59e0b !important; outline-offset: 2px; animation: gd-pulse 1.6s ease-in-out infinite; }
 @keyframes gd-pulse { 50% { outline-color: rgba(245,158,11,.2); } }
 .c1-none { padding: 24px 20px; font-size: 13px; color: var(--content-muted); }
-.rv-list a[data-st] { cursor: pointer; }
-.rv-list a.now { background: #fef3c7; }
-.rv-list h4 em a.rv-reset { display: inline; margin: 0; padding: 0; font-size: 12px; color: var(--brand-default); }
-.rv-list h4 em a.rv-reset:hover { background: none; text-decoration: underline; }
+@media (max-width: 900px) {
+  .rv-step span { display: none; }
+  .rv-tag { gap: 8px; padding-left: 12px; }
+}
 
 </style>
 </head>
@@ -275,7 +283,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 <div id="ov"></div>
 
 
-<div class="rv-tag"><a id="rv-figma" target="_blank" rel="noopener" title="Figma에서 이 화면 열기">Figma ↗</a><i class="rv-sep"></i><b id="rv-code"></b><span id="rv-name"></span><button id="rv-open">목록</button></div>
+<div class="rv-tag" id="rv-tag"><a id="rv-figma" target="_blank" rel="noopener" title="Figma에서 이 화면 열기">Figma ↗</a><i class="rv-sep"></i><b id="rv-code"></b><span id="rv-name"></span><span id="rv-flow"></span><button id="rv-open">목록</button></div>
 <div class="rv-list" id="rv-list"></div>
 <div class="rv-toast" id="rv-toast"></div>
 
@@ -1540,51 +1548,51 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 
 
 
-<template id="s-FR-H5" data-name="Home · 상장 심사 중 (S5)" data-node="" data-nav="home" data-badge="">
+<template id="s-FR-H5" data-name="Home · 상장 심사 중" data-node="" data-nav="home" data-badge="">
 <div class="page-head"><h1>Home</h1><p>Your organization at a glance.</p></div><div class="h-tasks plain"><p class="t">Nothing waiting on you</p><div style="flex:1"></div><a class="btn secondary" data-go="IB1">Open My tasks</a></div><div class="h-cols"><div class="h-work"><div class="card"><div class="card-head"><div class="stat"><p class="eyebrow">Your tokens</p><div class="num"><b>0</b><span>Listed tokens show up here</span></div></div><a class="link" data-go="TK1">All tokens</a></div></div><div class="card r14"><div class="h-lr-head"><p>Listing requests</p><span>1</span></div><a class="row h-lr" data-go="TK0-r"><div class="tok"><div class="sym">ASLV</div><div class="tx"><p>Ault Silver</p><p>ASLV · Submitted Nov 1</p></div></div><div class="cell"><span class="badge info">In platform review</span></div><div class="cell"></div><img class="chev16" data-i="chevron-right" alt=""></a></div></div><div class="h-side"><div class="card"><div class="card-head tight"><p class="eyebrow">Recent activity</p><a class="link auto" data-go="AL1">View all</a></div><div class="row h-act"><div class="mark"><img data-i="act-mint" width="16" height="16" alt=""></div><div class="txt"><p>Listing submitted</p><p>Ault Silver, ASLV</p></div><p class="date">Nov 1</p></div><div class="row h-act"><div class="mark"><img data-i="act-doc" width="16" height="16" alt=""></div><div class="txt"><p>Custodian connected</p><p>The Wyoming Reserve</p></div><p class="date">Oct 20</p></div><div class="row h-act"><div class="mark"><img data-i="act-people" width="16" height="16" alt=""></div><div class="txt"><p>KYB approved</p><p>Ault Global Commodities</p></div><p class="date">Oct 2</p></div></div></div></div>
 </template>
 
-<template id="s-FR-H6" data-name="Home · 상장됨, 첫 발행 전 (S6)" data-node="" data-nav="home" data-badge="">
+<template id="s-FR-H6" data-name="Home · 상장됨, 첫 발행 전" data-node="" data-nav="home" data-badge="">
 <div class="page-head"><h1>Home</h1><p>Your organization at a glance.</p></div><div class="card h-setup o4-setup"><div class="mk"><img data-i="nt-token" width="16" height="16" alt=""></div><div class="tx"><p>Ready for the first issue</p><p>Ault Silver was listed on Nov 4. Start an issue request when an investor is ready to deposit metal.</p></div><a class="btn primary" data-go="IS1">Start an issue</a></div><div class="h-tasks plain"><p class="t">Nothing waiting on you</p><div style="flex:1"></div><a class="btn secondary" data-go="IB1">Open My tasks</a></div><div class="h-cols"><div class="h-work"><div class="card"><div class="card-head"><div class="stat"><p class="eyebrow">Your tokens</p><div class="num"><b>1</b><span>Ready for the first issue</span></div></div><a class="link" data-go="TK1">All tokens</a></div><div class="thead"><p style="flex:1">Token</p><p style="width:160px">Reserve</p><p style="width:120px;text-align:right">Supply</p></div><a class="row" data-go="TK0-0"><img data-i="token-aslv" width="36" height="36" alt=""><div class="txt h-tok"><p>Ault Silver</p><p>ASLV</p></div><div class="h-res"><div class="bar"><i style="width:0px;background:var(--data-good)"></i></div><p>0%</p></div><p class="big h-sup">0</p></a></div></div><div class="h-side"><div class="card"><div class="card-head tight"><p class="eyebrow">Recent activity</p><a class="link auto" data-go="AL1">View all</a></div><div class="row h-act"><div class="mark"><img data-i="nt-check" width="16" height="16" alt=""></div><div class="txt"><p>Listing approved</p><p>Ault Silver, ASLV</p></div><p class="date">Nov 4</p></div><div class="row h-act"><div class="mark"><img data-i="act-mint" width="16" height="16" alt=""></div><div class="txt"><p>Listing submitted</p><p>Ault Silver, ASLV</p></div><p class="date">Nov 1</p></div><div class="row h-act"><div class="mark"><img data-i="act-doc" width="16" height="16" alt=""></div><div class="txt"><p>Custodian connected</p><p>The Wyoming Reserve</p></div><p class="date">Oct 20</p></div></div></div></div>
 </template>
 
-<template id="s-FR-H7" data-name="Home · 첫 발행 진행 중 (S7)" data-node="" data-nav="home" data-badge="1">
+<template id="s-FR-H7" data-name="Home · 첫 발행 진행 중" data-node="" data-nav="home" data-badge="1">
 <div class="page-head"><h1>Home</h1><p>Your organization at a glance.</p></div><div class="h-tasks"><p class="n">1</p><p class="t">waiting on you</p><p class="o">Oldest 40 min</p><div style="flex:1"></div><a class="btn secondary" data-go="IB1">Open My tasks</a></div><div class="h-cols"><div class="h-work"><div class="card"><div class="card-head"><div class="stat"><p class="eyebrow">Your tokens</p><div class="num"><b>1</b><span>1 issue in progress</span></div></div><a class="link" data-go="TK1">All tokens</a></div><div class="thead"><p style="flex:1">Token</p><p style="width:160px">Reserve</p><p style="width:120px;text-align:right">Supply</p></div><a class="row" data-go="TK0-0"><img data-i="token-aslv" width="36" height="36" alt=""><div class="txt h-tok"><p>Ault Silver</p><p>ASLV</p></div><div class="h-res"><div class="bar"><i style="width:0px;background:var(--data-good)"></i></div><p>0%</p></div><p class="big h-sup">0</p></a></div></div><div class="h-side"><div class="card"><div class="card-head"><div class="stat"><p class="eyebrow">In progress</p><div class="num"><b>1</b><span>Requests and proposals</span></div></div></div><a class="row" data-go="RQ1"><div class="txt"><p>Requests</p><p>1 issuance</p></div><p class="big">1</p><img class="chev16" data-i="chevron-right" alt=""></a></div><div class="card"><div class="card-head tight"><p class="eyebrow">Recent activity</p><a class="link auto" data-go="AL1">View all</a></div><div class="row h-act"><div class="mark"><img data-i="act-people" width="16" height="16" alt=""></div><div class="txt"><p>Issue requested</p><p>ISS-0001 for Daehan Securities</p></div><p class="date">Today</p></div><div class="row h-act"><div class="mark"><img data-i="nt-check" width="16" height="16" alt=""></div><div class="txt"><p>Listing approved</p><p>Ault Silver, ASLV</p></div><p class="date">Nov 4</p></div><div class="row h-act"><div class="mark"><img data-i="act-mint" width="16" height="16" alt=""></div><div class="txt"><p>Listing submitted</p><p>Ault Silver, ASLV</p></div><p class="date">Nov 1</p></div></div></div></div>
 </template>
 
-<template id="s-FR-H8" data-name="Home · 첫 발행 끝 (S8)" data-node="" data-nav="home" data-badge="">
+<template id="s-FR-H8" data-name="Home · 첫 발행 끝" data-node="" data-nav="home" data-badge="">
 <div class="page-head"><h1>Home</h1><p>Your organization at a glance.</p></div><div class="h-tasks plain"><p class="t">Nothing waiting on you</p><div style="flex:1"></div><a class="btn secondary" data-go="IB1">Open My tasks</a></div><div class="h-cols"><div class="h-work"><div class="card"><div class="card-head"><div class="stat"><p class="eyebrow">Your tokens</p><div class="num"><b>1</b><span>All active</span></div></div><a class="link" data-go="TK1">All tokens</a></div><div class="thead"><p style="flex:1">Token</p><p style="width:160px">Reserve</p><p style="width:120px;text-align:right">Supply</p></div><a class="row" data-go="FR-TK3"><img data-i="token-aslv" width="36" height="36" alt=""><div class="txt h-tok"><p>Ault Silver</p><p>ASLV</p></div><div class="h-res"><div class="bar"><i style="width:117px;background:var(--data-good)"></i></div><p>100%</p></div><p class="big h-sup">1,200</p></a></div></div><div class="h-side"><div class="card"><div class="card-head tight"><p class="eyebrow">Recent activity</p><a class="link auto" data-go="AL1">View all</a></div><div class="row h-act"><div class="mark"><img data-i="act-mint" width="16" height="16" alt=""></div><div class="txt"><p>Minted 1,200 ASLV</p><p>ISS-0001 for Daehan Securities</p></div><p class="date">Today</p></div><div class="row h-act"><div class="mark"><img data-i="act-people" width="16" height="16" alt=""></div><div class="txt"><p>Issue requested</p><p>ISS-0001 for Daehan Securities</p></div><p class="date">Today</p></div><div class="row h-act"><div class="mark"><img data-i="nt-check" width="16" height="16" alt=""></div><div class="txt"><p>Listing approved</p><p>Ault Silver, ASLV</p></div><p class="date">Nov 4</p></div></div></div></div>
 </template>
 
-<template id="s-FR-TK5" data-name="Tokens · 상장 요청 1건 (S5)" data-node="" data-nav="tokens" data-badge="" data-homeicon="nav-home-grid">
+<template id="s-FR-TK5" data-name="Tokens · 상장 요청 1건" data-node="" data-nav="tokens" data-badge="" data-homeicon="nav-home-grid">
 <div class="rq tk"><div class="o4-head"><div class="page-head"><h1>Tokens</h1><p>Tokens you issue, and every token listed on Universal Mint.</p></div><a class="btn primary" data-go="AD1">Add token</a></div><div class="o4-tabs"><a class="on">Your tokens<span class="ct">0</span></a><a class="" data-go="TK2">All listed<span class="ct">6</span></a></div><div class="card r14 tk-card"><div class="o4-ch"><b>Listed</b><span>0</span></div><div class="rq-tw"><div class="o4-th"><p style="width:350px">TOKEN</p><p style="width:120px">STATUS</p><p style="width:180px">RESERVE</p><p style="width:120px">SUPPLY</p><p style="width:170px">IN PROGRESS</p><p style="width:16px"></p></div><div class="o4-empty"><div class="mk"><img data-i="act-doc" width="16" height="16" alt=""></div><p class="t">No listed tokens yet</p><p class="d">Add a token to start a listing. It shows up here once listed.</p></div></div></div><div class="card r14 tk-card"><div class="o4-ch"><b>Listing requests</b><span>1</span></div><div class="rq-tw"><a class="rq-row tk-r" data-go="TK0-r"><span class="c" style="width:350px"><span class="tk sq">ASLV</span><span class="tx"><b>Ault Silver</b><span>ASLV · Submitted Nov 1</span></span></span><span class="c" style="width:300px"><span class="badge info">In platform review</span></span><span class="c" style="width:136px"></span><span class="c" style="width:170px"></span><img class="chev16" data-i="chevron-right" alt=""></a></div></div></div>
 </template>
 
-<template id="s-FR-TK6" data-name="Tokens · 상장됨, 공급 0 (S6)" data-node="" data-nav="tokens" data-badge="" data-homeicon="nav-home-grid">
+<template id="s-FR-TK6" data-name="Tokens · 상장됨, 공급 0" data-node="" data-nav="tokens" data-badge="" data-homeicon="nav-home-grid">
 <div class="rq tk"><div class="o4-head"><div class="page-head"><h1>Tokens</h1><p>Tokens you issue, and every token listed on Universal Mint.</p></div><a class="btn primary" data-go="AD1">Add token</a></div><div class="o4-tabs"><a class="on">Your tokens<span class="ct">1</span></a><a class="" data-go="TK2">All listed<span class="ct">6</span></a></div><div class="card r14 tk-card"><div class="o4-ch"><b>Listed</b><span>1</span></div><div class="rq-tw"><div class="o4-th"><p style="width:350px">TOKEN</p><p style="width:120px">STATUS</p><p style="width:180px">RESERVE</p><p style="width:120px">SUPPLY</p><p style="width:170px">IN PROGRESS</p><p style="width:16px"></p></div><a class="rq-row tk-r" data-go="TK0-0"><span class="c" style="width:350px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Ault Silver</b><span>ASLV</span></span></span><span class="c" style="width:120px"><span class="badge ok">Active</span></span><span class="c res" style="width:180px"><span class="tk-bar" style="width:137px;height:4px"><i style="width:0%;background:#0e7a5f"></i></span><b class="tk-pct">0%</b></span><span class="c" style="width:120px"><b class="tk-num">0</b></span><span class="c" style="width:170px"><span class="tk-m">—</span></span><img class="chev16" data-i="chevron-right" alt=""></a></div></div><div class="card r14 tk-card"><div class="o4-ch"><b>Listing requests</b><span>0</span></div><div class="rq-tw"><div class="o4-empty"><div class="mk"><img data-i="act-doc" width="16" height="16" alt=""></div><p class="t">No listing requests</p><p class="d">Drafts and requests you send to Universal Mint show up here.</p></div></div></div></div>
 </template>
 
-<template id="s-FR-TK7" data-name="Tokens · 첫 발행 진행 중 (S7)" data-node="" data-nav="tokens" data-badge="1" data-homeicon="nav-home-grid">
+<template id="s-FR-TK7" data-name="Tokens · 첫 발행 진행 중" data-node="" data-nav="tokens" data-badge="1" data-homeicon="nav-home-grid">
 <div class="rq tk"><div class="o4-head"><div class="page-head"><h1>Tokens</h1><p>Tokens you issue, and every token listed on Universal Mint.</p></div><a class="btn primary" data-go="AD1">Add token</a></div><div class="o4-tabs"><a class="on">Your tokens<span class="ct">1</span></a><a class="" data-go="TK2">All listed<span class="ct">6</span></a></div><div class="card r14 tk-card"><div class="o4-ch"><b>Listed</b><span>1</span></div><div class="rq-tw"><div class="o4-th"><p style="width:350px">TOKEN</p><p style="width:120px">STATUS</p><p style="width:180px">RESERVE</p><p style="width:120px">SUPPLY</p><p style="width:170px">IN PROGRESS</p><p style="width:16px"></p></div><a class="rq-row tk-r" data-go="TK0-0"><span class="c" style="width:350px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Ault Silver</b><span>ASLV</span></span></span><span class="c" style="width:120px"><span class="badge ok">Active</span></span><span class="c res" style="width:180px"><span class="tk-bar" style="width:137px;height:4px"><i style="width:0%;background:#0e7a5f"></i></span><b class="tk-pct">0%</b></span><span class="c" style="width:120px"><b class="tk-num">0</b></span><span class="c" style="width:170px"><span class="tk-v">1 request</span></span><img class="chev16" data-i="chevron-right" alt=""></a></div></div><div class="card r14 tk-card"><div class="o4-ch"><b>Listing requests</b><span>0</span></div><div class="rq-tw"><div class="o4-empty"><div class="mk"><img data-i="act-doc" width="16" height="16" alt=""></div><p class="t">No listing requests</p><p class="d">Drafts and requests you send to Universal Mint show up here.</p></div></div></div></div>
 </template>
 
-<template id="s-FR-TK8" data-name="Tokens · 첫 발행 끝, 공급 1,200 (S8)" data-node="" data-nav="tokens" data-badge="" data-homeicon="nav-home-grid">
+<template id="s-FR-TK8" data-name="Tokens · 첫 발행 끝, 공급 1,200" data-node="" data-nav="tokens" data-badge="" data-homeicon="nav-home-grid">
 <div class="rq tk"><div class="o4-head"><div class="page-head"><h1>Tokens</h1><p>Tokens you issue, and every token listed on Universal Mint.</p></div><a class="btn primary" data-go="AD1">Add token</a></div><div class="o4-tabs"><a class="on">Your tokens<span class="ct">1</span></a><a class="" data-go="TK2">All listed<span class="ct">6</span></a></div><div class="card r14 tk-card"><div class="o4-ch"><b>Listed</b><span>1</span></div><div class="rq-tw"><div class="o4-th"><p style="width:350px">TOKEN</p><p style="width:120px">STATUS</p><p style="width:180px">RESERVE</p><p style="width:120px">SUPPLY</p><p style="width:170px">IN PROGRESS</p><p style="width:16px"></p></div><a class="rq-row tk-r" data-go="FR-TK3"><span class="c" style="width:350px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Ault Silver</b><span>ASLV</span></span></span><span class="c" style="width:120px"><span class="badge ok">Active</span></span><span class="c res" style="width:180px"><span class="tk-bar" style="width:137px;height:4px"><i style="width:100%;background:#0e7a5f"></i></span><b class="tk-pct">100%</b></span><span class="c" style="width:120px"><b class="tk-num">1,200</b></span><span class="c" style="width:170px"><span class="tk-m">—</span></span><img class="chev16" data-i="chevron-right" alt=""></a></div></div><div class="card r14 tk-card"><div class="o4-ch"><b>Listing requests</b><span>0</span></div><div class="rq-tw"><div class="o4-empty"><div class="mk"><img data-i="act-doc" width="16" height="16" alt=""></div><p class="t">No listing requests</p><p class="d">Drafts and requests you send to Universal Mint show up here.</p></div></div></div></div>
 </template>
 
-<template id="s-FR-TK3" data-name="Token detail · 첫 발행 뒤 Overview (S8)" data-node="" data-nav="tokens" data-badge="" data-homeicon="nav-home-grid">
+<template id="s-FR-TK3" data-name="Token detail · 첫 발행 뒤 Overview" data-node="" data-nav="tokens" data-badge="" data-homeicon="nav-home-grid">
 <div class="rq tk"><a class="tk-back" data-go="TK1">← Tokens</a><div class="tk-hd"><span class="tk-img"><i style="background:#b2bac4"></i></span><div class="tt"><h1>Ault Silver</h1><div class="chips"><span class="badge ok">Active</span><span class="badge mut">Silver</span><span class="badge mut">Ethereum</span><span class="badge mut">Permissioned ERC-20</span><span class="badge mut">0x8a3f…c21e</span></div></div><div class="ac"><a class="btn secondary dark" data-go="RD1"><img data-i="tk-upload" alt="">Redeem</a><a class="btn primary" data-go="IS1"><img data-i="tk-issue" alt="">Issue</a></div></div><div class="o4-tabs tk-tabs"><a class="on">Overview</a><a data-nofigma="첫 발행 뒤 Investors (Daehan Securities 1곳)">Investors</a><a data-nofigma="첫 발행 뒤 Reserve (1,200 oz, 바 12개)">Reserve</a><a data-go="TK14-e">Disclosures</a><a data-go="TK7">Settings</a></div><div class="card tk-stats"><div class="s"><p class="eb">SUPPLY</p><b>1,200</b><span>ASLV circulating</span></div><div class="s"><p class="eb">RESERVE</p><b>100%</b><span class="tk-bar full"><i style="width:100%"></i></span><span>1,200 oz at The Wyoming Reserve, attested today</span></div><div class="s"><p class="eb">INVESTORS</p><b>1</b><span>has requested ASLV</span></div></div><div class="tk-2"><div class="card tk-cc"><div class="hd"><div class="tx"><b>In progress</b><span>Requests on ASLV that are not done yet.</span></div><a class="tk-lk" data-nofigma="토큰으로 거른 Requests(RQ-tk)">View in Requests →</a></div><div class="sr"><span>Issuance</span><b>None</b></div><div class="sr"><span>Redemption</span><b>None</b></div><div class="sr"><span>Waiting on you</span><b>None</b></div></div><div class="card tk-cc"><div class="hd"><div class="tx"><b>Recent disclosures</b><span>No disclosures yet.</span></div></div></div></div></div>
 </template>
 
-<template id="s-FR-RQ7" data-name="Requests · 첫 발행 1건 진행 중 (S7)" data-node="" data-nav="requests" data-badge="1" data-homeicon="nav-home-grid">
+<template id="s-FR-RQ7" data-name="Requests · 첫 발행 1건 진행 중" data-node="" data-nav="requests" data-badge="1" data-homeicon="nav-home-grid">
 <div class="rq"><div class="page-head"><h1>Requests</h1><p>Issuance and redemption requests for your tokens.</p></div><div class="ib-tabs rq-tabs"><a class="tab on"><span class="lb">In progress</span><span class="ct">1</span></a><a class="tab" data-go="RQ2"><span class="lb">History</span></a></div><div class="o4-sum"><p>Who has to act next?</p><div class="cards"><div class="c"><div class="nm"><span class="slot"><img data-i="i-user-round" alt=""></span><b class="me">You</b></div><b class="n me">1</b></div><div class="c"><div class="nm"><span class="slot"><img data-i="i-users-round" alt=""></span><b class="">Your team</b></div><b class="n">0</b></div><div class="c"><div class="nm"><span class="slot"><img data-i="rq-building" alt=""></span><b class="">Investors</b></div><b class="n">0</b></div><div class="c"><div class="nm"><span class="slot"><img data-i="nt-truck" alt=""></span><b class="">Custody &amp; shipping</b></div><b class="n">0</b></div></div></div><div class="card rq-tbl"><div class="o4-tool rq-tool"><div class="rq-sw"><a class="o4-search" data-nofigma="첫 발행 중 검색"><img data-i="i-search" alt="">Search reference or investor</a></div><div class="rq-fw"><a class="o4-filter" data-nofigma="첫 발행 중 필터"><img data-i="i-filter" alt="">Filter</a></div></div><div class="rq-tw"><div class="rq-th"><p style="width:86px">REFERENCE</p><p style="width:250px">REQUEST</p><p style="width:170px">STAGE</p><p style="width:270px">NEXT STEP</p><p style="width:88px">IN STAGE</p><p class="ac"></p></div><a class="rq-row me" data-go="FR-IB7"><span class="c ref" style="width:86px">ISS-0001</span><span class="c req" style="width:250px"><span class="tk"><i></i></span><span class="tx"><b>Issue 1,200 ASLV</b><span>For Daehan Securities</span></span></span><span class="c" style="width:170px"><span class="badge mut">Deposit review</span></span><span class="c nx" style="width:270px"><span class="who you">You</span><span class="tx"><b class="b">Review deposit evidence</b><span>Deposit confirmation and serials</span></span></span><span class="c age" style="width:88px">40 min</span><span class="c ac"><span class="btn secondary dark rq-rv">Review</span></span></a></div></div></div>
 </template>
 
-<template id="s-FR-RQ8" data-name="Requests · History 1건 (S8)" data-node="" data-nav="requests" data-badge="" data-homeicon="nav-home-grid">
+<template id="s-FR-RQ8" data-name="Requests · History 1건" data-node="" data-nav="requests" data-badge="" data-homeicon="nav-home-grid">
 <div class="rq"><div class="page-head"><h1>Requests</h1><p>Issuance and redemption requests for your tokens.</p></div><div class="ib-tabs rq-tabs"><a class="tab" data-nofigma="첫 발행 뒤 In progress (0건)"><span class="lb">In progress</span><span class="ct">0</span></a><a class="tab on"><span class="lb">History</span></a></div><div class="card rq-tbl"><div class="o4-tool rq-tool"><div class="rq-sw"><a class="o4-search" data-nofigma="첫 발행 뒤 History 검색"><img data-i="i-search" alt="">Search reference or investor</a></div><div class="rq-fw"><a class="o4-filter" data-nofigma="History에서 필터를 연 모양"><img data-i="i-filter" alt="">Filter</a></div></div><div class="rq-tw"><div class="rq-th"><p style="width:86px">REFERENCE</p><p style="width:250px">REQUEST</p><p style="width:170px">STATUS</p><p style="width:270px">RESULT</p><p style="width:88px">CLOSED</p><p class="ac"></p></div><a class="rq-row" data-nofigma="첫 발행 요청 상세 (완료)"><span class="c ref" style="width:86px">ISS-0001</span><span class="c req" style="width:250px"><span class="tk"><i></i></span><span class="tx"><b>Issue 1,200 ASLV</b><span>For Daehan Securities</span></span></span><span class="c" style="width:170px"><span class="badge ok">Done</span></span><span class="c nx" style="width:270px"><span class="tx"><b class="r">Minted 1,200 ASLV</b><span>Fireblocks signers</span></span></span><span class="c age" style="width:88px">Today</span><span class="c ac"></span></a></div></div></div>
 </template>
 
-<template id="s-FR-IB7" data-name="My tasks · 첫 입고 확인 (S7)" data-node="" data-nav="tasks" data-badge="1" data-homeicon="nav-home-grid">
+<template id="s-FR-IB7" data-name="My tasks · 첫 입고 확인" data-node="" data-nav="tasks" data-badge="1" data-homeicon="nav-home-grid">
 <div class="ib"><div class="ib-list"><div class="ib-head"><div class="ib-tr"><div class="l"><p class="ib-t">My tasks</p><a class="ib-kind" data-go="IB1-k1">All kinds ▾</a></div><a class="ib-fold" data-go="@collapse" title="Collapse list"><img data-i="ib-chevrons-left" alt=""></a></div><div class="ib-tabs"><a class="tab on" data-go="IB1"><span class="lb">To do</span><span class="ct">1</span></a><a class="tab" data-go="IB3"><span class="lb">Done</span></a></div></div><div class="ib-items"><a class="ib-item sel" data-go="FR-IB7"><span class="ud on"></span><span class="mk"><img data-i="act-people" alt=""></span><span class="tx"><b class="bd">Confirm deposit</b><span>ISS-0001, 1,200 ASLV. Daehan Securities sent silver</span></span><span class="tm">40m</span></a></div></div><div class="ib-rail"><a class="rl-open" data-go="@expand" title="Expand list"><img data-i="ib-chevrons-right" alt=""></a><i class="rl-div"></i><a class="rl-task sel" data-go="FR-IB7" title="Confirm deposit"><span class="mk"><img data-i="act-people" alt=""></span><i class="ud"></i></a></div><div class="ib-det"><div class="ib-pane"><span>1 of 1   ↑ ↓ to move</span></div><div class="ib-body"><div class="ib-rh"><div class="tk"><i></i></div><div class="tt"><h1>Confirm deposit</h1><p>Issue 1,200 ASLV · ISS-0001 · Ault Silver for Daehan Securities</p></div><span class="badge warn">Waiting on you</span></div><div class="card ib-card"><div class="ib-steps"><div class="st"><span class="sm d"><img data-i="ib-check" alt=""></span><div class="tx"><b class="m">Request</b><span>Daehan Securities</span></div></div><i class="cn on"></i><div class="st"><img class="sm" data-i="ib-step-now" alt=""><div class="tx"><b class="b">Deposit</b><span>Your check</span></div></div><i class="cn"></i><div class="st"><span class="sm t"></span><div class="tx"><b class="f">Mint approval</b><span>Mint approvers</span></div></div><i class="cn"></i><div class="st"><span class="sm t"></span><div class="tx"><b class="f">Mint</b><span>Fireblocks signers</span></div></div></div></div><div class="card ib-card ib-turn"><div class="ib-th"><p class="eb">YOUR TURN</p><p class="tl">Check the deposit documents</p></div><div class="ib-row"><span class="mk sq"><img data-i="ob-contract" alt=""></span><div class="tx"><b>Deposit receipt</b><span>1,200 oz in VAU079. Uploaded by The Wyoming Reserve</span></div><a class="ib-lk" data-nofigma="첫 입고 확인서">Open</a></div><div class="ib-row"><span class="mk sq"><img data-i="ib-list-checks" alt=""></span><div class="tx"><b>Bar list</b><span>12 bars of 100 oz</span></div><a class="ib-lk" data-nofigma="첫 입고 바 목록">Open</a></div><div class="ib-dec"><p>Check both documents before minting.</p><div class="ac"><a class="btn primary" data-go="@deposit">Confirm deposit</a></div></div></div><div class="card ib-card"><div class="ib-ch">Request details</div><div class="ib-info"><span>Amount</span><b>1,200 ASLV</b></div><div class="ib-info"><span>Reserve after mint</span><b>1,200 oz at The Wyoming Reserve</b></div><div class="ib-info"><span>Receiving wallet</span><b>0x25AB…297C</b></div><div class="ib-info"><span>Terms accepted</span><b>Nov 7, 2026</b></div></div></div></div></div>
 </template>
 
@@ -3449,7 +3457,7 @@ const WS = {
 function fillIcons(root) { root.querySelectorAll('[data-i]').forEach(im => { im.src = ICONS[im.dataset.i]; }); }
 
 const ST_KEY = 'um-review-scenario';
-const ST = { s: 9, dep: false, seen: 0, hint: true, fold: true };
+const ST = { s: 9, dep: false, seen: 0, hint: true };
 try { const v = JSON.parse(localStorage.getItem(ST_KEY)); if (v && typeof v.s === 'number') Object.assign(ST, v); } catch (e) {}
 function saveST() { try { localStorage.setItem(ST_KEY, JSON.stringify(ST)); } catch (e) {} }
 const FLOW_URL = { 'add-token-flow': '../add-token-flow/', 'issue-flow': '../issue-flow/' };
@@ -3512,9 +3520,6 @@ let viaGo = false;
 let flowHit = -1;
 
 function setState(n, byFF) {
-  const wasOps = scOf(ST.s) === 'ops', isOps = scOf(n) === 'ops';
-  if (!isOps && wasOps) ST.fold = false;
-  if (isOps && !wasOps) ST.fold = true;
   if (n !== ST.s) { ST.dep = n === 8; ST.task = false; }
   ST.s = n; flowHit = -1;
   if (!byFF) ST.seen = notes().length;
@@ -3538,29 +3543,33 @@ function dot() {
   u.style.visibility = scOf(ST.s) !== 'first' || notes().length > ST.seen ? '' : 'hidden';
 }
 
-const gd = document.createElement('div');
-gd.className = 'gd'; gd.id = 'gd';
-document.body.appendChild(gd);
+const FLOW_INFO = { first: '조직 만들기부터 첫 상장, 첫 발행까지(Issuer 관리자)', join: '초대받은 팀원이 합류해 첫 발행 승인까지(Mint approvers)' };
+function stepGoal() {
+  const st = STATES[ST.s];
+  return ST.s === 7 && ST.dep ? '입고를 확인했습니다. 승인과 서명은 ⏩로 넘기세요'
+    : st.opsOk && ST.task ? '첫 할 일을 처리했습니다. ⏩로 흐름을 마치세요' : st.goal;
+}
 function guide() {
-  const st = STATES[ST.s], sc = SC[st.sc], ops = st.sc === 'ops';
-  gd.classList.toggle('fold', ST.fold);
-  if (ST.fold) {
-    gd.innerHTML = `<button class="gd-pill" data-gd="open" title="시나리오 가이드 펼치기"><b>${ops ? '시나리오' : sc.t}</b><span>${ops ? '운영 중' : stCode(ST.s) + ' ' + st.t}</span><i>▴</i></button>`;
-    hints(); return;
-  }
-  const now = sc.goals.findIndex(g => !goalDone(g));
-  const goals = sc.goals.length ? '<ol class="gd-goals">' + sc.goals.map((g, i) => `<li class="${goalDone(g) ? 'ok' : i === now ? 'now' : ''}">${g[0]}</li>`).join('') + '</ol>' : '';
-  const goal = ST.s === 7 && ST.dep ? '입고를 확인했습니다. Mint approvers 승인과 Fireblocks 서명은 ⏩로 넘기세요'
-    : st.opsOk && ST.task ? '첫 할 일을 처리했습니다. 둘러보거나 ⏩로 마치세요' : st.goal;
-  const ff = st.ff ? `<button class="gd-ff" data-gd="ff">⏩ ${st.ff[0]}</button>` : '';
-  const fl = st.flow && st.flow[1] ? `<a class="gd-flow" href="${FLOW_URL[st.flow[1]]}" target="_blank" rel="noopener">${st.flow[2]} Flow 화면 ↗</a>` : '';
-  gd.innerHTML = '<div class="gd-hd"><div class="gd-seg">' + Object.entries(SC).map(([k, v]) => `<a data-gd="sc" data-k="${k}" class="${k === st.sc ? 'on' : ''}">${v.t}</a>`).join('') + '</div>'
-    + '<button class="gd-x" data-gd="fold" title="접기">▾</button></div>'
-    + `<p class="gd-st">${stCode(ST.s)} · ${st.t}</p><p class="gd-goal">${goal}</p>`
-    + (ff || fl ? `<div class="gd-ac">${ff}${fl}</div>` : '') + goals
-    + `<div class="gd-ft"><label><input type="checkbox" data-gd="hint"${ST.hint ? ' checked' : ''}>다음 버튼 강조</label>`
-    + (ops ? '' : `<a data-gd="sc" data-k="${st.sc}">처음부터 다시</a>`) + '</div>';
+  const st = STATES[ST.s], on = st.sc !== 'ops';
+  $('rv-flow').innerHTML = on ? `<i class="rv-sep"></i><span class="rv-step" title="${stepGoal()}"><b>${stCode(ST.s)}</b><span>${stepGoal()}</span></span>`
+    + (st.ff ? `<button id="rv-ff" data-gd="ff">⏩ ${st.ff[0]}</button>` : '') : '';
+  $('rv-tag').classList.toggle('flow', on);
+  if ($('rv-list').classList.contains('show')) flowTab();
   hints();
+}
+function flowTab() {
+  const cur = scOf(ST.s);
+  $('rv-flows').innerHTML = Object.entries(SC).filter(([k]) => k !== 'ops').map(([k, v]) => {
+    const steps = STATES.map((x, i) => [x, i]).filter(([x]) => x.sc === k);
+    const head = `<a class="rv-fl${k === cur ? ' on' : ''}" data-gd="sc" data-k="${k}"><b>${v.t}</b><span>${FLOW_INFO[k]}</span><em>${k === cur ? '진행 중' : steps.length + '단계 · 시작'}</em></a>`;
+    if (k !== cur) return head;
+    return head + '<ol class="rv-steps">' + steps.map(([x, i]) => {
+      const cls = i < ST.s ? 'ok' : i === ST.s ? 'now' : '';
+      const fl = i === ST.s && x.flow && x.flow[1] ? `<a class="rv-fx" href="${FLOW_URL[x.flow[1]]}" target="_blank" rel="noopener">${x.flow[2]} Flow 화면 ↗</a>` : '';
+      return `<li class="${cls}"><a data-gd="st" data-n="${i}"><b>${stCode(i)}</b><span>${x.t}</span></a>${i === ST.s ? `<p>${stepGoal()}</p>${fl}` : ''}</li>`;
+    }).join('') + '</ol>'
+      + `<div class="rv-fo"><label><input type="checkbox" data-gd="hint"${ST.hint ? ' checked' : ''}>다음 버튼 강조</label><a data-gd="sc" data-k="${k}">처음부터 다시</a><a data-gd="sc" data-k="ops">흐름 끝내기</a></div>`;
+  }).join('') + '<div class="rv-fl off"><b>투자자(Standard, Personal)</b><span>신청부터 첫 요청까지</span><em>준비 중</em></div>';
 }
 function hints() {
   document.querySelectorAll('.gd-hl').forEach(e => e.classList.remove('gd-hl'));
@@ -3573,7 +3582,7 @@ function hints() {
   let found = false;
   codes.forEach(c => document.querySelectorAll(`#ov [data-go="${c}"], #main [data-go="${c}"], #bare [data-go="${c}"], #sb .inset:not(.lk):not([hidden]) [data-go="${c}"]`)
     .forEach(e => { if (e.getClientRects().length && !(nx && found)) { e.classList.add('gd-hl'); found = true; } }));
-  if (!found) { const b = gd.querySelector('.gd-ff') || gd.querySelector('.gd-pill'); if (b && st.ff) b.classList.add('gd-hl'); }
+  if (!found && $('rv-ff')) $('rv-ff').classList.add('gd-hl');
 }
 function fastForward() {
   const st = STATES[ST.s];
@@ -3583,16 +3592,18 @@ function fastForward() {
   guide(); dot();
 }
 function startScenario(n) { setState(n); go(STATES[n].start); guide(); dot(); }
-gd.addEventListener('click', e => {
+function onGd(e) {
   const a = e.target.closest('[data-gd]');
   if (!a || a.tagName === 'INPUT') return;
   e.preventDefault();
   const k = a.dataset.gd;
   if (k === 'ff') fastForward();
-  else if (k === 'sc') startScenario(SC[a.dataset.k].from);
-  else if (k === 'fold' || k === 'open') { ST.fold = k === 'fold'; saveST(); guide(); }
-});
-gd.addEventListener('change', e => { if (e.target.dataset.gd === 'hint') { ST.hint = e.target.checked; saveST(); hints(); } });
+  else if (k === 'sc') { $('rv-list').classList.remove('show'); startScenario(SC[a.dataset.k].from); }
+  else if (k === 'st') { $('rv-list').classList.remove('show'); startScenario(+a.dataset.n); }
+}
+$('rv-tag').addEventListener('click', onGd);
+$('rv-list').addEventListener('click', onGd);
+$('rv-list').addEventListener('change', e => { if (e.target.dataset.gd === 'hint') { ST.hint = e.target.checked; saveST(); hints(); } });
 
 function render(code) {
   let s = screens[code];
@@ -3663,7 +3674,7 @@ function go(code, el) {
 
 document.addEventListener('click', e => {
   const lst = $('rv-list');
-  if (lst.classList.contains('show') && !e.target.closest('#rv-list, #rv-open')) {
+  if (lst.classList.contains('show') && !e.target.closest('#rv-list, #rv-open, #rv-ff')) {
     e.preventDefault(); lst.classList.remove('show'); return;
   }
   if (e.target.closest('[data-close]')) { e.preventDefault(); closeOverlay(); return; }
@@ -3698,18 +3709,18 @@ document.addEventListener('click', e => {
 
 function buildList() {
   const box = $('rv-list');
-  box.innerHTML = '<h4><span>시나리오 · 상태</span><em><a class="rv-reset" data-st="0">처음부터 다시</a></em></h4>'
-    + STATES.map((x, i) => `<a data-st="${i}"><b>${stCode(i)}</b><span>${x.t} <i>${x.sc === 'ops' ? '지금 화면 그대로' : SC[x.sc].t}</i></span></a>`).join('')
+  box.innerHTML = '<div class="rv-tabs"><a data-tab="flows">흐름</a><a data-tab="screens">화면</a></div><div id="rv-flows"></div><div id="rv-screens">'
     + PLAN.map(([g, codes]) => {
-    const made = codes.filter(c => screens[c]).length;
-    return '<h4><span>' + g + '</span><em>' + (made === codes.length ? made + '장' : made + ' / ' + codes.length + '장') + '</em></h4>' + codes.map(c => {
-      const s = screens[c];
-      return '<a href="#' + c + '" class="' + (s ? '' : 'todo') + '"' + (s ? ' title="' + esc(s.name).replace(/"/g, '&quot;') + '"' : '') + '><b>' + c + '</b><span>' + (s ? nameHTML(c) : '준비 중') + '</span></a>';
-    }).join('');
-  }).join('');
+      const made = codes.filter(c => screens[c]).length;
+      return '<h4><span>' + g + '</span><em>' + (made === codes.length ? made + '장' : made + ' / ' + codes.length + '장') + '</em></h4>' + codes.map(c => {
+        const s = screens[c];
+        return '<a href="#' + c + '" class="' + (s ? '' : 'todo') + '"' + (s ? ' title="' + esc(s.name).replace(/"/g, '&quot;') + '"' : '') + '><b>' + c + '</b><span>' + (s ? nameHTML(c) : '준비 중') + '</span></a>';
+      }).join('');
+    }).join('') + '</div>';
   box.addEventListener('click', e => {
-    const a = e.target.closest('a');
-    if (a && a.dataset.st) { e.preventDefault(); box.classList.remove('show'); startScenario(+a.dataset.st); return; }
+    const t = e.target.closest('[data-tab]');
+    if (t) { e.preventDefault(); showTab(t.dataset.tab); return; }
+    const a = e.target.closest('#rv-screens a');
     if (a && a.classList.contains('todo')) { e.preventDefault(); toast(a.querySelector('b').textContent + ': 이 프로토타입에 없는 화면'); }
     else if (a) {
       const c = a.querySelector('b').textContent;
@@ -3718,14 +3729,21 @@ function buildList() {
     }
   });
 }
+function showTab(tab) {
+  const box = $('rv-list');
+  box.dataset.tab = tab;
+  box.querySelectorAll('[data-tab]').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
+  box.scrollTop = 0;
+  if (tab === 'flows') { flowTab(); return; }
+  const code = openOv || current;
+  box.querySelectorAll('#rv-screens a').forEach(a => a.classList.toggle('cur', a.getAttribute('href') === '#' + code));
+  const cur = box.querySelector('#rv-screens a.cur');
+  if (cur) cur.scrollIntoView({ block: 'center' });
+}
 $('rv-open').addEventListener('click', () => {
   const box = $('rv-list');
   box.classList.toggle('show');
-  const code = openOv || current;
-  box.querySelectorAll('a').forEach(a => a.classList.toggle('cur', a.getAttribute('href') === '#' + code));
-  box.querySelectorAll('a[data-st]:not(.rv-reset)').forEach(a => a.classList.toggle('now', +a.dataset.st === ST.s));
-  const cur = box.querySelector('a.cur');
-  if (box.classList.contains('show') && cur) cur.scrollIntoView({ block: 'center' });
+  if (box.classList.contains('show')) showTab(scOf(ST.s) === 'ops' ? 'screens' : 'flows');
 });
 
 function route() {
