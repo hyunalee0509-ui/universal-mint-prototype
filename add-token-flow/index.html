@@ -1037,21 +1037,91 @@ function notifHTML(){
 
 /* ================= prototype control panel (Korean, not product UI) ================= */
 const SCENARIOS = [
+  ['정상 화면', [['st:start','Tokens에서 시작'],['st:review','Review, 제출 직전 (AD6b)'],['st:inReview','제출 직후, 심사 중 (AD7b)'],['st:live','상장 완료, 토큰 상세 (AD8)'],['st:rejected','플랫폼 거절 (AD8x)'],['st:withdrawn','요청 철회됨 (AD7w)']]],
+  ['조직 승인 경로', [['st:orgWaiting','제안 뒤 승인 대기 (PR1)'],['st:orgTurn','승인자 차례, My tasks (E1)'],['st:orgApproved','조직 승인 완료 (PR5)'],['st:orgRejected','제안 반려됨 (PR3)'],['st:propWithdrawn','제안 철회됨 (PR4w)']]],
   ['시작 전 막힘', [['noRights','상장 권한 없음 (YT1c, AD0a)'],['noKyc','내 인증(KYC) 미완료 (YT2, AD0a2)'],['kybExpired','조직 KYB 만료 (AD0b)']]],
   ['단계에서 막힘', [['noFbTokens','Fireblocks에 상장할 토큰 없음 (AD1g)'],['addrListed','직접 등록: 이미 상장된 계약 (AD1c2)'],['noCustodian','이 자산의 보관기관 없음 (AD3a)'],['docusignOff','DocuSign 미연결 (AD5k)'],['kycTodo','Review: 내가 할 일 남음 (AD6)'],['waitingPlatform','Review: 플랫폼 인증 대기 (AD6a)'],['passkeyOther','패스키가 다른 기기에만 (AD6e3)']]],
   ['외부, 서버 실패', [['fbFail','Fireblocks 토큰 불러오기 실패 (AD1e)'],['addrNoAnswer','직접 등록: 주소 응답 없음 (AD1d)'],['addrNetFail','직접 등록: 네트워크 실패 (AD1i)'],['custFail','보관기관 목록 실패 (AD3y)'],['noVault','자산 보유 vault 없음 (AD5c)'],['noAsset','계약에 연결된 자산 없음 (AD5c2)'],['fbNoAnswer','Fireblocks 응답 없음 (AD5e2)'],['serverRefused','제출: 서버가 거절 (ADE1)'],['passkeyFail','패스키 서명 실패 (AD6e2)'],['platformRefused','마지막 승인 뒤 플랫폼 거절 (PR2z)']]],
   ['결과 경합', [['raceLive','철회 직전 플랫폼이 승인 (AD7x)'],['raceRejected','철회 직전 플랫폼이 거절 (AD7x2)']]],
 ];
+// Targets that only make sense for one viewer or one listing rule
+const FORCED = {
+  'st:orgWaiting':{persona:'juya', rule:'org'}, 'st:orgTurn':{persona:'joe', rule:'org'}, 'st:orgApproved':{persona:'juya', rule:'org'},
+  'st:orgRejected':{persona:'juya', rule:'org'}, 'st:propWithdrawn':{persona:'juya', rule:'org'}, 'platformRefused':{persona:'joe', rule:'org'},
+  'st:inReview':{persona:'juya'}, 'st:live':{persona:'juya'}, 'st:rejected':{persona:'juya'}, 'st:withdrawn':{persona:'juya'},
+  'raceLive':{persona:'juya', rule:'direct'}, 'raceRejected':{persona:'juya', rule:'direct'},
+};
+S.pend = {target:'st:start', kind:'commodity', persona:'juya', rule:'direct'};
+
+function fullDraft(kind){
+  const d = fresh(kind);
+  d.por = {name: kind==='custom' ? 'Anchorage custody statement.pdf' : 'Wyoming custody statement.pdf', size:248000};
+  d.docs = [{name: `${TOKENS[d.token].sym} whitepaper.pdf`, size:1240000}];
+  d.reached = 5;
+  return d;
+}
+function seedReq(status, path){
+  const now = Date.now(), r = {id:++S.seq, d:fullDraft(S.pend.kind), by:'Juya Kim', path, status, approvals:[], at:{}, fresh:false};
+  if (path==='org'){ r.at.proposed = now; r.approvals.push('Juya Kim'); }
+  else r.at.submitted = now;
+  if (status==='review' && path==='org'){ r.approvals.push('Joe Miller'); r.at.orgApproved = r.at.submitted = now; r.decidedBy = 'Joe Miller'; }
+  if (status==='review' && path==='direct') r.fresh = true;
+  if (status==='live' || status==='rejected') r.at.decided = now;
+  if (status==='withdrawn'){ r.at.withdrawn = now; r.reason = 'The custody statement needs an update.'; }
+  if (status==='orgRejected'){ r.at.decided = now; r.rejBy = 'Joe Miller'; r.decidedBy = 'Joe Miller'; r.rejReason = 'Use the renewed custody statement before we list.'; }
+  if (status==='propWithdrawn') r.at.withdrawn = now;
+  S.reqs.push(r); S.cur = r.id;
+  return r;
+}
+function applyProto(){
+  const p = S.pend, f = FORCED[p.target] || {}, tgt = p.target;
+  // start clean so every target opens the same way each time
+  Object.assign(S, {reqs:[], cur:null, notes:[], d:fresh(p.kind), draftSaved:false, once:{}, refused:false, modal:null, mf:{}, signErr:false, signing:false,
+    notifOpen:false, menu:null, tip:false, errs:{}, fromReview:false, task:null, taskTab:'todo', backTo:null, done1:false, done2:false});
+  S.persona = f.persona || p.persona; S.rule = f.rule || p.rule;
+  S.scenario = tgt.startsWith('st:') ? 'none' : tgt;
+  const toReview = () => { S.d = fullDraft(p.kind); S.draftSaved = true; go('ad6'); };
+  const atStep = (screen) => { S.d = fullDraft(p.kind); S.d.reached = STEP_OF[screen]; S.draftSaved = true; go(screen); };
+  switch (tgt){
+    case 'st:start': case 'noKyc': go('tokens'); break;
+    case 'noRights': S.tip = true; go('tokens'); S.tip = true; render(); break;
+    case 'kybExpired': go('ad0'); break;
+    case 'st:review': case 'kycTodo': case 'waitingPlatform': toReview(); break;
+    case 'passkeyOther': case 'passkeyFail': case 'serverRefused': toReview(); S.modal = {type:'submit'}; render(); break;
+    case 'st:inReview': seedReq('review','direct'); go('ad7'); break;
+    case 'st:live': { const r = seedReq('live','direct'); note('juya','check',`${r.d.name} is listed`,`Approved by the platform. ${T(r.d).firstAction}.`,'token',r.id); go('ad8'); break; }
+    case 'st:rejected': { const r = seedReq('rejected','direct'); note('juya','x-circle',`${r.d.name} listing was rejected`,'Custody statement flagged. See the decision.','req',r.id); go('ad7'); break; }
+    case 'st:withdrawn': seedReq('withdrawn','direct'); go('ad7'); break;
+    case 'st:orgWaiting': seedReq('org','org'); go('ad7'); break;
+    case 'st:orgTurn': case 'platformRefused': { const r = seedReq('org','org'); note('joe','users-round',`Juya Kim proposed listing ${r.d.name}`,'Your approval is needed. 1 of 2 approved','task',r.id); S.task = 'r'+r.id; go('tasks'); break; }
+    case 'st:orgApproved': seedReq('review','org'); go('ad7'); break;
+    case 'st:orgRejected': seedReq('orgRejected','org'); go('ad7'); break;
+    case 'st:propWithdrawn': seedReq('propWithdrawn','org'); go('ad7'); break;
+    case 'raceLive': case 'raceRejected': { const r = seedReq('review','direct'); r.fresh = false; go('ad7'); S.modal = {type:'withdrawReq', rid:r.id}; render(); break; }
+    case 'fbFail': case 'noFbTokens': atStep('ad1'); break;
+    case 'addrListed': case 'addrNoAnswer': case 'addrNetFail':
+      atStep('ad1'); S.d.tokenSrc = 'self'; S.d.addr = '0x8f3a2B07e1D94c5A0b6E31f9C4d2a8E7b591c21b'; startRead(); break;
+    case 'noCustodian': case 'custFail': atStep('ad3'); break;
+    case 'docusignOff': atStep('ad5'); break;
+    case 'noVault': case 'noAsset': case 'fbNoAnswer': atStep('ad5b'); break;
+    default: go('tokens');
+  }
+  S.protoMin = true; render();
+}
+
 function protoHTML(){
   const inReview = S.reqs.filter(r=>r.status==='review');
+  const p = S.pend, seg = (key, opts) => `<div class="seg">${opts.map(([v,l])=>`<button class="${p[key]===v?'on':''}" data-a="pend" data-v="${key}:${v}">${l}</button>`).join('')}</div>`;
+  const forced = FORCED[p.target];
   return `<button class="ph" data-a="protoMin" aria-expanded="${!S.protoMin}"><b>프로토타입 설정</b><span class="grow"></span><i data-lucide="${S.protoMin?'chevron-up':'chevron-down'}" style="width:14px"></i></button>
   <div class="pb">
-    <div><div class="pl">보는 사람</div><div class="seg"><button class="${S.persona==='juya'?'on':''}" data-a="persona" data-v="juya">Juya Kim (제안)</button><button class="${S.persona==='joe'?'on':''}" data-a="persona" data-v="joe">Joe Miller (승인)</button></div></div>
-    <div><div class="pl">상장 규칙</div><div class="seg"><button class="${S.rule==='direct'?'on':''}" data-a="rule" data-v="direct">바로 제출</button><button class="${S.rule==='org'?'on':''}" data-a="rule" data-v="org">조직 승인 2 of 4</button></div></div>
-    <div><div class="pl">상황</div><select class="select" data-proto="scenario"><option value="none">정상</option>${SCENARIOS.map(([g,items])=>`<optgroup label="${g}">${items.map(([v,l])=>`<option value="${v}" ${S.scenario===v?'selected':''}>${l}</option>`).join('')}</optgroup>`).join('')}</select></div>
-    ${inReview.length?`<div><div class="pl">플랫폼 심사 (포털 밖)</div><div style="display:flex;gap:6px"><button class="btn primary" data-a="platform" data-v="approve">승인</button><button class="btn" data-a="platform" data-v="reject">거절</button></div></div>`:''}
-    <div class="pnote">입력 오류는 직접 입력해서 확인할 수 있습니다. 실패 상황은 한 번만 일어나고, 다시 시도하면 넘어갑니다.</div>
-    <button class="btn" data-a="reset">처음부터</button>
+    <div><div class="pl">화면 또는 상황</div><select class="select" data-proto="target" aria-label="화면 또는 상황">${SCENARIOS.map(([g,items])=>`<optgroup label="${g}">${items.map(([v,l])=>`<option value="${v}" ${p.target===v?'selected':''}>${l}</option>`).join('')}</optgroup>`).join('')}</select></div>
+    <div><div class="pl">토큰 종류</div>${seg('kind',[['commodity','Commodity (AGP)'],['custom','Custom (BMAX)']])}</div>
+    <div><div class="pl">보는 사람${forced?.persona?' (이 화면은 자동으로 정해짐)':''}</div>${forced?.persona ? `<div class="seg"><button class="on" disabled>${PEOPLE[forced.persona].name}</button></div>` : seg('persona',[['juya','Juya Kim (제안)'],['joe','Joe Miller (승인)']])}</div>
+    <div><div class="pl">상장 규칙${forced?.rule?' (이 화면은 자동으로 정해짐)':''}</div>${forced?.rule ? `<div class="seg"><button class="on" disabled>${forced.rule==='org'?'조직 승인 2 of 4':'바로 제출'}</button></div>` : seg('rule',[['direct','바로 제출'],['org','조직 승인 2 of 4']])}</div>
+    <div style="display:flex;gap:6px"><button class="btn" data-a="reset">처음부터</button><span class="grow"></span><button class="btn primary" data-a="applyProto" style="min-width:72px">확인</button></div>
+    ${inReview.length?`<div style="border-top:1px dashed var(--border-strong);padding-top:10px"><div class="pl">플랫폼 심사 (포털 밖)</div><div style="display:flex;gap:6px"><button class="btn primary" data-a="platform" data-v="approve">승인</button><button class="btn" data-a="platform" data-v="reject">거절</button></div></div>`:''}
+    <div class="pnote">확인을 누르면 고른 조건으로 새로 시작해서 그 화면을 엽니다. 입력 오류는 직접 입력해서 확인할 수 있고, 실패 상황은 한 번만 일어나며 다시 시도하면 넘어갑니다.</div>
   </div>`;
 }
 
@@ -1217,6 +1287,8 @@ const A = {
   protoMin(){ S.protoMin=!S.protoMin; render(); },
   persona(v){ if (S.persona===v) return; S.persona=v; S.notifOpen=false; closeModal(); S.backTo=null; S.taskTab='todo'; S.task=null; go(myTasks().some(t=>t.rid) ? 'tasks' :(S.screen==='ad7'||S.screen==='ad8') ? S.screen : 'tokens'); toast(`${me().name}(으)로 보는 중`); },
   rule(v){ S.rule=v; render(); },
+  pend(v){ const [k,val]=v.split(':'); S.pend[k]=val; $('#proto').innerHTML = protoHTML(); if (window.lucide) lucide.createIcons(); },
+  applyProto(){ applyProto(); const o = [...document.querySelectorAll('[data-proto="target"] option')].find(x=>x.value===S.pend.target); toast('열림: '+(o?o.textContent:'')); },
   platform(v){
     const r = [...S.reqs].reverse().find(x=>x.status==='review'); if (!r) return;
     r.fresh=false; r.at.decided=Date.now();
@@ -1256,7 +1328,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const el = e.target;
-  if (el.dataset.proto==='scenario'){ S.scenario = el.value; S.once = {}; S.refused=false; S.tip=false; render(); toast(el.value==='none'?'정상 상황':'상황: '+el.options[el.selectedIndex].text); return; }
+  if (el.dataset.proto){ S.pend[el.dataset.proto] = el.value; $('#proto').innerHTML = protoHTML(); if (window.lucide) lucide.createIcons(); return; }
   if (el.dataset.bind && el.tagName==='SELECT'){ S.d[el.dataset.bind]=el.value; delete S.errs[el.dataset.bind]; render(); return; }
   if (el.dataset.bind==='imgUrl'){
     const u = el.value.trim(), d = S.d;
