@@ -202,6 +202,13 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .rv-list .rv-tabs a:hover { background: none; color: #111827; }
 .rv-list .rv-tabs a.on { color: #111827; border-bottom-color: #111827; }
 .rv-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding-bottom: 8px; }
+.rv-search { flex-shrink: 0; padding: 10px 12px; border-bottom: 1px solid #e3e6ea; }
+.rv-search input { width: 100%; height: 34px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 8px; font: inherit; font-size: 13px; color: #111827; background: #fff; outline: none; }
+.rv-search input:focus { border-color: #111827; }
+.rv-search input::placeholder { color: #9ca3af; }
+.rv-list[data-view="flows"] .rv-search { display: none; }
+.rv-list a[hidden], .rv-list h4[hidden] { display: none; }
+.rv-none { display: none; padding: 24px 16px; text-align: center; color: #6b7280; }
 .rv-list[data-view="flows"] #rv-screens, .rv-list[data-view="screens"] #rv-flows, .rv-list[data-view="screens"] .rv-foot { display: none; }
 .rv-list h4 { top: 0; }
 .rv-list h4:first-child { border-top: 0; margin-top: 0; }
@@ -4982,7 +4989,7 @@ function openOverlay(code) {
   layer.appendChild(s.tpl.content.cloneNode(true));
   fillIcons(layer);
   if (s.after) { const [to, ms] = s.after.split(':'); setTimeout(() => { if (openOv === code) go(to); }, +ms || 1500); }
-  if (code === 'C1' && scOf(ST.s) !== 'ops') {
+  if (code === 'C1' && !opsLike(ST.s)) {
     const pop = layer.querySelector('.c1'), ns = notes();
     if (scOf(ST.s) !== 'join') pop.querySelectorAll('.c1-item').forEach(x => x.remove());
     pop.querySelector('.c1-head').insertAdjacentHTML('afterend', ns.length ? ns.map(([ic, t, d, g, age]) => `<a class="c1-item" data-go="${g}"><div class="mk"><img src="${ICONS[ic]}" width="16" height="16" alt=""></div>`
@@ -5156,10 +5163,10 @@ const STATES = [
 ];
 STATES.forEach(x => { x.sc = x.sc || 'first'; });
 const SC = {
-  first: { t: '처음 시작', from: 0, goals: [['조직 만들기 신청', 2], ['심사 통과', 3], ['신원 인증', 4], ['첫 상장 요청', 5], ['상장 승인', 6], ['첫 발행 요청', 7], ['입고 확인', 'dep'], ['발행 끝', 8]] },
-  join: { t: '초대 합류', from: 10, goals: [['초대 합류', 12], ['신원 확인', 13], ['첫 발행 승인', 'task']] },
-  std: { t: '투자자 · Standard', from: 14, goals: [] },
-  per: { t: '투자자 · Personal', from: 21, goals: [] },
+  first: { t: 'Issuer 새로 만들기', from: 0, goals: [['조직 만들기 신청', 2], ['심사 통과', 3], ['신원 인증', 4], ['첫 상장 요청', 5], ['상장 승인', 6], ['첫 발행 요청', 7], ['입고 확인', 'dep'], ['발행 끝', 8]] },
+  join: { t: 'Issuer 초대받아 합류', from: 10, goals: [['초대 합류', 12], ['신원 확인', 13], ['첫 발행 승인', 'task']] },
+  std: { t: 'Standard 새로 만들기', from: 14, goals: [] },
+  per: { t: 'Personal 새로 만들기', from: 21, goals: [] },
   ops: { t: '운영 중', from: 9, goals: [] },
 };
 const scOf = n => STATES[n].sc;
@@ -5211,11 +5218,78 @@ function remap(code) {
 }
 function dot() {
   const u = document.querySelector('.hdr .unread');
-  u.style.visibility = (scOf(ST.s) === 'ops' || scOf(ST.s) === 'join') || notes().length > ST.seen ? '' : 'hidden';
+  u.style.visibility = (opsLike(ST.s) || scOf(ST.s) === 'join') || notes().length > ST.seen ? '' : 'hidden';
 }
 
-const FLOW_INFO = { first: '조직 만들기부터 첫 상장, 첫 발행까지(Issuer 관리자)', join: '초대받은 팀원이 합류해 첫 발행 승인까지(Mint approvers)',
-  std: '투자 기관(Harbor Trust) 신청부터 첫 발행 요청, 입금, 보유까지', per: '개인 투자자 신원 확인부터 첫 발행 요청, 입금, 보유까지' };
+const FLOW_INFO = { first: '조직 만들기부터 첫 상장, 첫 발행까지', join: '초대받은 팀원이 합류해 첫 발행 승인까지',
+  std: '신청부터 첫 발행 요청, 보유까지', per: '신원 확인부터 첫 발행 요청, 보유까지' };
+
+const RUN_FLOWS = [
+  ['rul', 'R', '승인 규칙 바꾸기', '그룹 고치기, 승인자 바꾸기, 투표', [
+    { t: '그룹 고치기', start: 'AR1', scr: ['AR1', 'AR4', 'AR4-e', 'AR4-c', 'AR4-x', 'AR4-t'], goal: 'Edit으로 그룹을 고치고 변경을 제안하세요',
+      next: { AR1: 'AR4', AR4: 'AR4-t' }, ff: ['투표 시작', 'PP9'] },
+    { t: '그룹 변경 투표', start: 'PP9', scr: ['PP9', 'PP9a', 'PP9c'], goal: 'Governance로서 변경 내용을 보고 투표하세요',
+      next: { PP9: 'PP9a' }, ff: ['다른 승인자 투표, 통과', 'PP9b'] },
+    { t: '승인자 바꾸기', start: 'PP9b', scr: ['PP9b', 'AR2', 'AR5', 'AR5-o', 'PP15', 'PP15a'], goal: '그룹 변경이 적용됐습니다. Policies에서 동작의 승인자를 바꾸고 투표하세요',
+      next: { PP9b: 'AR1', AR1: 'AR2', AR2: 'AR5', AR5: 'PP15', PP15: 'PP15a' }, ff: ['다른 승인자 투표, 통과', 'PP15b'] },
+    { t: '적용됨', start: 'PP15b', scr: ['PP15b', 'AR2'], goal: '승인자 변경이 적용됐습니다. View policies로 바뀐 규칙을 보세요',
+      next: { PP15b: 'AR2' }, ff: ['흐름 마치기', 'AR2', 9] }]],
+  ['mem', 'M', '멤버 초대와 내보내기', '초대 투표, 내보내기 제안, 내보낼 수 없을 때', [
+    { t: '초대', start: 'MB1', scr: ['MB1', 'MB2', 'MB2e', 'MB2-dup', 'C8'], goal: 'Invite member로 새 멤버 초대를 제안하세요',
+      next: { MB1: 'MB2', MB2: 'C8' }, ff: ['초대 투표 중', 'MB2-v'] },
+    { t: '초대 관리', start: 'MB2-v', scr: ['MB2-v', 'MB3', 'MB3-r', 'MB3-d'], goal: 'Invitations에서 초대 상태를 보고, 만료된 초대는 Resend로 다시 보내세요',
+      next: { 'MB2-v': 'MB3-r', MB3: 'MB3-r' }, ff: ['다음: 내보내기', 'MB4'] },
+    { t: '내보내기 제안', start: 'MB4', scr: ['MB4', 'MB6', 'MB6-t'], goal: 'Jason Lee를 내보내는 제안을 하세요',
+      next: { MB4: 'MB6', MB6: 'MB6-t' }, ff: ['투표 시작', 'PP13'] },
+    { t: '내보내기 투표', start: 'PP13', scr: ['PP13', 'PP13a', 'PP13c', 'MB1-v', 'MB4-left'], goal: 'Governance로서 투표하세요. 투표 중에는 목록과 상세에 표시됩니다',
+      next: { PP13: 'PP13a' }, ff: ['다른 승인자 투표, 통과', 'PP13b'] },
+    { t: '내보냄', start: 'PP13b', scr: ['PP13b', 'MB4-rm'], goal: '접근이 끝났습니다. 지난 기록은 Audit log에 남습니다',
+      ff: ['다음: 내보낼 수 없을 때', 'MB4-jm'] },
+    { t: '내보낼 수 없을 때', start: 'MB4-jm', scr: ['MB4-jm', 'MB6b', 'MB6-admin'], goal: 'Joe Miller를 내보내 보세요. 승인 그룹 인원이 모자라면 막힙니다',
+      next: { 'MB4-jm': 'MB6b' }, ff: ['흐름 마치기', 'MB1', 9] }]],
+  ['cus', 'K', '커스터디언 연결과 키 교체', '커스터디언 추가, 동기화 실패, 키 교체', [
+    { t: '커스터디언 추가', start: 'CU1', scr: ['CU1', 'CU3', 'CU4-m', 'CU4-m-e', 'CU1-new', 'CU5', 'CU5-x', 'CU-v'], goal: 'Add custodian으로 보관 기관을 추가하고 설정을 저장하세요',
+      next: { CU1: 'CU3', CU3: 'CU4-m', 'CU4-m': 'CU4-m-e', 'CU4-m-e': 'CU1-new' }, ff: ['다음: 연결 문제', 'CU2-sync'] },
+    { t: '연결 문제', start: 'CU2-sync', scr: ['CU2-sync', 'CU2-api', 'CU2-key', 'CU2-att', 'CU2-up'], goal: '동기화 실패, 키 만료, 증명 기한 지남일 때 할 일을 보세요',
+      next: { 'CU2-sync': 'CU2-api' }, ff: ['다음: 키 교체', 'CR4b'] },
+    { t: '키 교체', start: 'CR4b', scr: ['CR4b', 'CR5-a', 'CR4', 'CR5', 'CR2-t', 'CR3', 'CR3a'], goal: 'Replace key로 새 키를 넣고 변경을 제안하세요',
+      next: { CR4b: 'CR5-a' }, ff: ['흐름 마치기', 'CR1', 9] }]],
+  ['dis', 'N', '공시 올리기와 내리기', '새 공시 작성, 승인 대기, 게시, 내리기 제안', [
+    { t: '작성', start: 'DC1', scr: ['DC1', 'DC2', 'DC2-o2', 'DC2-up', 'DC2-e', 'DC2-d', 'DC2b'], goal: 'New disclosure로 공시를 쓰고, 미리 본 뒤 승인 요청을 보내세요',
+      next: { DC1: 'DC2', DC2: 'DC2b', DC2b: 'DC3' }, ff: ['승인 요청 보냄', 'DC3'] },
+    { t: '승인 대기', start: 'DC3', scr: ['DC3', 'DC3-w', 'DC4', 'DC4-r', 'DC3-r'], goal: '다른 승인자가 승인하면 게시됩니다. 승인자가 보는 화면(DC4)과 반려도 보세요',
+      ff: ['승인, 게시', 'DC5'] },
+    { t: '게시와 내리기', start: 'DC5', scr: ['DC5', 'DC5-pv', 'DC5-u', 'DC5-uv'], goal: '게시된 공시를 Unpublish로 내리는 제안을 하세요',
+      next: { DC5: 'DC5-u', 'DC5-u': 'DC5-uv' }, ff: ['내리기 통과', 'DC5u'] },
+    { t: '내림과 정정', start: 'DC5u', scr: ['DC5u', 'DC5-c'], goal: '내린 공시와 정정 공시를 보세요',
+      next: { DC5u: 'DC5-c' }, ff: ['흐름 마치기', 'DC1', 9] }]],
+  ['sus', 'T', '토큰 정지와 재개', '정지 제안, 투표, 정지 중, 재개 제안', [
+    { t: '정지 제안과 투표', start: 'TK7', scr: ['TK7', 'TK8', 'PP11', 'PP11a', 'PP11c'], goal: 'Settings에서 Suspend로 정지를 제안하고 투표하세요',
+      next: { TK7: 'TK8', TK8: 'PP11', PP11: 'PP11a' }, ff: ['다른 승인자 투표, 통과', 'PP11b'] },
+    { t: '정지 중', start: 'PP11b', scr: ['PP11b', 'TK9', 'TK9-s', 'TK9-r', 'TK9-v'], goal: '정지된 토큰을 보고 Propose resume로 재개를 제안하세요',
+      next: { PP11b: 'TK9', TK9: 'TK9-r', 'TK9-r': 'TK9-v' }, ff: ['재개 통과', 'TK9-ok'] },
+    { t: '재개됨', start: 'TK9-ok', scr: ['TK9-ok'], goal: '토큰이 다시 Active입니다', ff: ['흐름 마치기', 'TK9-ok', 9] }]],
+  ['del', 'L', '상장 폐지', '폐지 제안, 투표, 상환 기간, 끝', [
+    { t: '폐지 제안과 투표', start: 'TK7', scr: ['TK7', 'TK12', 'PP14', 'C3b', 'PP14a', 'PP14c'], goal: 'Settings에서 Delist로 상장 폐지를 제안하고 찬성하세요',
+      next: { TK7: 'TK12', TK12: 'PP14', PP14: 'C3b', C3b: 'PP14a' }, ff: ['다른 승인자 투표, 통과', 'PP14b'] },
+    { t: '상환 기간', start: 'PP14b', scr: ['PP14b', 'TK10', 'DC6'], goal: '상장이 폐지됐습니다. 보유자는 상환 기간 동안 상환할 수 있습니다',
+      next: { PP14b: 'TK10' }, ff: ['상환 기간 끝', 'TK10-end'] },
+    { t: '상환 기간 끝', start: 'TK10-end', scr: ['TK10-end'], goal: '상환 기간이 끝났습니다', ff: ['흐름 마치기', 'TK10-end', 9] }]],
+  ['clo', 'X', '조직 닫기', '닫을 수 없을 때, 닫기 제안, 투표, 닫힌 조직', [
+    { t: '닫을 수 없을 때', start: 'PW1', scr: ['PW1', 'PW4b'], goal: 'Close organization을 눌러 보세요. 진행 중 요청이나 상장 토큰이 있으면 닫을 수 없습니다',
+      next: { PW1: 'PW4b' }, ff: ['요청 0건, 토큰 모두 폐지', 'PW1'] },
+    { t: '닫기 제안과 투표', start: 'PW1', scr: ['PW1', 'PW4', 'PP12', 'PP12a', 'PP12c'], goal: '조건을 채웠습니다. Close organization으로 닫기를 제안하고 투표하세요',
+      next: { PW1: 'PW4b', PW4: 'PP12', PP12: 'PP12a' }, links: { PW4b: 'PW4' }, ff: ['다른 승인자 투표, 통과', 'PP12b'] },
+    { t: '닫힌 조직', start: 'PP12b', scr: ['PP12b', 'PP12b-e', 'H3'], goal: '조직이 닫혔습니다. 기록을 내보내고 Home에서 닫힌 조직을 보세요',
+      next: { PP12b: 'PP12b-e' }, links: { H1: 'H3' }, ff: ['흐름 마치기', 'H3', 9] }]],
+];
+RUN_FLOWS.forEach(([k, pre, t, info, steps]) => {
+  SC[k] = { t, from: STATES.length, goals: [], grp: 'run' };
+  SC_PRE[k] = pre; FLOW_INFO[k] = info;
+  steps.forEach(x => { if (x.links) LINKS[STATES.length] = x.links; STATES.push(Object.assign({ sc: k }, x)); });
+});
+const opsLike = n => scOf(n) === 'ops' || SC[scOf(n)].grp === 'run';
+
 function stepGoal() {
   const st = STATES[ST.s];
   return ST.s === 7 && ST.dep ? '입고를 확인했습니다. 승인과 서명은 ⏩로 넘기세요'
@@ -5238,13 +5312,16 @@ const CHEV = '<svg class="chev" viewBox="0 0 16 16" width="14" height="14" aria-
 const flowOpen = k => (scOf(ST.s) === k && !closedFlows.has(k)) || openFlows.has(k);
 function flowTab() {
   const cur = scOf(ST.s), here = openOv || current, body = $('rv-body'), top = body.scrollTop;
+  let grp = '';
   $('rv-flows').innerHTML = Object.entries(SC).filter(([k]) => k !== 'ops').map(([k, v]) => {
+    const g = v.grp || 'start', gh = g === grp ? '' : `<h4><span>${g === 'run' ? '운영 중' : '처음 시작'}</span></h4>`;
+    grp = g;
     const on = k === cur, open = flowOpen(k);
     const steps = STATES.map((x, i) => [x, i]).filter(([x]) => x.sc === k);
     const head = `<div class="rv-fh${open ? ' open' : ''}" data-gd="tog" data-k="${k}" role="button" aria-expanded="${open}">${CHEV}`
       + `<div class="tx"><b>${v.t}</b><span>${FLOW_INFO[k]}</span></div>`
       + (on ? '<span class="pill now">진행 중</span>' : `<a class="pill go" data-gd="sc" data-k="${k}">시작</a>`) + '</div>';
-    if (!open) return `<section class="rv-fg">${head}</section>`;
+    if (!open) return `${gh}<section class="rv-fg">${head}</section>`;
     const li = steps.map(([x, i]) => {
       const cls = !on ? '' : i < ST.s ? 'ok' : i === ST.s ? 'now' : '';
       const scr = (x.scr || []).filter(c => screens[c]);
@@ -5255,7 +5332,7 @@ function flowTab() {
       const chips = scr.map(c => `<a class="${screens[c].node ? '' : 'nf'}${c === here ? ' cur' : ''}" data-gd="scr" data-n="${i}" data-c="${c}" title="${esc(screens[c].name).replace(/"/g, '&quot;')}${screens[c].node ? '' : ' · Figma에 없음'}">${c}</a>`).join('');
       return `<li class="now">${row}<div class="cur"><p>${stepGoal()}</p>${fl}<div class="rv-chips">${chips}</div>${nf ? '<p class="lg"><i></i>Figma에 없는 화면</p>' : ''}</div></li>`;
     }).join('');
-    return `<section class="rv-fg">${head}<ol class="rv-steps">${li}</ol></section>`;
+    return `${gh}<section class="rv-fg">${head}<ol class="rv-steps">${li}</ol></section>`;
   }).join('');
   $('rv-foot').innerHTML = cur === 'ops' ? '' : `<label><input type="checkbox" data-gd="hint"${ST.hint ? ' checked' : ''}>다음 버튼 강조</label>`
     + `<a data-gd="sc" data-k="${cur}">처음부터</a><a data-gd="end">흐름 끝내기</a>`;
@@ -5447,14 +5524,23 @@ document.addEventListener('click', e => {
 
 function buildList() {
   const box = $('rv-list');
-  box.innerHTML = '<div class="rv-tabs"><a data-tab="flows">흐름으로 보기</a><a data-tab="screens">화면별 보기</a></div><div class="rv-body" id="rv-body"><div id="rv-flows"></div><div id="rv-screens">'
+  box.innerHTML = '<div class="rv-tabs"><a data-tab="flows">흐름별 보기</a><a data-tab="screens">화면별 보기</a></div>'
+    + '<div class="rv-search"><input id="rv-q" type="search" placeholder="화면 코드나 이름 (예: PW4b, 조직 닫기)" autocomplete="off" spellcheck="false"></div>'
+    + '<div class="rv-body" id="rv-body"><div id="rv-flows"></div><div id="rv-screens">'
     + PLAN.map(([g, codes]) => {
       const made = codes.filter(c => screens[c]).length;
       return '<h4><span>' + g + '</span><em>' + (made === codes.length ? made + '장' : made + ' / ' + codes.length + '장') + '</em></h4>' + codes.map(c => {
         const s = screens[c];
-        return '<a href="#' + c + '" class="' + (s ? '' : 'todo') + '"' + (s ? ' title="' + esc(s.name).replace(/"/g, '&quot;') + '"' : '') + '><b>' + c + '</b><span>' + (s ? nameHTML(c) : '준비 중') + '</span></a>';
+        return '<a href="#' + c + '" data-q="' + esc(qText(c, g)).replace(/"/g, '&quot;') + '" class="' + (s ? '' : 'todo') + '"' + (s ? ' title="' + esc(s.name).replace(/"/g, '&quot;') + '"' : '') + '><b>' + c + '</b><span>' + (s ? nameHTML(c) : '준비 중') + '</span></a>';
       }).join('');
-    }).join('') + '</div></div><div class="rv-foot" id="rv-foot"></div>';
+    }).join('') + '<p class="rv-none" id="rv-none">맞는 화면이 없습니다</p></div></div><div class="rv-foot" id="rv-foot"></div>';
+  const q = $('rv-q');
+  q.addEventListener('input', () => filterList(q.value));
+  q.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const first = [...box.querySelectorAll('#rv-screens a')].find(a => !a.hidden && !a.classList.contains('todo'));
+    if (first) first.click();
+  });
   box.addEventListener('click', e => {
     const t = e.target.closest('.rv-tabs [data-tab]');
     if (t) { e.preventDefault(); showTab(t.dataset.tab); return; }
@@ -5467,6 +5553,29 @@ function buildList() {
     }
   });
 }
+function qText(c, g) {
+  const s = screens[c];
+  if (!s) return (c + ' ' + g).toLowerCase();
+  const h = s.tpl.content.querySelector('h1, .t');
+  return (c + ' ' + s.name + ' ' + g + ' ' + (h ? h.textContent : '')).toLowerCase();
+}
+function filterList(v) {
+  const words = v.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const box = $('rv-list');
+  let n = 0;
+  box.querySelectorAll('#rv-screens a').forEach(a => { a.hidden = !words.every(w => a.dataset.q.includes(w)); if (!a.hidden) n++; });
+  box.querySelectorAll('#rv-screens h4').forEach(h => {
+    let el = h.nextElementSibling, any = false;
+    let k = 0;
+    while (el && el.tagName === 'A') { if (!el.hidden) { any = true; k++; } el = el.nextElementSibling; }
+    h.hidden = !any;
+    const em = h.querySelector('em');
+    if (em.dataset.all === undefined) em.dataset.all = em.textContent;
+    em.textContent = words.length ? k + '장' : em.dataset.all;
+  });
+  $('rv-none').style.display = n ? 'none' : 'block';
+  $('rv-body').scrollTop = 0;
+}
 function showTab(tab) {
   const box = $('rv-list');
   box.dataset.view = tab;
@@ -5476,7 +5585,8 @@ function showTab(tab) {
   const code = openOv || current;
   box.querySelectorAll('#rv-screens a').forEach(a => a.classList.toggle('cur', a.getAttribute('href') === '#' + code));
   const cur = box.querySelector('#rv-screens a.cur');
-  if (cur) cur.scrollIntoView({ block: 'center' });
+  if (cur && !cur.hidden) cur.scrollIntoView({ block: 'center' });
+  if (matchMedia('(min-width: 900px)').matches) { const q = $('rv-q'); q.focus(); q.select(); }
 }
 $('rv-open').addEventListener('click', () => {
   const box = $('rv-list');
