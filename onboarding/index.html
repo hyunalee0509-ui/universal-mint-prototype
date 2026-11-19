@@ -52,6 +52,7 @@ img { display: block; }
 .hdr .brand { flex: 1; display: flex; align-items: center; gap: 8px; }
 .hdr .brand img { width: 22px; height: 22px; }
 .hdr .brand p { font-weight: 700; font-size: 16px; color: var(--brand-strong); white-space: nowrap; }
+.hdr .brand { cursor: pointer; }   
 .hdr .tools { display: flex; align-items: center; gap: 12px; }
 .hdr .bell { position: relative; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 .hdr .bell .unread { position: absolute; left: 24px; top: 6px; width: 7px; height: 7px; }
@@ -73,7 +74,7 @@ img { display: block; }
 .nav { position: relative; display: flex; align-items: center; gap: 12px; height: 37px; padding: 8px 16px; border-radius: 10px; width: 100%; }
 .nav img { width: 16px; height: 16px; flex-shrink: 0; }
 .nav span { flex: 1; font-size: 14px; line-height: 1.5; color: var(--content-muted); }
-.nav:hover { background: var(--bg-surface-muted); }
+.nav:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .nav.on { background: var(--bg-surface-muted); }
 .nav.on span { font-weight: 600; color: var(--content-strong); }
 .nav.on::before { content: ""; position: absolute; left: 0; top: 8px; width: 3px; height: 21px; border-radius: 6px; background: var(--brand-default); }
@@ -108,7 +109,7 @@ img { display: block; }
 .link.auto { height: auto; }
 
 .row { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 24px; border-top: 1px solid var(--border-default); width: 100%; }
-a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
+a.row:hover, button.row:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .row .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; white-space: nowrap; }
 .row .txt p:first-child { font-weight: 500; font-size: 14px; }
 .row .txt p:last-child { font-size: 12px; color: var(--content-muted); }
@@ -134,7 +135,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .rv-tag #rv-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px; color: rgba(255,255,255,.85); }
 .rv-tag #rv-name i { font-style: normal; color: rgba(255,255,255,.5); }
 .rv-tag #rv-figma { font-size: 11px; color: rgba(255,255,255,.5); padding: 4px 0; flex-shrink: 0; }
-.rv-tag #rv-figma:hover { color: #fff; text-decoration: underline; }
+.rv-tag #rv-figma:hover { color: #fff; }
 .rv-tag .rv-sep { width: 1px; height: 16px; background: rgba(255,255,255,.2); flex-shrink: 0; }
 .rv-tag #rv-open { height: 36px; padding: 0 20px; border-radius: 999px; background: #fff; color: #1f2937; font-size: 14px; font-weight: 600; flex-shrink: 0; margin-left: 6px; }
 .rv-tag #rv-open:hover { background: #e5e7eb; }
@@ -147,7 +148,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .rv-list h4:first-child { margin-top: 0; border-top: 0; }
 .rv-list h4 em { font-style: normal; font-size: 12px; font-weight: 500; color: #6b7280; }
 .rv-list a { display: flex; align-items: baseline; gap: 10px; margin: 0 8px; padding: 6px 8px; border-radius: 6px; }
-.rv-list a:hover { background: var(--bg-surface-subtle); }
+.rv-list a:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rv-list a.cur { background: #e8eef7; }
 .rv-list a b { width: 56px; flex-shrink: 0; }
 .rv-list a span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -216,24 +217,24 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .rv-foot:empty { display: none; }
 .rv-foot label { display: flex; align-items: center; gap: 6px; margin-right: auto; cursor: pointer; }
 .rv-list .rv-foot a { display: inline; margin: 0; padding: 0; border-radius: 0; color: #4b5563; cursor: pointer; }
-.rv-list .rv-foot a:hover { background: none; color: #111827; text-decoration: underline; }
+.rv-list .rv-foot a:hover { background: none; color: #111827; }
 
 #rv-flows { padding: 8px 0; }
 .rv-fg + .rv-fg { border-top: 1px solid #f0f1f3; }
 .rv-fh { display: flex; align-items: center; gap: 10px; margin: 4px 8px; padding: 10px 10px; border-radius: 8px; cursor: pointer; }
-.rv-fh:hover { background: #f7f8fa; }
+.rv-fh:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rv-fh .chev { flex-shrink: 0; color: #9ca3af; transition: transform .15s; }
 .rv-fh.open .chev { transform: rotate(90deg); color: #4b5563; }
 
 .rv-fh.open { position: sticky; top: 0; z-index: 2; background: #fff; box-shadow: 0 -4px 0 #fff, 0 4px 0 #fff, 0 5px 0 #f0f1f3; }
-.rv-fh.open:hover { background: #f7f8fa; }
+.rv-fh.open:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rv-fh .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .rv-fh .tx b { font-size: 14px; font-weight: 700; color: #111827; }
 .rv-fh .tx span { font-size: 12px; color: #6b7280; line-height: 1.4; }
 .rv-list .rv-fh .pill { flex-shrink: 0; margin: 0; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #6b7280; background: #f1f3f5; }
 .rv-list .rv-fh .pill.now { color: #92400e; background: #fef3c7; }
 .rv-list .rv-fh a.pill.go { color: #111827; background: #fff; border: 1px solid #d1d5db; cursor: pointer; }
-.rv-list .rv-fh a.pill.go:hover { background: #f7f8fa; }
+.rv-list .rv-fh a.pill.go:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rv-fg.off .rv-fh { cursor: default; opacity: .55; }
 .rv-fg.off .rv-fh:hover { background: none; }
 
@@ -243,7 +244,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .rv-steps li:first-child::before { top: 15px; }
 .rv-steps li:last-child::before { bottom: auto; height: 15px; }
 .rv-list .rv-steps a.row { position: relative; display: flex; align-items: center; gap: 8px; height: 30px; margin: 0; padding: 0 8px 0 26px; border-radius: 6px; color: #6b7280; cursor: pointer; }
-.rv-list .rv-steps a.row:hover { background: #f7f8fa; }
+.rv-list .rv-steps a.row:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rv-steps .dot { position: absolute; left: 4px; top: 10px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #d1d5db; background: #fff; }
 .rv-steps li.ok .dot { border-color: var(--data-good); background: var(--data-good); }
 .rv-steps li.now .dot { border-color: #f59e0b; background: #f59e0b; box-shadow: 0 0 0 3px #fef3c7; }
@@ -256,11 +257,11 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .rv-steps .cur { margin: 2px 0 8px 26px; padding: 10px 12px; border: 1px solid #fde68a; border-radius: 8px; background: #fffbeb; display: flex; flex-direction: column; gap: 8px; }
 .rv-steps .cur > p { font-size: 12px; line-height: 1.45; color: #374151; }
 .rv-list .rv-steps .cur a.fx { display: inline; align-self: flex-start; margin: 0; padding: 0; font-size: 12px; font-weight: 600; color: var(--brand-default); }
-.rv-list .rv-steps .cur a.fx:hover { background: none; text-decoration: underline; }
+.rv-list .rv-steps .cur a.fx:hover { background: none; filter: brightness(.7); }
 .rv-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .rv-list .rv-chips a { display: inline-block; margin: 0; padding: 2px 7px; border: 1px solid #d9dde3; border-radius: 5px; background: #fff; font-size: 11px; font-weight: 600; color: #374151; cursor: pointer; }
 .rv-list .rv-chips a.nf { border-style: dashed; border-color: #b9c0ca; }
-.rv-list .rv-chips a:hover { background: #f1f3f5; }
+.rv-list .rv-chips a:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rv-list .rv-chips a.cur { background: #111827; border-color: #111827; color: #fff; }
 .rv-steps .cur .lg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #9ca3af; }
 .rv-steps .cur .lg i { width: 14px; height: 10px; border: 1px dashed #b9c0ca; border-radius: 3px; }
@@ -288,12 +289,68 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
   .panel > #main { overflow-y: auto; }
 }
 
+
+:root { --hover-tint: rgba(5,13,24,.07); --press-tint: rgba(5,13,24,.12); }   
+
+.btn { transition: background-color .12s, border-color .12s, filter .12s; }
+.btn.primary:not(.dim):not(.off):hover, .btn.danger:not(.secondary):not(.dim):hover { filter: brightness(.9); }
+.btn.primary:not(.dim):not(.off):active, .btn.danger:not(.secondary):not(.dim):active { filter: brightness(.8); }
+.btn.secondary:not(.dim):not(.off):hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); border-color: #c4c9d0; }
+.btn.secondary:not(.dim):not(.off):active { background-image: linear-gradient(var(--press-tint), var(--press-tint)); }
+.btn.secondary.tk-redt:not(.dim):hover, .btn.secondary.danger:not(.dim):hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); border-color: #f0c4c0; }
+
+.o4-tabs a, .ib-tabs .tab, .pf-ni { transition: color .12s, border-color .12s, background-color .12s; }
+.o4-tabs a:not(.on):hover, .ib-tabs .tab:not(.on):hover { color: var(--content-strong); }
+.pf-ni:not(.on):hover { color: var(--content-strong); background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
+
+
+.link, .tk-lk, .ib-lk, .mb-act, .cu-lk, .cr-lk, .cu-edit, .ar-ed, .o2-link, .o3-blink, .ob-link, .ob-foot, .rq-clr, .al-again, .exp, .dismiss, .pw-undo, .mb-rs, .pf-tl, .ob-type a, .o2-tog, .rq-banner a, .pg a, .mb-srch a, .pf-x, .x, .c1-x { transition: color .12s; }
+.link:hover, .tk-lk:hover, .ib-lk:hover, .mb-act:hover, .cu-lk:hover, .cr-lk:hover, .cu-edit:hover, .ar-ed:hover, .o2-link:hover, .o3-blink:hover, .ob-link:hover, .rq-clr:hover, .exp:hover, .dismiss:hover, .mb-rs:hover, .pf-tl:not(.off):hover, .ob-type a:hover, .o2-tog:hover, .rq-banner a:hover, .pg a:hover { color: var(--status-info); }
+.ob-foot:hover, .mb-srch a:hover, .pf-x:hover, .x:hover, .pf-tl.mut:hover { color: var(--content-strong); }
+.c1-x:hover { color: var(--content-muted); }   
+.pf-tl.red:hover { color: #7a0d1c; }
+.al-again:hover, .pw-undo:hover { color: #fff; }   
+.tk-back, .rq-back, .o2-back { transition: color .12s; }
+.tk-back:hover, .rq-back:hover, .o2-back:hover { color: var(--content-strong); }
+
+
+.o4-dd, .o4-search, .o4-filter, .ib-kind, .rq-chip, .tk-sort, a.in, a.ctl, .ctl[data-go], .ob-opt { transition: border-color .12s, background-color .12s; }
+.o4-dd:hover, .o4-search:hover, .o4-filter:hover, .ib-kind:hover, .rq-chip:hover, .tk-sort:hover, a.in:hover, a.ctl:hover, .ctl[data-go]:hover, .ob-opt:hover { border-color: #8f97a3; }
+
+.pw-more, .c2-create { transition: background-color .12s; }
+.pw-more:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
+.c2-create:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
+
+.switcher, .hdr .bell, .hdr .account { transition: background-color .12s, border-color .12s; }
+.switcher:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); border-color: var(--border-strong); }   
+.hdr .bell:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
+.hdr .account { padding: 4px 8px; margin: -4px -8px; border-radius: 10px; }
+.hdr .account:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
+.rv-foot label:hover { color: #111827; }
+
+a.row, button.row, .rq-row, .nav, .ib-item, .c1-item, .rv-list a { transition: background-color .12s; }
+
+@keyframes um-fade { from { opacity: 0; } }
+@keyframes um-pop { from { opacity: 0; scale: .98; } }
+@keyframes um-drop { from { opacity: 0; translate: 0 -4px; } }
+@keyframes um-up { from { opacity: 0; translate: 0 8px; } }
+.scrim { animation: um-fade .16s ease-out; }
+.pop.modal, .modal, .pop.tk-drawer { animation: um-pop .16s ease-out; }
+.pop:not(.modal):not(.tk-drawer) { animation: um-drop .14s ease-out; }
+.dn-toast, .rv-toast.show { animation: um-up .18s ease-out; }
+#ov.ov-swap .scrim, #ov.ov-swap .pop, #ov.ov-swap .modal { animation: none; }   
+
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a[href]:focus-visible { outline: 2px solid var(--status-info); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
 </style>
 </head>
 <body>
 <div class="app">
   <header class="hdr">
-    <div class="brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAz1BMVEVMaXEICA1mZWiGhokICA0QEBBPBBgICBAHEicICRBRUFQ1NDkIBwwtJSxXDhsJGjQbFR0hDxt5eX0kJTBcFyxfXmFEDRwcL0p3IzwJCA05OD0QABAIBw3///+zGUIKMWGVACQyWYni4uK8vLwAHU1zEi8JIkUIBw0GDyQ9BhaVHiSQkJLg4OHLy8sNHTQLDxkuUn4nJitTUlZyAh+jo6UdChMhISY/PkPbQWrw7/AlQWR2dnmcFjvBwcMdMUyxsbKFFSHGO2EKK1acnJ2VLktgpsM3AAAAHXRSTlMAYP36PBC/IMCAwKNwgv7qj6Dhv/7f3uj2UN8Q33rRwzUAAAAJcEhZcwAACxMAAAsTAQCanBgAAAObSURBVHjapZfpdqJAEIUD4gAuuCYaE/coGgSEEdFoXJK8/zNNd3U3i9JEmfqRc6KnPvtW3dviw0Nq5Ysd+SF75cu5bXdVzIyQHhddXDk1W3vhs0trURfuP33VIM1b+Gveq6OUI42fvrMioLtGwcQv3LXru455pw65QcRvc2txvHNHxlqkvPrzTauj4leOexxjwGi0W+du1lGqM/G+MR5TwMh02SiMspy+OqJ3iz5zDOV2zBEgHP93HXIxFH+EdqMhy2UDCOEoCmm+hdM7/graVx2JcL8JYufkUgAvr+T03U/dhfajWGLvCY9Eh6Hn+ADZDbYFJxCr+dhszZEpkknyAIa5C1znuAXpcj6iQyVyAbCtIx2jynWnr/ABo6jrhKRo4gXxTiAG26LLCF0XRHNlI3fy1igzy7iXAQyj6X+j9SQCpOi2TN+J6JAK9B9xDeZmACmWv3YNf9hLeXfhukW9ceXOIrQoh5ocWLB93mzakBK5aMRcx+oI0UT1DfvNq63hcHgo54kFUTuqn9c8WdflKMJoMncKreUQ1we0yHOved6cm/pcjhvXXJMAomjuSDSJO6XGB7QvD/YMTj3pNb2mpw3+Mk3xAEajid+skfbhwbb6Uwro7fXTIASEAUTutmPRROLp6e3ZVz8E9PRBDBAJoE/Fl/Grz7R9ac2m/X4qgAQQASDbuwvxutWHstIAZKUYYJDVVSPioaYKuXB4AGww03BXj3AJBuItLB7VV4VejhyADGkUOg64Raow8faUfHxFZRdOIgC584dYFayiBJtnp69FVpYAKGFzb36qBKEehnR1cfF8QMkDd5+bcPko1pKKZ6ePf0kmANQJdnfb0/4AYGYfEsWnAHrI3d78NCCAt+nMDk9/vatEQG8yRy9RwNsbPf2XIiVcZbcDKqXEu/BmgMLES3I2gMr8+dFSswNIoJctISOA3WZLW8gCiAZavQJovwGqsUBfAebek5AO0GmgZxDoC4Dmaad3jWaMB4gF+gLgnd5xaRBAPiAS6PgQ9x4lnLAOLiAx0ABADSg8FCHxAOw2iwf6pUYIKIDaO9HxmgzgBlp42gNhP6cInZdGTqDxFUYRREcKIDHQ8I1HdcAo+IDkQBOEQg+BHMEDWNV82pN2OAoOQPn1WV9tUh2p90HqjxU2iqwAhKA6MgOCUWQHoIe9yf8ByCgQAKUC7uDKFAOmyj2/PZ+fmnMt/MFRsS2OA1NGEU2MXOM68B9UCxMrqQcbEQAAAABJRU5ErkJggg==" alt=""><p>Universal Mint</p></div>
+    <a class="brand" id="brand" title="Home"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAz1BMVEVMaXEICA1mZWiGhokICA0QEBBPBBgICBAHEicICRBRUFQ1NDkIBwwtJSxXDhsJGjQbFR0hDxt5eX0kJTBcFyxfXmFEDRwcL0p3IzwJCA05OD0QABAIBw3///+zGUIKMWGVACQyWYni4uK8vLwAHU1zEi8JIkUIBw0GDyQ9BhaVHiSQkJLg4OHLy8sNHTQLDxkuUn4nJitTUlZyAh+jo6UdChMhISY/PkPbQWrw7/AlQWR2dnmcFjvBwcMdMUyxsbKFFSHGO2EKK1acnJ2VLktgpsM3AAAAHXRSTlMAYP36PBC/IMCAwKNwgv7qj6Dhv/7f3uj2UN8Q33rRwzUAAAAJcEhZcwAACxMAAAsTAQCanBgAAAObSURBVHjapZfpdqJAEIUD4gAuuCYaE/coGgSEEdFoXJK8/zNNd3U3i9JEmfqRc6KnPvtW3dviw0Nq5Ysd+SF75cu5bXdVzIyQHhddXDk1W3vhs0trURfuP33VIM1b+Gveq6OUI42fvrMioLtGwcQv3LXru455pw65QcRvc2txvHNHxlqkvPrzTauj4leOexxjwGi0W+du1lGqM/G+MR5TwMh02SiMspy+OqJ3iz5zDOV2zBEgHP93HXIxFH+EdqMhy2UDCOEoCmm+hdM7/graVx2JcL8JYufkUgAvr+T03U/dhfajWGLvCY9Eh6Hn+ADZDbYFJxCr+dhszZEpkknyAIa5C1znuAXpcj6iQyVyAbCtIx2jynWnr/ABo6jrhKRo4gXxTiAG26LLCF0XRHNlI3fy1igzy7iXAQyj6X+j9SQCpOi2TN+J6JAK9B9xDeZmACmWv3YNf9hLeXfhukW9ceXOIrQoh5ocWLB93mzakBK5aMRcx+oI0UT1DfvNq63hcHgo54kFUTuqn9c8WdflKMJoMncKreUQ1we0yHOved6cm/pcjhvXXJMAomjuSDSJO6XGB7QvD/YMTj3pNb2mpw3+Mk3xAEajid+skfbhwbb6Uwro7fXTIASEAUTutmPRROLp6e3ZVz8E9PRBDBAJoE/Fl/Grz7R9ac2m/X4qgAQQASDbuwvxutWHstIAZKUYYJDVVSPioaYKuXB4AGww03BXj3AJBuItLB7VV4VejhyADGkUOg64Raow8faUfHxFZRdOIgC584dYFayiBJtnp69FVpYAKGFzb36qBKEehnR1cfF8QMkDd5+bcPko1pKKZ6ePf0kmANQJdnfb0/4AYGYfEsWnAHrI3d78NCCAt+nMDk9/vatEQG8yRy9RwNsbPf2XIiVcZbcDKqXEu/BmgMLES3I2gMr8+dFSswNIoJctISOA3WZLW8gCiAZavQJovwGqsUBfAebek5AO0GmgZxDoC4Dmaad3jWaMB4gF+gLgnd5xaRBAPiAS6PgQ9x4lnLAOLiAx0ABADSg8FCHxAOw2iwf6pUYIKIDaO9HxmgzgBlp42gNhP6cInZdGTqDxFUYRREcKIDHQ8I1HdcAo+IDkQBOEQg+BHMEDWNV82pN2OAoOQPn1WV9tUh2p90HqjxU2iqwAhKA6MgOCUWQHoIe9yf8ByCgQAKUC7uDKFAOmyj2/PZ+fmnMt/MFRsS2OA1NGEU2MXOM68B9UCxMrqQcbEQAAAABJRU5ErkJggg==" alt=""><p>Universal Mint</p></a>
     <div class="tools">
       <button class="bell" data-go="C1" aria-label="Notifications"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiB2aWV3Qm94PSIwIDAgMTggMTgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJnbHlwaCI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik05LjY0OTk3IDE1LjM3NTRDOS44NTcxIDE1LjAxNjcgMTAuMzE1MiAxNC44OTM2IDEwLjY3MzkgMTUuMTAwN0MxMS4wMzI1IDE1LjMwNzggMTEuMTU1NCAxNS43NjYgMTAuOTQ4NiAxNi4xMjQ2QzEwLjc1MTEgMTYuNDY2NiAxMC40NjY2IDE2Ljc1MTEgMTAuMTI0NiAxNi45NDg2QzkuNzgyNjMgMTcuMTQ2IDkuMzk0NCAxNy4yNDk2IDguOTk5NTggMTcuMjQ5NkM4LjYwNDc5IDE3LjI0OTYgOC4yMTY1IDE3LjE0NiA3Ljg3NDU4IDE2Ljk0ODZDNy41MzI2OSAxNi43NTEyIDcuMjQ5MTMgMTYuNDY2NSA3LjA1MTcxIDE2LjEyNDZDNi44NDQ3NSAxNS43NjYgNi45Njc3MyAxNS4zMDc4IDcuMzI2MzcgMTUuMTAwN0M3LjY4NTA0IDE0Ljg5MzggOC4xNDMyMSAxNS4wMTY3IDguMzUwMjkgMTUuMzc1NEM4LjQxNjA2IDE1LjQ4OTIgOC41MTExNCAxNS41ODMyIDguNjI0OTUgMTUuNjQ4OUM4LjczODg0IDE1LjcxNDcgOC44NjgwOCAxNS43NDk5IDguOTk5NTggMTUuNzVDOS4xMzEyMyAxNS43NSA5LjI2MTMxIDE1LjcxNDcgOS4zNzUzMiAxNS42NDg5QzkuNDg5MDggMTUuNTgzMSA5LjU4NDI0IDE1LjQ4OTIgOS42NDk5NyAxNS4zNzU0WiIgZmlsbD0iIzVBNjQ3MiIvPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik0xMi43NTAyIDZDMTIuNzUwMiA1LjAwNTQ0IDEyLjM1NDggNC4wNTExNiAxMS42NTE1IDMuMzQ3OUMxMC45NDg0IDIuNjQ0OTQgOS45OTQ3OCAyLjI1MDUxIDkuMDAwNTUgMi4yNTAzN0M4LjAwNjExIDIuMjUwMzcgNy4wNTE2OCAyLjY0NDgxIDYuMzQ4NDUgMy4zNDc5QzUuNjQ1MTkgNC4wNTExNiA1LjI0OTgyIDUuMDA1NDQgNS4yNDk4MiA2QzUuMjQ5ODIgNy43NjU1NCA0Ljk3MyA4Ljk5ODMyIDQuNTI0NzIgOS45NDczOUM0LjA4MTk4IDEwLjg4NDYgMy40OTQ1MSAxMS40OTAxIDMuMDAwOTEgMTEuOTk5NkgxNS4wMDAyQzE0LjUwNTUgMTEuNDg5NyAxMy45MTc5IDEwLjg4NDMgMTMuNDc1MyA5Ljk0NzM5QzEzLjAyNjkgOC45OTgxNiAxMi43NTAyIDcuNzY1NDEgMTIuNzUwMiA2Wk0xNC4yNDk4IDZDMTQuMjQ5OCA3LjYwODY0IDE0LjUwMjQgOC42MDkxNiAxNC44MzIxIDkuMzA2ODhDMTUuMDc5OCA5LjgzMTIyIDE1LjM4NDQgMTAuMjE2NSAxNS43MzE5IDEwLjU5MzRMMTYuMDkzMyAxMC45NzM1TDE2LjEwOTggMTAuOTlDMTYuMzA1NCAxMS4yMDUgMTYuNDM0NiAxMS40NzMyIDE2LjQ4MTEgMTEuNzYwMUMxNi41Mjc2IDEyLjA0NjkgMTYuNDg5OSAxMi4zNDE1IDE2LjM3MjQgMTIuNjA3MkMxNi4yNTQ4IDEyLjg3MjkgMTYuMDYyMiAxMy4wOTkgMTUuODE4NyAxMy4yNTc2QzE1LjU3NTIgMTMuNDE2IDE1LjI5MDcgMTMuNTAwNCAxNS4wMDAyIDEzLjUwMDRIMi45OTk4MkMyLjcwOTI3IDEzLjUwMDIgMi40MjQ3MSAxMy40MTUyIDIuMTgxMzMgMTMuMjU2NUMxLjkzNzg1IDEzLjA5NzYgMS43NDQ5IDEyLjg3MSAxLjYyNzYyIDEyLjYwNUMxLjUxMDQ1IDEyLjMzOTEgMS40NzMwNyAxMi4wNDQ3IDEuNTE5OTYgMTEuNzU3OUMxLjU2NjkgMTEuNDcxIDEuNjk2NDQgMTEuMjAzNyAxLjg5MjM5IDEwLjk4ODlMMS45MDc3NyAxMC45NzI0QzIuNDA2MDggMTAuNDU4IDIuODM3NTIgMTAuMDA2MiAzLjE2NzkxIDkuMzA2ODhDMy40OTc1IDguNjA5MTcgMy43NTAxOCA3LjYwODU2IDMuNzUwMTggNkMzLjc1MDE4IDQuNjA3NzQgNC4zMDI3OCAzLjI3MjI2IDUuMjg3MTcgMi4yODc3MkM2LjI3MTczIDEuMzAzMTUgNy42MDgxNiAwLjc0OTYzNCA5LjAwMDU1IDAuNzQ5NjM0QzEwLjM5MjcgMC43NDk3NzkgMTEuNzI4NCAxLjMwMzI4IDEyLjcxMjggMi4yODc3MkMxMy42OTcyIDMuMjcyMjYgMTQuMjQ5OCA0LjYwNzc0IDE0LjI0OTggNloiIGZpbGw9IiM1QTY0NzIiLz4KPC9nPgo8L3N2Zz4K" width="18" height="18" alt=""><img class="unread" src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjciIGhlaWdodD0iNyIgdmlld0JveD0iMCAwIDcgNyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBpZD0idW5yZWFkIiBjeD0iMy41IiBjeT0iMy41IiByPSIzLjUiIGZpbGw9IiNCMzE5NDIiLz4KPC9zdmc+Cg==" alt=""></button>
       <div class="divider"></div>
@@ -685,7 +742,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .ob { position: relative; }
 .ob-exit { position: absolute; top: 28px; right: 32px; display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: 1px solid var(--border-default); border-radius: 10px; background: #fff; font-weight: 500; font-size: 13px; color: var(--content-default, #050d18); white-space: nowrap; cursor: pointer; }
 .ob-exit.back { right: auto; left: 32px; }
-.ob-exit:hover { background: var(--bg-surface-subtle); }
+.ob-exit:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 @media (max-width: 700px) { .ob-exit.back { left: 16px; right: auto; } .ob-exit { top: 16px; right: 16px; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; } .ob { padding-top: 76px; } }
 .btn.full { width: 100%; }
 .btn.big { height: 44px; padding: 0 32px; font-size: 14px; line-height: 1.5; }
@@ -700,7 +757,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .ctl .ph { color: var(--content-faint); }
 .ctl span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ctl img { width: 16px; height: 16px; flex-shrink: 0; }
-a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
+a.ctl:hover, a .ctl:hover { border-color: #8f97a3; }
 
 .ob-noinv { border: 1px solid var(--border-default); border-radius: 12px; overflow: hidden; }
 .ob-noinv div { background: #f6f7f9; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 4px; white-space: nowrap; }
@@ -713,7 +770,7 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 
 .ob-opts { display: flex; gap: 16px; padding: 4px 32px 16px; }
 .ob-opt { flex: 1; min-width: 0; height: 200px; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 32px 24px; border: 1px solid var(--border-default); border-radius: 14px; background: #fff; }
-.ob-opt:hover { border-color: var(--border-strong); }
+.ob-opt:hover { border-color: #8f97a3; }
 .ob-opt .ic { flex: 1; display: flex; align-items: center; justify-content: center; }
 .ob-opt .ic img { width: 28px; height: 28px; }
 .ob-opt .t { display: flex; flex-direction: column; gap: 4px; text-align: center; }
@@ -761,7 +818,7 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 
 .dd { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); display: flex; flex-direction: column; gap: 2px; padding: 6px; background: #fff; border: 1px solid var(--border-default); border-radius: 10px; box-shadow: 0 8px 24px rgba(5,13,26,.14); }
 .dd a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; line-height: 1.45; }
-.dd a:hover { background: var(--bg-surface-subtle); }
+.dd a:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .dd a.sel { background: #edf1f7; }
 .dd a span { flex: 1; font-size: 14px; color: #1b2430; }
 .dd a.mu span { color: var(--content-muted); }
@@ -1770,7 +1827,7 @@ a.ctl:hover, a .ctl:hover { border-color: var(--border-strong); }
 .ar-lns:has(.ar-ln:only-child) { padding: 0; }
 .ar-ln { display: flex; align-items: center; gap: 16px; min-height: 40px; }
 .ar-lns:has(.ar-ln:only-child) .ar-ln { min-height: 44px; }
-a.ar-ln:hover { background: var(--bg-surface-subtle); }
+a.ar-ln:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 
 .ar-grp { border-bottom: 1px solid var(--border-default); min-width: fit-content; }
 .ar-grp:last-child { border-bottom: 0; }
@@ -1845,7 +1902,7 @@ a.ar-ln:hover { background: var(--bg-surface-subtle); }
 .c1-head p { font-weight: 600; font-size: 20px; white-space: nowrap; }
 .c1-x { width: 20px; height: 20px; }
 .c1-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 24px; border-bottom: 1px solid var(--border-default); }
-.c1-item:hover { background: var(--bg-surface-subtle); }
+.c1-item:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .c1-item .mk { width: 36px; height: 36px; border-radius: 8px; background: var(--brand-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .c1-item .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .c1-item .tx p:first-child { font-weight: 600; font-size: 14px; line-height: 1.5; }
@@ -1855,7 +1912,7 @@ a.ar-ln:hover { background: var(--bg-surface-subtle); }
 .c2 { border-radius: 12px; padding: 8px 6px; display: flex; flex-direction: column; gap: 2px; }
 .c2-label { padding: 6px 0 6px 10px; font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--content-muted); }
 .c2-ws { width: 240px; display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 8px; }
-.c2-ws:hover { background: var(--bg-surface-subtle); }
+.c2-ws:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .c2-ws.on { background: #f4f7fc; }
 .c2-ws .org { flex: 1; min-width: 0; font-size: 12px; line-height: 1.45; }
 .c2-ws .org p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1936,7 +1993,7 @@ a.ar-ln:hover { background: var(--bg-surface-subtle); }
 </template>
 
 <template id="s-CR4" data-name="Credentials · 상세 (Fireblocks workspace)" data-node="2416:25650" data-nav="credentials" data-badge="5" data-homeicon="nav-home-grid">
-<div class="rq tk"><a class="tk-back" data-go="CR1">← Credentials</a><div class="tk-hd"><span class="tk-img lg b"><img data-i="ib-building" alt=""></span><div class="tt"><h1>Fireblocks workspace</h1><div class="chips"><span class="badge mut">Signer</span><span class="badge ok">Connected</span></div></div><div class="ac"><a class="btn secondary dark" data-go="CR5">Replace key</a><a class="btn secondary dark" data-go="CR3">Revoke</a></div></div><div class="tk-cols"><div class="l"><div class="card r14 tk-card"><div class="o4-ch"><b>Signing activity</b><span>4</span></div><div class="rq-tw"><div class="o4-th"><p style="width:240px">REQUEST</p><p style="width:150px">INVESTOR</p><p style="width:140px">STATUS</p><p style="width:90px">WHEN</p><p style="width:16px"></p></div><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Issue 1,200 ASLV</b><span>ISS-0011</span></span></span><span class="c" style="width:150px"><span class="av sm">DS</span><b class="tk-s13">Daehan Securities</b></span><span class="c" style="width:140px"><span class="badge warn">Waiting to sign</span></span><span class="c" style="width:90px"><span class="tk-m">now</span></span><img class="chev16" data-i="chevron-right" alt=""></a><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Issue 800 BMAX</b><span>ISS-0010</span></span></span><span class="c" style="width:150px"><span class="av sm">JP</span><b class="tk-s13">Juno Partners</b></span><span class="c" style="width:140px"><span class="badge ok">Signed</span></span><span class="c" style="width:90px"><span class="tk-m">Oct 29</span></span><img class="chev16" data-i="chevron-right" alt=""></a><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Redeem 150 ASLV</b><span>RED-0002</span></span></span><span class="c" style="width:150px"><span class="av sm">MP</span><b class="tk-s13">Minji Park</b></span><span class="c" style="width:140px"><span class="badge ok">Signed</span></span><span class="c" style="width:90px"><span class="tk-m">Oct 27</span></span><img class="chev16" data-i="chevron-right" alt=""></a><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Issue 1,000 ASLV</b><span>ISS-0003</span></span></span><span class="c" style="width:150px"><span class="av sm">CO</span><b class="tk-s13">Colossus</b></span><span class="c" style="width:140px"><span class="badge ok">Signed</span></span><span class="c" style="width:90px"><span class="tk-m">Sep 28</span></span><img class="chev16" data-i="chevron-right" alt=""></a></div></div></div><div class="r"><div class="card r14 tk-card"><div class="o4-ch"><b>Details</b></div><div class="tk-pr"><span>Service</span><b>Fireblocks</b></div><div class="tk-pr"><span>Key</span><b>•••• a91f</b></div><div class="tk-pr"><span>Added by</span><b>Jason Lee, Sep 2</b></div><div class="tk-pr"><span>Last used</span><b>Oct 29</b></div></div><div class="card r14 tk-card"><div class="o4-ch"><b>Used for</b><span>2</span></div><div class="tk-wr"><span class="mk sq"><img data-i="ob-vault" alt=""></span><span class="tx"><b>Mint and burn signing</b><span>ASLV, BMAX</span></span></div><div class="tk-wr"><span class="mk sq"><img data-i="ob-vault" alt=""></span><span class="tx"><b>Approval signatures</b><span>All proposals</span></span></div></div></div></div></div>
+<div class="rq tk"><a class="tk-back" data-go="CR1">← Credentials</a><div class="tk-hd"><span class="tk-img lg b"><img data-i="ib-building" alt=""></span><div class="tt"><h1>Fireblocks workspace</h1><div class="chips"><span class="badge mut">Signer</span><span class="badge ok">Connected</span></div></div><div class="ac"><a class="btn secondary dark" data-go="CR5">Replace key</a><a class="btn secondary dark tk-redt" data-go="CR3">Revoke</a></div></div><div class="tk-cols"><div class="l"><div class="card r14 tk-card"><div class="o4-ch"><b>Signing activity</b><span>4</span></div><div class="rq-tw"><div class="o4-th"><p style="width:240px">REQUEST</p><p style="width:150px">INVESTOR</p><p style="width:140px">STATUS</p><p style="width:90px">WHEN</p><p style="width:16px"></p></div><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Issue 1,200 ASLV</b><span>ISS-0011</span></span></span><span class="c" style="width:150px"><span class="av sm">DS</span><b class="tk-s13">Daehan Securities</b></span><span class="c" style="width:140px"><span class="badge warn">Waiting to sign</span></span><span class="c" style="width:90px"><span class="tk-m">now</span></span><img class="chev16" data-i="chevron-right" alt=""></a><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Issue 800 BMAX</b><span>ISS-0010</span></span></span><span class="c" style="width:150px"><span class="av sm">JP</span><b class="tk-s13">Juno Partners</b></span><span class="c" style="width:140px"><span class="badge ok">Signed</span></span><span class="c" style="width:90px"><span class="tk-m">Oct 29</span></span><img class="chev16" data-i="chevron-right" alt=""></a><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Redeem 150 ASLV</b><span>RED-0002</span></span></span><span class="c" style="width:150px"><span class="av sm">MP</span><b class="tk-s13">Minji Park</b></span><span class="c" style="width:140px"><span class="badge ok">Signed</span></span><span class="c" style="width:90px"><span class="tk-m">Oct 27</span></span><img class="chev16" data-i="chevron-right" alt=""></a><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Issue 1,000 ASLV</b><span>ISS-0003</span></span></span><span class="c" style="width:150px"><span class="av sm">CO</span><b class="tk-s13">Colossus</b></span><span class="c" style="width:140px"><span class="badge ok">Signed</span></span><span class="c" style="width:90px"><span class="tk-m">Sep 28</span></span><img class="chev16" data-i="chevron-right" alt=""></a></div></div></div><div class="r"><div class="card r14 tk-card"><div class="o4-ch"><b>Details</b></div><div class="tk-pr"><span>Service</span><b>Fireblocks</b></div><div class="tk-pr"><span>Key</span><b>•••• a91f</b></div><div class="tk-pr"><span>Added by</span><b>Jason Lee, Sep 2</b></div><div class="tk-pr"><span>Last used</span><b>Oct 29</b></div></div><div class="card r14 tk-card"><div class="o4-ch"><b>Used for</b><span>2</span></div><div class="tk-wr"><span class="mk sq"><img data-i="ob-vault" alt=""></span><span class="tx"><b>Mint and burn signing</b><span>ASLV, BMAX</span></span></div><div class="tk-wr"><span class="mk sq"><img data-i="ob-vault" alt=""></span><span class="tx"><b>Approval signatures</b><span>All proposals</span></span></div></div></div></div></div>
 </template>
 
 <template id="s-CR5" data-name="Credentials · 키 바꾸기 창" data-overlay="modal" data-base="CR4" data-node="2686:46543">
@@ -1964,7 +2021,7 @@ a.ar-ln:hover { background: var(--bg-surface-subtle); }
 </template>
 
 <template id="s-CR4b" data-name="Credentials · 연결 실패 (Anchorage API)" data-node="2416:26013" data-nav="credentials" data-badge="5" data-homeicon="nav-home-grid">
-<div class="rq tk"><a class="tk-back" data-go="CR1">← Credentials</a><div class="rq-banner tk-bn "><div class="tx"><b>Can’t reach Anchorage Digital Bank</b><span>Since Nov 2. BMAX reserve balances and deposit checks are paused. Check the key’s access in Anchorage, then replace it here.</span></div><a class="tk-lk" data-go="CR5-a">Replace key</a></div><div class="tk-hd"><span class="tk-img lg b"><img data-i="ib-building" alt=""></span><div class="tt"><h1>Anchorage API</h1><div class="chips"><span class="badge mut">Custodian</span><span class="badge danger">Unreachable</span></div></div><div class="ac"><a class="btn secondary dark" data-go="CR3a">Revoke</a></div></div><div class="tk-cols"><div class="l"><div class="card r14 tk-card"><div class="o4-ch"><b>Paused by this connection</b><span>1</span></div><div class="rq-tw"><div class="o4-th"><p style="width:240px">REQUEST</p><p style="width:150px">INVESTOR</p><p style="width:140px">STATUS</p><p style="width:90px">WHEN</p><p style="width:16px"></p></div><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Issue 500 BMAX</b><span>ISS-0013</span></span></span><span class="c" style="width:150px"><span class="av sm">JP</span><b class="tk-s13">Juno Partners</b></span><span class="c" style="width:140px"><span class="badge warn">Paused</span></span><span class="c" style="width:90px"><span class="tk-m">2h</span></span><img class="chev16" data-i="chevron-right" alt=""></a></div></div></div><div class="r"><div class="card r14 tk-card"><div class="o4-ch"><b>Details</b></div><div class="tk-pr"><span>Service</span><b>Anchorage Digital Bank</b></div><div class="tk-pr"><span>Key</span><b>•••• 7c2e</b></div><div class="tk-pr"><span>Added by</span><b>Jason Lee, Oct 14</b></div><div class="tk-pr"><span>Last used</span><b>Nov 2, failing since</b></div></div><div class="card r14 tk-card"><div class="o4-ch"><b>Used for</b><span>2</span></div><div class="tk-wr"><span class="mk sq"><img data-i="ob-vault" alt=""></span><span class="tx"><b>Reserve balances</b><span>BMAX</span></span></div><div class="tk-wr"><span class="mk sq"><img data-i="ob-vault" alt=""></span><span class="tx"><b>Deposit checks</b><span>BMAX</span></span></div></div></div></div></div>
+<div class="rq tk"><a class="tk-back" data-go="CR1">← Credentials</a><div class="rq-banner tk-bn "><div class="tx"><b>Can’t reach Anchorage Digital Bank</b><span>Since Nov 2. BMAX reserve balances and deposit checks are paused. Check the key’s access in Anchorage, then replace it here.</span></div><a class="tk-lk" data-go="CR5-a">Replace key</a></div><div class="tk-hd"><span class="tk-img lg b"><img data-i="ib-building" alt=""></span><div class="tt"><h1>Anchorage API</h1><div class="chips"><span class="badge mut">Custodian</span><span class="badge danger">Unreachable</span></div></div><div class="ac"><a class="btn secondary dark tk-redt" data-go="CR3a">Revoke</a></div></div><div class="tk-cols"><div class="l"><div class="card r14 tk-card"><div class="o4-ch"><b>Paused by this connection</b><span>1</span></div><div class="rq-tw"><div class="o4-th"><p style="width:240px">REQUEST</p><p style="width:150px">INVESTOR</p><p style="width:140px">STATUS</p><p style="width:90px">WHEN</p><p style="width:16px"></p></div><a class="rq-row tk-r" data-nofigma="요청 상세"><span class="c" style="width:240px"><span class="tk"><i style="background:#b2bac4"></i></span><span class="tx"><b>Issue 500 BMAX</b><span>ISS-0013</span></span></span><span class="c" style="width:150px"><span class="av sm">JP</span><b class="tk-s13">Juno Partners</b></span><span class="c" style="width:140px"><span class="badge warn">Paused</span></span><span class="c" style="width:90px"><span class="tk-m">2h</span></span><img class="chev16" data-i="chevron-right" alt=""></a></div></div></div><div class="r"><div class="card r14 tk-card"><div class="o4-ch"><b>Details</b></div><div class="tk-pr"><span>Service</span><b>Anchorage Digital Bank</b></div><div class="tk-pr"><span>Key</span><b>•••• 7c2e</b></div><div class="tk-pr"><span>Added by</span><b>Jason Lee, Oct 14</b></div><div class="tk-pr"><span>Last used</span><b>Nov 2, failing since</b></div></div><div class="card r14 tk-card"><div class="o4-ch"><b>Used for</b><span>2</span></div><div class="tk-wr"><span class="mk sq"><img data-i="ob-vault" alt=""></span><span class="tx"><b>Reserve balances</b><span>BMAX</span></span></div><div class="tk-wr"><span class="mk sq"><img data-i="ob-vault" alt=""></span><span class="tx"><b>Deposit checks</b><span>BMAX</span></span></div></div></div></div></div>
 </template>
 
 <template id="s-CR1-L" data-name="Credentials · 불러오는 중" data-node="2802:66258" data-nav="credentials" data-badge="5" data-homeicon="nav-home-grid">
@@ -1984,7 +2041,7 @@ a.ar-ln:hover { background: var(--bg-surface-subtle); }
 </template>
 
 <template id="s-CR4-F" data-name="Credential 상세 · 불러오기 실패" data-node="2802:69685" data-nav="credentials" data-badge="5" data-homeicon="nav-home-grid">
-<div class="rq tk"><a class="tk-back" data-go="CR1">← Credentials</a><div class="tk-hd"><span class="tk-img lg b"><img data-i="ib-building" alt=""></span><div class="tt"><h1>Fireblocks workspace</h1><div class="chips"><span class="badge mut">Signer</span><span class="badge ok">Connected</span></div></div><div class="ac"><a class="btn secondary dark" data-go="CR5">Replace key</a><a class="btn secondary dark" data-go="CR3">Revoke</a></div></div><div class="card r14 tk-err"><div class="ib-empty"><span class="mk sq"><img data-i="circle-alert" alt=""></span><p class="t">Couldn’t load this credential</p><p class="d">Check your connection and try again.</p><div class="a"><a class="btn secondary dark" data-go="CR4">Try again</a></div></div></div></div>
+<div class="rq tk"><a class="tk-back" data-go="CR1">← Credentials</a><div class="tk-hd"><span class="tk-img lg b"><img data-i="ib-building" alt=""></span><div class="tt"><h1>Fireblocks workspace</h1><div class="chips"><span class="badge mut">Signer</span><span class="badge ok">Connected</span></div></div><div class="ac"><a class="btn secondary dark" data-go="CR5">Replace key</a><a class="btn secondary dark tk-redt" data-go="CR3">Revoke</a></div></div><div class="card r14 tk-err"><div class="ib-empty"><span class="mk sq"><img data-i="circle-alert" alt=""></span><p class="t">Couldn’t load this credential</p><p class="d">Check your connection and try again.</p><div class="a"><a class="btn secondary dark" data-go="CR4">Try again</a></div></div></div></div>
 </template>
 
 <template id="s-C6" data-name="권한 없음 · Credentials (보기만, 관리 잠금)" data-user="Mina Cho|mina.c@bharvest.io|MC" data-node="2311:7562" data-nav="credentials" data-badge="5" data-homeicon="nav-home-grid">
@@ -2261,7 +2318,7 @@ a.ar-ln:hover { background: var(--bg-surface-subtle); }
 </template>
 
 <template id="s-DC5" data-name="공시 상세 · 게시됨" data-node="2679:45384" data-nav="disclosures" data-badge="5" data-homeicon="nav-home-grid">
-<div class="rq tk"><a class="tk-back" data-go="DC1">← Disclosures</a><div class="dc-title"><h1>October reserve statement</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>Reserves cover 100% of ASLV on Oct 31. The Wyoming Reserve holds 5,000 oz in 50 bars. The full attestation is attached.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026.pdf</b><span>PDF, 2 pages</span></span><a class="btn secondary dark" data-go="DC5-pv">Preview</a><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Nov 6, 11:05</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Attestation</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"><a class="btn secondary dark" data-go="DC5-u">Unpublish</a></div></div></div></div>
+<div class="rq tk"><a class="tk-back" data-go="DC1">← Disclosures</a><div class="dc-title"><h1>October reserve statement</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>Reserves cover 100% of ASLV on Oct 31. The Wyoming Reserve holds 5,000 oz in 50 bars. The full attestation is attached.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026.pdf</b><span>PDF, 2 pages</span></span><a class="btn secondary dark" data-go="DC5-pv">Preview</a><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Nov 6, 11:05</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Attestation</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"><a class="btn secondary dark tk-redt" data-go="DC5-u">Unpublish</a></div></div></div></div>
 </template>
 
 <template id="s-DC5-u" data-name="공시 상세 · 내리기 제안 창 (Unpublish)" data-overlay="modal" data-base="DC5" data-node="2791:53223">
@@ -2281,11 +2338,11 @@ a.ar-ln:hover { background: var(--bg-surface-subtle); }
 </template>
 
 <template id="s-DC5-c" data-name="공시 상세 · 정정 공시" data-node="3345:90950" data-nav="disclosures" data-badge="5" data-homeicon="nav-home-grid">
-<div class="rq tk"><a class="tk-back" data-go="DC1">← Disclosures</a><div class="dc-title"><h1>October reserve statement (revised)</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>Corrects the bar list in the Oct 31 statement: one serial number was wrong. Totals are unchanged, 5,000 oz in 50 bars. Replaces the statement unpublished on Nov 9.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026-revised.pdf</b><span>PDF, 2 pages</span></span><a class="btn secondary dark" data-go="DC5-pv">Preview</a><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Nov 9, 15:20</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Attestation</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"><a class="btn secondary dark" data-go="DC5-u">Unpublish</a></div></div></div></div>
+<div class="rq tk"><a class="tk-back" data-go="DC1">← Disclosures</a><div class="dc-title"><h1>October reserve statement (revised)</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>Corrects the bar list in the Oct 31 statement: one serial number was wrong. Totals are unchanged, 5,000 oz in 50 bars. Replaces the statement unpublished on Nov 9.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026-revised.pdf</b><span>PDF, 2 pages</span></span><a class="btn secondary dark" data-go="DC5-pv">Preview</a><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Nov 9, 15:20</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Attestation</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"><a class="btn secondary dark tk-redt" data-go="DC5-u">Unpublish</a></div></div></div></div>
 </template>
 
 <template id="s-DC5-long" data-name="공시 상세 · 긴 공시 예시 (정책 변경)" data-node="2841:70793" data-nav="disclosures" data-badge="5" data-homeicon="nav-home-grid">
-<div class="rq tk"><a class="tk-back" data-go="DC1">← Disclosures</a><div class="dc-title"><h1>Redemption fee policy update</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>From November 5, when PRP-0007 passed, the redemption fee for Ault Silver changes from 0.3% to 0.5% of the redeemed amount.</p><p>Why: custody fees at The Wyoming Reserve rose in October, and the fee now covers storage, insurance and shipping preparation.</p><p>Who it affects: redemptions submitted on or after December 1. Requests already submitted keep the 0.3% fee. Issuance fees do not change.</p><p>What you need to do: nothing. The new fee shows on the redemption form before you submit.</p><p>Questions: contact your account manager, Jason Lee.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026.pdf</b><span>PDF · 2 pages</span></span><a class="btn secondary dark" data-go="DC5-pv">Preview</a><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Nov 5, 14:12</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Policy change</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"><a class="btn secondary dark" data-go="DC5-u">Unpublish</a></div></div></div></div>
+<div class="rq tk"><a class="tk-back" data-go="DC1">← Disclosures</a><div class="dc-title"><h1>Redemption fee policy update</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>From November 5, when PRP-0007 passed, the redemption fee for Ault Silver changes from 0.3% to 0.5% of the redeemed amount.</p><p>Why: custody fees at The Wyoming Reserve rose in October, and the fee now covers storage, insurance and shipping preparation.</p><p>Who it affects: redemptions submitted on or after December 1. Requests already submitted keep the 0.3% fee. Issuance fees do not change.</p><p>What you need to do: nothing. The new fee shows on the redemption form before you submit.</p><p>Questions: contact your account manager, Jason Lee.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026.pdf</b><span>PDF · 2 pages</span></span><a class="btn secondary dark" data-go="DC5-pv">Preview</a><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Nov 5, 14:12</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Policy change</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"><a class="btn secondary dark tk-redt" data-go="DC5-u">Unpublish</a></div></div></div></div>
 </template>
 
 <template id="s-DC6" data-name="공시 상세 · 자동 공지" data-node="3345:89113" data-nav="disclosures" data-badge="5" data-homeicon="nav-home-grid">
@@ -2338,7 +2395,7 @@ a.ar-ln:hover { background: var(--bg-surface-subtle); }
 .dc-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 88px; padding: 16px; border: 1px dashed #c7ccd4; border-radius: 8px; background: #fafbfc; text-align: center; }
 .dc-drop b { font-weight: 500; font-size: 14px; }
 .dc-drop span { font-size: 12px; color: var(--content-muted); }
-a.dc-drop:hover { background: #f3f5f8; }
+a.dc-drop:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .dc-drop.up, .dc-drop.er { align-items: stretch; border-style: solid; background: #fff; }
 .dc-drop.er { border-color: #db2626; }
 .dc-file { display: flex; align-items: center; gap: 12px; text-align: left; }
@@ -3153,7 +3210,7 @@ a.dc-drop:hover { background: #f3f5f8; }
 .ib-kind.open { border-color: var(--brand-default); }
 .ib-showing { font-size: 13px; color: var(--content-muted); white-space: nowrap; }
 .ib-fold { width: 32px; height: 32px; border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.ib-fold:hover, .rl-open:hover { background: var(--bg-surface-subtle); }
+.ib-fold:hover, .rl-open:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .ib-fold img, .rl-open img { width: 16px; height: 16px; }
 .ib-tabs { display: flex; gap: 14px; padding-top: 8px; border-bottom: 1px solid var(--border-default); }
 .ib-tabs .tab { display: flex; align-items: center; gap: 8px; padding: 0 4px 10px; border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 14px; line-height: 1.5; color: var(--content-muted); }
@@ -3161,7 +3218,7 @@ a.dc-drop:hover { background: #f3f5f8; }
 .ib-tabs .ct { padding: 0 6px; border-radius: 999px; background: var(--bg-surface-muted); font-weight: 500; font-size: 12px; line-height: 1.45; color: var(--content-muted); }
 .ib-items { display: flex; flex-direction: column; }
 .ib-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border-default); }
-.ib-item:hover { background: var(--bg-surface-subtle); }
+.ib-item:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .ib-item.sel { background: var(--brand-soft); }
 .ib-item .ud { width: 8px; height: 36px; flex-shrink: 0; position: relative; }
 .ib-item .ud.on::after { content: ""; position: absolute; left: 1px; top: 15px; width: 6px; height: 6px; border-radius: 999px; background: var(--brand-default); }
@@ -3176,7 +3233,7 @@ a.dc-drop:hover { background: #f3f5f8; }
 .rl-open { width: 36px; height: 36px; border: 1px solid var(--border-strong); border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; }
 .rl-div { width: 32px; height: 1px; background: var(--border-default); }
 .rl-task { position: relative; width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0; }
-.rl-task:hover { background: var(--bg-surface-subtle); }
+.rl-task:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rl-task.sel { background: var(--brand-soft); }
 .rl-task .mk { position: absolute; left: 6px; top: 6px; }
 .rl-task.sel .mk { background: #fff; }
@@ -3330,7 +3387,7 @@ a.dc-drop:hover { background: #f3f5f8; }
 .pop.dd.zm { width: 162px; }
 .pop.dd .op { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: #1c2430; white-space: nowrap; }
 .pop.dd .op span + span { font-size: 12px; color: #596373; white-space: pre; }
-.pop.dd .op:hover { background: var(--bg-surface-subtle); }
+.pop.dd .op:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .pop.dd .op.sel { background: #edf2fa; font-weight: 500; color: var(--brand-default); }
 .pop.dd .op.sel span + span { font-weight: 400; color: var(--brand-default); }
 .pop.dd .dv { height: 1px; background: #e5e8ed; flex-shrink: 0; }
@@ -3593,7 +3650,7 @@ a.dc-drop:hover { background: #f3f5f8; }
 .pop.pf-menu { width: 240px; border-radius: 12px; }
 .pf-items { display: flex; flex-direction: column; padding: 6px 0; }
 .pf-mi { height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 16px; font-size: 14px; color: #050d18; }
-.pf-mi:hover, .pf-so:hover { background: var(--bg-surface-subtle); }
+.pf-mi:hover, .pf-so:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .pf-mi img { width: 16px; height: 16px; }
 .pf-so { height: 44px; display: flex; align-items: center; padding: 0 16px; border-top: 1px solid #e6e8eb; font-weight: 500; font-size: 14px; color: #050d18; }
 .pop.modal.pf-m { width: 880px; height: 640px; max-width: calc(100vw - 32px); }
@@ -4101,7 +4158,7 @@ a.dc-drop:hover { background: #f3f5f8; }
 .pw-row .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .pw-row .tx b { font-weight: 500; font-size: 14px; }
 .pw-row .tx span { font-size: 13px; color: var(--content-muted); }
-a.pw-row:hover { background: var(--bg-surface-subtle); }
+a.pw-row:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .pw-dz { border-color: #b31942; }
 .pw-dz .pw-row { border-top: 1px solid var(--border-default); }
 .pw-sk { display: flex; flex-direction: column; gap: 22px; padding: 24px; }
@@ -4120,7 +4177,7 @@ a.pw-row:hover { background: var(--bg-surface-subtle); }
 .pw-more.open { background: #f1f3f5; }
 .pop.pw-menu { width: 200px; padding: 6px; border-radius: 10px; border-color: #e0e5eb; display: flex; flex-direction: column; }
 .pw-menu a { height: 36px; display: flex; align-items: center; padding: 0 10px; border-radius: 6px; font-size: 14px; color: #1a1f29; }
-.pw-menu a:hover { background: var(--bg-surface-subtle); }
+.pw-menu a:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .pw-menu a.red { color: #c2262e; }
 .pw-e { border-top: 0; }
 .pw-undo { margin-left: 8px; font-weight: 600; color: #94c4fc; }
@@ -4232,7 +4289,7 @@ a.pw-row:hover { background: var(--bg-surface-subtle); }
 .rq-th .ac, .rq-row .ac { width: 92px; flex-shrink: 0; }
 .rq-row { display: flex; align-items: center; gap: 16px; height: 64px; padding: 0 24px; min-width: fit-content; }
 .rq-row + .rq-row { border-top: 1px solid var(--border-default); }
-.rq-row:hover { background: var(--bg-surface-subtle); }
+.rq-row:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rq-row.me { background: #f4f7fc; }
 .rq-row .c { flex-shrink: 0; display: flex; align-items: center; gap: 10px; min-width: 0; }
 .rq-row .ref { font-weight: 500; font-size: 12px; color: #1b2430; }
@@ -4260,7 +4317,7 @@ a.pw-row:hover { background: var(--bg-surface-subtle); }
 .rq-pop .g > p { font-weight: 500; font-size: 12px; line-height: 1.45; color: #596373; }
 .rq-pop .ops { display: flex; flex-wrap: wrap; gap: 5px 6px; }
 .rq-pop .op { height: 24px; padding: 3px 10px; border: 1px solid #e0e5eb; border-radius: 999px; background: #fff; font-weight: 500; font-size: 12px; line-height: 1.45; color: #1c2430; white-space: nowrap; }
-.rq-pop .op:hover { background: var(--bg-surface-subtle); }
+.rq-pop .op:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rq-pop .op.on { background: #004285; border-color: #004285; color: #fff; }
 .rq-pop .ft { padding-top: 4px; }
 .rq-pop .ft a { font-weight: 500; font-size: 12px; color: #004285; }
@@ -4268,7 +4325,7 @@ a.pw-row:hover { background: var(--bg-surface-subtle); }
 .rq-back { align-self: flex-start; height: 32px; display: flex; align-items: center; font-weight: 500; font-size: 13px; color: #004285; }
 .rq .ib-rh .tt { flex: 1; }
 .rq .ib-rc { width: 340px; }
-a.rq-hov:hover { background: var(--bg-surface-subtle); }
+a.rq-hov:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .rq-banner { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: #fff8eb; border: 1px solid #f0c878; border-radius: 10px; }
 .rq-banner .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .rq-banner b { font-weight: 600; font-size: 15px; color: #050d18; }
@@ -4349,7 +4406,7 @@ a.rq-hov:hover { background: var(--bg-surface-subtle); }
 
 <template id="s-ST-DC5" data-name="Standard · 공시 상세 (보유자)" data-node="2841:70299" data-nav="disclosures" data-badge="2" data-ws="standard" data-homeicon="nav-home-grid">
 
-<div class="rq tk"><a class="tk-back" data-go="ST-DC1">← Disclosures</a><div class="dc-title"><h1>October reserve statement</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>Reserves cover 100% of ASLV on Oct 31. The Wyoming Reserve holds 5,000 oz in 50 bars. The full attestation is attached.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026.pdf</b><span>PDF, 2 pages</span></span><a class="btn secondary dark" data-go="DC5-pv">Preview</a><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Oct 31, 11:05</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Issuer</span><b>Ault Global Commodities</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Attestation</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"></div></div></div></div>
+<div class="rq tk"><a class="tk-back" data-go="ST-DC1">← Disclosures</a><div class="dc-title"><h1>October reserve statement</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>Reserves cover 100% of ASLV on Oct 31. The Wyoming Reserve holds 5,000 oz in 50 bars. The full attestation is attached.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026.pdf</b><span>PDF, 2 pages</span></span><a class="btn secondary dark" data-go="DC5-pv">Preview</a><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Oct 31, 11:05</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Issuer</span><b>Ault Global Commodities</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Attestation</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"><a class="btn secondary dark tk-redt" data-go="DC5-u">Unpublish</a></div></div></div></div>
 
 </template>
 
@@ -4367,7 +4424,7 @@ a.rq-hov:hover { background: var(--bg-surface-subtle); }
 
 <template id="s-PD2" data-name="Personal · 공시 상세" data-node="2939:79189" data-nav="disclosures" data-badge="" data-ws="personal" data-homeicon="nav-home-grid">
 
-<div class="rq tk"><a class="tk-back" data-go="PD1">← Disclosures</a><div class="dc-title"><h1>October reserve statement</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>Reserves cover 100% of ASLV on Oct 31. The Wyoming Reserve holds 5,000 oz in 50 bars. The full attestation is attached.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026.pdf</b><span>PDF · 2 pages</span></span><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Oct 31, 11:05</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Issuer</span><b>Ault Global Commodities</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Attestation</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"></div></div></div></div>
+<div class="rq tk"><a class="tk-back" data-go="PD1">← Disclosures</a><div class="dc-title"><h1>October reserve statement</h1><span class="badge ok">Published</span></div><div class="tk-cols dc-cols"><div class="l"><div class="card r14 tk-card dc-notice"><div class="o4-ch"><b>Notice</b></div><div class="dc-txt"><p>Reserves cover 100% of ASLV on Oct 31. The Wyoming Reserve holds 5,000 oz in 50 bars. The full attestation is attached.</p></div><div class="tk-wr dc-att"><span class="mk sq"><img data-i="act-doc" alt=""></span><span class="tx"><b>reserve-statement-oct-2026.pdf</b><span>PDF · 2 pages</span></span><a class="tk-lk" data-nofigma="첨부 문서 내려받기">Download</a></div></div></div><div class="r"><div class="card r14 tk-card dc-side"><div class="o4-ch"><b>Published</b></div><div class="tk-pr"><span>Published</span><b>Oct 31, 11:05</b></div><div class="tk-pr"><span>Submitted by</span><b>Juya Kim</b></div><div class="tk-pr"><span>Approved by</span><b>David Park</b></div><div class="tk-pr"><span>Issuer</span><b>Ault Global Commodities</b></div><div class="tk-pr"><span>Token</span><b>ASLV</b></div><div class="tk-pr"><span>Kind</span><b>Attestation</b></div><div class="tk-pr dc-stack"><span>Platform reserve, Oct 31</span><b>5,000 oz for 5,000 ASLV</b></div></div><div class="dc-ac"><a class="btn secondary dark tk-redt" data-go="DC5-u">Unpublish</a></div></div></div></div>
 
 </template>
 
@@ -4784,7 +4841,7 @@ a.tk-bn:hover { filter: brightness(.98); }
 .tk-cc .dr img { width: 16px; height: 16px; }
 .tk-cc .dr b { flex: 1; min-width: 0; font-weight: 400; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tk-cc .dr span { font-size: 12px; color: var(--content-muted); white-space: nowrap; }
-a.sr:hover, a.dr:hover { background: var(--bg-surface-subtle); }
+a.sr:hover, a.dr:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .tk-cc.skc2 { display: flex; flex-direction: column; gap: 14px; padding: 24px; min-height: 223px; }
 
 .tk-cols { display: flex; gap: 16px; width: 100%; align-items: flex-start; }
@@ -4816,7 +4873,7 @@ a.sr:hover, a.dr:hover { background: var(--bg-surface-subtle); }
 .tk-dd { position: absolute; z-index: 20; left: 0; top: 38px; width: 182px; padding: 6px; display: flex; flex-direction: column; gap: 2px; background: #fff; border: 1px solid #e0e5eb; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.14); }
 .tk-dd a { height: 31px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-radius: 6px; font-size: 13px; }
 .tk-dd a.on { background: #edf2fa; }
-.tk-dd a:hover { background: var(--bg-surface-subtle); }
+.tk-dd a:hover { background-image: linear-gradient(var(--hover-tint), var(--hover-tint)); }
 .tk .rq-th p { color: #b9bec4; }
 
 .tk-set { display: flex; gap: 24px; width: 100%; align-items: flex-start; }
@@ -4984,7 +5041,9 @@ function closeOverlay() {
   if (current) setTag(current);
 }
 function openOverlay(code) {
+  const swap = !!openOv;
   closeOverlay();
+  $('ov').classList.toggle('ov-swap', swap);
   const s = screens[code];
   const layer = $('ov');
   layer.appendChild(s.tpl.content.cloneNode(true));
@@ -5392,6 +5451,7 @@ function onGd(e) {
   else if (k === 'end') { setState(9); render(current); }
 }
 $('rv-tag').addEventListener('click', onGd);
+$('brand').addEventListener('click', e => { e.preventDefault(); const h = document.querySelector('#sb [data-nav="home"]'); if (h && h.getClientRects().length) h.click(); });
 $('rv-list').addEventListener('click', onGd);
 $('rv-list').addEventListener('change', e => { if (e.target.dataset.gd === 'hint') { ST.hint = e.target.checked; saveST(); hints(); } });
 
