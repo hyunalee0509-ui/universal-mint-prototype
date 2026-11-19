@@ -271,6 +271,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
   .rv-step span { display: none; }
   .rv-step em, .rv-prog { display: none; }   
   .rv-tag { gap: 8px; padding-left: 12px; }
+  #rv-ff { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }   
 }
 
 
@@ -5289,12 +5290,19 @@ RUN_FLOWS.forEach(([k, pre, t, info, steps]) => {
   steps.forEach(x => { if (x.links) LINKS[STATES.length] = x.links; STATES.push(Object.assign({ sc: k }, x)); });
 });
 const opsLike = n => scOf(n) === 'ops' || SC[scOf(n)].grp === 'run';
+['start', 'run'].forEach(g => {
+  const ks = Object.keys(SC).filter(k => k !== 'ops' && (SC[k].grp || 'start') === g);
+  ks.slice(0, -1).forEach((k, i) => {
+    const nk = ks[i + 1], last = STATES.map((x, j) => x.sc === k ? j : -1).filter(j => j >= 0).pop();
+    STATES[last].ff = ['다음 흐름으로', STATES[SC[nk].from].start, SC[nk].from, SC[k].t + ' 끝. ' + SC[nk].t + ' 시작', '다음 흐름: ' + SC[nk].t];
+  });
+});
 
 function stepGoal() {
   const st = STATES[ST.s];
   return ST.s === 7 && ST.dep ? '입고를 확인했습니다. 승인과 서명은 ⏩로 넘기세요'
     : st.depOk && ST.dep ? '보냈다고 알렸습니다. 발행사 확인과 발행은 ⏩로 넘기세요'
-    : st.opsOk && ST.task ? '첫 할 일을 처리했습니다. ⏩로 흐름을 마치세요' : st.goal;
+    : st.opsOk && ST.task ? '첫 할 일을 처리했습니다. ⏩로 다음 흐름으로 넘어가세요' : st.goal;
 }
 function guide() {
   const st = STATES[ST.s], on = st.sc !== 'ops';
@@ -5302,7 +5310,7 @@ function guide() {
   const dots = `<i class="rv-prog"><i style="width:${Math.round((sib.indexOf(ST.s) + 1) / sib.length * 100)}%"></i></i>`;
   const where = st.t;
   $('rv-flow').innerHTML = on ? `<i class="rv-sep"></i><span class="rv-step" title="${SC[st.sc].t} · ${sib.indexOf(ST.s) + 1}/${sib.length} ${where}: ${stepGoal()}"><b>${stCode(ST.s)}</b><em>${where}</em>${dots}<span>${stepGoal()}</span></span>`
-    + (st.ff ? `<button id="rv-ff" data-gd="ff">⏩ ${st.ff[0]}</button>` : '') : '';
+    + (st.ff ? `<button id="rv-ff" data-gd="ff" title="${st.ff[4] || st.ff[0]}">⏩ ${st.ff[0]}</button>` : '') : '';
   $('rv-tag').classList.toggle('flow', on);
   if ($('rv-list').classList.contains('show')) flowTab();
   hints();
@@ -5354,6 +5362,7 @@ function hints() {
 function fastForward() {
   const st = STATES[ST.s];
   if (!st.ff) return;
+  if (st.ff[3]) { startScenario(st.ff[2]); toast(st.ff[3]); return; }
   setState(st.ff[2] !== undefined ? st.ff[2] : ST.s + 1, true);
   go(st.ff[1]);
   guide(); dot();
