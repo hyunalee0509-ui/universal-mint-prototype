@@ -182,18 +182,17 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 
 #rv-flow { display: contents; }
 #rv-code { white-space: nowrap; }
-.rv-tag.flow #rv-name { max-width: 200px; }
-.rv-step { display: flex; align-items: baseline; gap: 6px; min-width: 0; color: rgba(255,255,255,.85); }
-.rv-step b { color: #fcd34d; flex-shrink: 0; }
 
-.rv-dots { display: flex; align-items: center; gap: 2px; flex-shrink: 0; align-self: center; }
-.rv-dots i { width: 10px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.22); }
-.rv-dots i.d { background: rgba(255,255,255,.85); }
-.rv-dots i.n { background: #fcd34d; }
+.rv-tag.flow #rv-name { display: none; }
+.rv-tag.flow { gap: 8px; }
+.rv-step { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.rv-step b { color: #fcd34d; flex-shrink: 0; font-weight: 700; }
 .rv-step em { flex-shrink: 0; font-style: normal; font-weight: 600; color: #fff; white-space: nowrap; }
-.rv-step em::after { content: '·'; margin-left: 6px; color: rgba(255,255,255,.5); font-weight: 400; }
-.rv-step span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
-#rv-ff { height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.14); color: #fff; font-size: 13px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+
+.rv-prog { display: block; width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.22); overflow: hidden; flex-shrink: 0; }
+.rv-prog i { display: block; height: 100%; border-radius: 2px; background: #fcd34d; }
+.rv-step span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; color: rgba(255,255,255,.72); padding-left: 8px; border-left: 1px solid rgba(255,255,255,.2); }
+#rv-ff { height: 30px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.14); color: #fff; font-size: 13px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
 #rv-ff:hover { background: rgba(255,255,255,.24); }
 
 .rv-list { width: 380px; height: min(560px, calc(100vh - 100px)); max-height: none; overflow: hidden; padding: 0; flex-direction: column; }
@@ -260,7 +259,7 @@ a.row:hover, button.row:hover { background: var(--bg-surface-subtle); }
 .c1-none { padding: 24px 20px; font-size: 13px; color: var(--content-muted); }
 @media (max-width: 900px) {
   .rv-step span { display: none; }
-  .rv-step em, .rv-dots { display: none; }   
+  .rv-step em, .rv-prog { display: none; }   
   .rv-tag { gap: 8px; padding-left: 12px; }
 }
 
@@ -5064,9 +5063,9 @@ function stepGoal() {
 function guide() {
   const st = STATES[ST.s], on = st.sc !== 'ops';
   const sib = STATES.map((x, i) => i).filter(i => STATES[i].sc === st.sc);
-  const dots = '<i class="rv-dots">' + sib.map(i => `<i class="${i < ST.s ? 'd' : i === ST.s ? 'n' : ''}"></i>`).join('') + '</i>';
+  const dots = `<i class="rv-prog"><i style="width:${Math.round((sib.indexOf(ST.s) + 1) / sib.length * 100)}%"></i></i>`;
   const where = st.t;
-  $('rv-flow').innerHTML = on ? `<i class="rv-sep"></i><span class="rv-step" title="${SC[st.sc].t} · ${sib.indexOf(ST.s) + 1}/${sib.length} ${where}: ${stepGoal()}"><b>${stCode(ST.s)}</b>${dots}<em>${where}</em><span>${stepGoal()}</span></span>`
+  $('rv-flow').innerHTML = on ? `<i class="rv-sep"></i><span class="rv-step" title="${SC[st.sc].t} · ${sib.indexOf(ST.s) + 1}/${sib.length} ${where}: ${stepGoal()}"><b>${stCode(ST.s)}</b><em>${where}</em>${dots}<span>${stepGoal()}</span></span>`
     + (st.ff ? `<button id="rv-ff" data-gd="ff">⏩ ${st.ff[0]}</button>` : '') : '';
   $('rv-tag').classList.toggle('flow', on);
   if ($('rv-list').classList.contains('show')) flowTab();
@@ -5087,7 +5086,7 @@ function flowTab() {
     const li = steps.map(([x, i]) => {
       const cls = !on ? '' : i < ST.s ? 'ok' : i === ST.s ? 'now' : '';
       const scr = (x.scr || []).filter(c => screens[c]);
-      const row = `<a class="row" data-gd="st" data-n="${i}"><i class="dot"></i><b>${stCode(i)}</b><span>${x.t}</span>${cls === 'now' ? '' : `<em>${scr.length}</em>`}</a>`;
+      const row = `<a class="row" data-gd="st" data-n="${i}"><i class="dot"></i><b>${stCode(i)}</b><span>${x.t}</span>${cls === 'now' ? '' : `<em>${scr.length}장</em>`}</a>`;
       if (cls !== 'now') return `<li class="${cls}">${row}</li>`;
       const nf = scr.some(c => !screens[c].node);
       const fl = x.flow && x.flow[1] ? `<a class="fx" href="${FLOW_URL[x.flow[1]]}" target="_blank" rel="noopener">${x.flow[2]} Flow 화면 ↗</a>` : '';
@@ -5270,7 +5269,7 @@ document.addEventListener('click', e => {
 
 function buildList() {
   const box = $('rv-list');
-  box.innerHTML = '<div class="rv-tabs"><a data-tab="flows">흐름</a><a data-tab="screens">화면</a></div><div class="rv-body" id="rv-body"><div id="rv-flows"></div><div id="rv-screens">'
+  box.innerHTML = '<div class="rv-tabs"><a data-tab="flows">흐름으로 보기</a><a data-tab="screens">화면별 보기</a></div><div class="rv-body" id="rv-body"><div id="rv-flows"></div><div id="rv-screens">'
     + PLAN.map(([g, codes]) => {
       const made = codes.filter(c => screens[c]).length;
       return '<h4><span>' + g + '</span><em>' + (made === codes.length ? made + '장' : made + ' / ' + codes.length + '장') + '</em></h4>' + codes.map(c => {
