@@ -295,6 +295,29 @@ textarea.input{height:auto;min-height:72px;padding:10px 14px;resize:vertical}
 .proto .select{height:34px;font-size:12px;font-family:inherit}
 .proto .btn{height:30px;font-size:11px;padding:0 10px;font-family:inherit}
 .proto .pnote{font-size:11px;color:var(--muted);line-height:1.45}
+.proto .psec{display:flex;flex-direction:column;gap:8px}
+.proto .psec+.psec{border-top:1px dashed var(--border-strong);padding-top:10px}
+.proto .psec:empty,.proto .psec:has(.pst:only-child){display:none}
+.proto .pst{font-size:11px;font-weight:600;color:var(--strong)}
+.proto .flow{display:flex;flex-wrap:wrap;align-items:center;gap:2px;font-size:10px;color:var(--muted)}
+.proto .flow span{padding:2px 5px;border-radius:4px;background:var(--bg-subtle)}
+.proto .flow span.on{background:var(--brand);color:#fff}
+.proto .flow i{font-style:normal}
+.proto .stgs{display:flex;flex-direction:column;gap:4px}
+.proto .stg{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.proto .stg.cur{border-color:var(--brand)}
+.proto .stg.open{padding-bottom:4px}
+.proto .sh{display:flex;align-items:center;gap:7px;width:100%;border:0;background:none;padding:7px 8px;font:inherit;font-size:12px;font-weight:600;color:var(--strong);cursor:pointer;text-align:left}
+.proto .sh b{width:16px;height:16px;border-radius:50%;background:var(--bg-subtle);color:var(--muted);font-size:10px;display:grid;place-items:center;flex:none}
+.proto .stg.cur .sh b{background:var(--brand);color:#fff}
+.proto .sh em{font-style:normal;font-weight:400;font-size:10px;color:var(--muted)}
+.proto .sub{font-size:10px;color:var(--muted);padding:6px 8px 2px}
+.proto .sub.bad{color:#b54708}
+.proto .opt{display:flex;gap:6px;align-items:baseline;width:100%;border:0;background:none;padding:4px 8px;font:inherit;font-size:11px;color:var(--strong);text-align:left;cursor:pointer;line-height:1.35}
+.proto .opt:hover{background:var(--bg-subtle)}
+.proto .opt.on{background:#e6eef8;box-shadow:inset 2px 0 0 var(--brand)}
+.proto .opt code{flex:none;min-width:42px;font-family:"DM Sans",sans-serif;font-weight:700;font-size:10px;color:var(--brand)}
+.proto .opt.bad code{color:#b54708}
 .proto .fig{flex:none;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:700;color:#fff;background:var(--brand);border-radius:6px;padding:1px 7px}
 .proto .fig.none{background:var(--muted)}
 .proto .fign{font-size:11px;color:var(--strong);line-height:1.45;text-decoration:none}
@@ -1309,6 +1332,24 @@ const SCENARIOS = [
   ['외부, 서버 실패', [['fbFail',lbl('AD1e')],['addrNoAnswer',lbl('AD1d')],['addrNetFail',lbl('AD1i')],['custFail',lbl('AD3y')],['noVault',lbl('AD5c')],['noAsset',lbl('AD5c2')],['fbNoAnswer',lbl('AD5e2')],['serverRefused',lbl('ADE1')],['passkeyFail',lbl('AD6e2')],['platformRefused',lbl('PR2z')]]],
   ['결과 경합', [['raceLive',lbl('AD7x')],['raceRejected',lbl('AD7x2')]]],
 ];
+// Panel map: the same targets as SCENARIOS, arranged by where they happen in the journey.
+// Each group: [sub label, tone ('' normal, 'var' variation, 'bad' blocked or failed), targets]
+const FLOW = [
+  ['entry','진입', [['', '', ['st:start','st:tk1','st:tk2']], ['시작 전 막힘','bad',['noRights','noRightsPopup','noKyc','kybExpired']]]],
+  ['write','작성', [['이어서 작성','',['st:resume']],
+    ['Token','bad',['noFbTokens','addrListed','fbFail','addrNoAnswer','addrNetFail']],
+    ['Backing','bad',['noCustodian','custFail']],
+    ['Investor terms','var',['st:split','st:excluded','st:terms','st:terms2']],
+    ['Operations','var',['st:docusign']], ['Operations','bad',['docusignOff','noVault','noAsset','fbNoAnswer']]]],
+  ['submit','검토, 제출', [['', '', ['st:review']], ['제출 전 막힘','bad',['kycTodo','waitingPlatform','passkeyOther']], ['제출 실패','bad',['passkeyFail','serverRefused']]]],
+  ['org','조직 승인', [['상장 규칙이 승인일 때만','',['st:orgWaiting','st:orgTurn','st:prMid','st:orgApproved']], ['제안이 끝남','var',['st:orgClosed','st:orgRejected','st:propWithdrawn']], ['실패','bad',['platformRefused']]]],
+  ['review','플랫폼 심사', [['', '', ['st:inReview']], ['철회','var',['st:withdrawn']]]],
+  ['result','결과', [['', '', ['st:live','st:rejected']], ['심사 결과와 동시에 행동','bad',['raceLive','raceRejected']]]],
+];
+const TARGET_LABEL = Object.fromEntries(SCENARIOS.flatMap(([,items])=>items));
+const stageOf = t => (FLOW.find(([,,gs])=>gs.some(([,,ts])=>ts.includes(t)))||FLOW[0])[0];
+{ const inFlow = FLOW.flatMap(([,,gs])=>gs.flatMap(g=>g[2])); const missing = Object.keys(TARGET_LABEL).filter(t=>!inFlow.includes(t));
+  console.assert(!missing.length && inFlow.length===Object.keys(TARGET_LABEL).length, 'FLOW out of sync with SCENARIOS', missing); }
 // Targets that only make sense for one viewer or one listing rule
 const FORCED = {
   'st:prMid':{persona:'joe', rule:'org3'}, 'st:orgClosed':{persona:'joe', rule:'org'},
@@ -1402,17 +1443,30 @@ function protoHTML(){
       ? `<a class="fig" href="${url}" target="_blank" rel="noopener" title="Figma에서 ${esc(fc)} 열기">${esc(fc)} <i data-lucide="external-link" style="width:11px;height:11px;vertical-align:-1px"></i></a><a class="fign" href="${url}" target="_blank" rel="noopener">${esc(FIGMA[fc])}${fnote?`<br><em>${esc(fnote)}</em>`:''}</a>`
       : `<span class="fig">${esc(fc)}</span><span class="fign">${esc(FIGMA[fc])}</span>`)
                  : `<span class="fig none" title="Figma 프레임 없음">Figma 없음</span><span class="fign">${esc(fnote||'')}</span>`;
+  const cur = stageOf(p.target), open = S.stgOpen || cur;
+  const row = (t, tone) => { const l = TARGET_LABEL[t], m = l.match(/^(\S+) (.*)$/), code = m && FIGMA[m[1]] ? m[1] : '';
+    const name = code ? (FIGMA[code].split(', ').slice(1).join(', ') || FIGMA[code]) + l.slice(code.length + 1 + FIGMA[code].length) : l;
+    return `<button class="opt ${tone} ${p.target===t?'on':''}" data-a="pend" data-v="target:${t}"><code>${esc(code||'')}</code><span>${esc(name)}</span></button>`; };
+  const map = FLOW.map(([key, title, groups], i) => {
+    const n = groups.reduce((s,g)=>s+g[2].length,0), isOpen = key===open;
+    return `<div class="stg ${isOpen?'open':''} ${key===cur?'cur':''}"><button class="sh" data-a="stg" data-v="${key}" aria-expanded="${isOpen}"><b>${i+1}</b>${title}<span class="grow"></span><em>${n}</em><i data-lucide="chevron-${isOpen?'up':'down'}" style="width:14px;height:14px"></i></button>
+      ${isOpen ? groups.map(([sub,tone,ts])=>`${sub?`<div class="sub ${tone}">${esc(sub)}${tone==='bad'?' (막힘, 실패)':tone==='var'?' (펼침, 변형)':''}</div>`:''}${ts.map(t=>row(t,tone)).join('')}`).join('') : ''}</div>`;
+  }).join('');
+  const sec = (title, body) => `<div class="psec"><div class="pst">${title}</div>${body}</div>`;
+  const live = [
+    `<div><div class="pl">보는 사람만 바꾸기 (상태 유지)</div><div class="seg"><button class="${S.persona==='juya'?'on':''}" data-a="persona" data-v="juya">Juya Kim</button><button class="${S.persona==='joe'?'on':''}" data-a="persona" data-v="joe">Joe Miller</button></div></div>`,
+    S.reqs.some(r=>r.status==='org') ? `<div><div class="pl">조직 승인 (다른 Governance 멤버)</div><button class="btn" data-a="otherApprove">다른 멤버가 승인</button></div>` : '',
+    inReview.length ? `<div><div class="pl">플랫폼 심사 (포털 밖)</div><div style="display:flex;gap:6px"><button class="btn primary" data-a="platform" data-v="approve">승인</button><button class="btn" data-a="platform" data-v="reject">거절</button></div></div>` : '',
+  ].join('');
   return `<div class="ph"><span class="grow" style="display:flex;flex-direction:column;gap:4px"><b>프로토타입 설정</b><span style="display:flex;gap:6px;align-items:flex-start">${fig}</span></span></div>
   <div class="pb">
-    <div><div class="pl">화면 또는 상황</div><select class="select" data-proto="target" aria-label="화면 또는 상황">${SCENARIOS.map(([g,items])=>`<optgroup label="${g}">${items.map(([v,l])=>`<option value="${v}" ${p.target===v?'selected':''}>${l}</option>`).join('')}</optgroup>`).join('')}</select></div>
-    <div><div class="pl">토큰 종류</div>${seg('kind',[['commodity','Commodity (AGP)'],['custom','Custom (BMAX)']])}</div>
+    ${sec('1. 열 화면 고르기', `<div class="flow">${FLOW.map(([k,t])=>`<span class="${k===cur?'on':''}">${t}</span>`).join('<i>›</i>')}</div><div class="stgs">${map}</div>`)}
+    ${sec('2. 조건', `<div><div class="pl">토큰 종류</div>${seg('kind',[['commodity','Commodity (AGP)'],['custom','Custom (BMAX)']])}</div>
     <div><div class="pl">보는 사람${forced?.persona?' (이 화면은 자동으로 정해짐)':''}</div>${forced?.persona ? `<div class="seg"><button class="on" disabled>${PEOPLE[forced.persona].name}</button></div>` : seg('persona',[['juya','Juya Kim (제안)'],['joe','Joe Miller (승인)']])}</div>
     <div><div class="pl">상장 규칙${forced?.rule?' (이 화면은 자동으로 정해짐)':''}</div>${forced?.rule ? `<div class="seg"><button class="on" disabled>${{org:'조직 승인 2 of 4', org3:'조직 승인 3 of 4', direct:'바로 제출'}[forced.rule]}</button></div>` : seg('rule',[['direct','바로 제출'],['org','승인 2 of 4'],['org3','승인 3 of 4']])}</div>
-    <div style="display:flex;gap:6px"><button class="btn" data-a="reset">처음부터</button><span class="grow"></span><button class="btn primary" data-a="applyProto" style="min-width:72px">확인</button></div>
-    ${inReview.length?`<div style="border-top:1px dashed var(--border-strong);padding-top:10px"><div class="pl">플랫폼 심사 (포털 밖)</div><div style="display:flex;gap:6px"><button class="btn primary" data-a="platform" data-v="approve">승인</button><button class="btn" data-a="platform" data-v="reject">거절</button></div></div>`:''}
-    <div style="border-top:1px dashed var(--border-strong);padding-top:10px"><div class="pl">지금 상태 그대로 보는 사람만 바꾸기</div><div class="seg"><button class="${S.persona==='juya'?'on':''}" data-a="persona" data-v="juya">Juya Kim</button><button class="${S.persona==='joe'?'on':''}" data-a="persona" data-v="joe">Joe Miller</button></div></div>
-    ${S.reqs.some(r=>r.status==='org')?`<div style="border-top:1px dashed var(--border-strong);padding-top:10px"><div class="pl">조직 승인 (다른 Governance 멤버)</div><button class="btn" data-a="otherApprove">다른 멤버가 승인</button></div>`:''}
-    <div class="pnote">확인을 누르면 고른 조건으로 새로 시작해서 그 화면을 엽니다. 입력 오류는 직접 입력해서 확인할 수 있고, 실패 상황은 한 번만 일어나며 다시 시도하면 넘어갑니다.</div>
+    <div style="display:flex;gap:6px"><button class="btn" data-a="reset">처음부터</button><span class="grow"></span><button class="btn primary" data-a="applyProto" style="min-width:72px">확인</button></div>`)}
+    ${sec('3. 지금 화면에서', live)}
+    <div class="pnote">실패 상황은 한 번만 일어나고, 다시 시도하면 넘어갑니다.</div>
   </div>`;
 }
 
@@ -1604,8 +1658,9 @@ const A = {
   /* prototype panel */
   persona(v){ if (S.persona===v) return; S.persona=v; S.notifOpen=false; closeModal(); S.backTo=null; S.taskTab='todo'; S.task=null; go(myTasks().some(t=>t.rid) ? 'tasks' :(S.screen==='ad7'||S.screen==='ad8') ? S.screen : 'tokens'); toast(`${me().name}(으)로 보는 중`); },
   rule(v){ S.rule=v; render(); },
-  pend(v){ const [k,val]=v.split(':'); S.pend[k]=val; $('#proto').innerHTML = protoHTML(); if (window.lucide) lucide.createIcons(); },
-  applyProto(){ applyProto(); const o = [...document.querySelectorAll('[data-proto="target"] option')].find(x=>x.value===S.pend.target); toast('열림: '+(o?o.textContent:'')); },
+  pend(v){ const i=v.indexOf(':'), k=v.slice(0,i), val=v.slice(i+1); S.pend[k]=val; if (k==='target') S.stgOpen = null; $('#proto').innerHTML = protoHTML(); if (window.lucide) lucide.createIcons(); },
+  stg(v){ S.stgOpen = (S.stgOpen || stageOf(S.pend.target))===v ? 'none' : v; $('#proto').innerHTML = protoHTML(); if (window.lucide) lucide.createIcons(); },
+  applyProto(){ applyProto(); toast('열림: '+(TARGET_LABEL[S.pend.target]||'')); },
   platform(v){
     const r = [...S.reqs].reverse().find(x=>x.status==='review'); if (!r) return;
     r.fresh=false; r.at.decided=Date.now();
@@ -1694,7 +1749,57 @@ document.addEventListener('keydown', e => {
   else if (S.notifOpen || S.menu || S.tip){ S.notifOpen=false; S.menu=null; S.tip=false; render(); }
 });
 
+/* ================= deep links from Figma: index.html#AD6b opens that frame's state ================= */
+function openCode(raw){
+  const code = raw==='AD7-entry' ? 'AD7 진입' : raw;
+  if (!FIGMA[code]) return false;
+  const custom = /-B$/.test(code) || code==='AD3c' || code==='AD4c';
+  const listed = {};
+  SCENARIOS.forEach(([,items])=>items.forEach(([v,l])=>{ const c=l.split(' ')[0]; if (FIGMA[c] && !listed[c]) listed[c]=v; }));
+  const base = {'AD6b-B':'st:review','AD8-B':'st:live','AD7-B':'st:inReview','AD7':'st:inReview','AD7 진입':'st:inReview','AD7c':'st:inReview',
+    'PR2':'st:orgTurn','PR2s':'st:orgTurn','PR2r':'st:orgTurn','PR4':'st:orgWaiting','PR3e':'st:orgRejected','AD8x2':'st:rejected',
+    'E2':'st:live','E3':'st:rejected','AD6c':'st:review','AD6d':'st:review','AD6e':'st:review','YTw':'st:withdrawn'}[code] || listed[code] || 'st:start';
+  Object.assign(S.pend, {target:base, kind:custom?'custom':'commodity', persona:'juya', rule: code==='AD6d' ? 'org' : 'direct'});
+  applyProto();
+  const d = () => S.d;
+  const at = (screen, tweak) => { S.d = fullDraft(S.pend.kind); S.d.reached = STEP_OF[screen]; if (tweak) tweak(S.d); S.draftSaved = true; go(screen); };
+  const self = (tweak) => at('ad1', x=>{ x.tokenSrc='self'; tweak && tweak(x); });
+  const r = getR();
+  const POST = {
+    'AD0': ()=>go('ad0'), 'AD0a2': ()=>{ S.scenario='noKyc'; go('tokens'); S.modal={type:'kyc'}; }, 'AD1a': ()=>at('ad1'), 'AD1b': ()=>at('ad1'), 'AD1a-B': ()=>at('ad1'),
+    'AD1c': ()=>self(), 'AD1h': ()=>{ self(x=>x.addr='0x8f3a2B07e1D94c5A0b6E31f9C4d2a8E7b591c21b'); startRead(); },
+    'AD1x': ()=>{ self(x=>x.addr='0x8f3a2B07e1D94c5A0b6E31f9C4d2a8E7b591c2'); S.errs.addr='Must be a 0x-prefixed 40-character address'; },
+    'AD2': ()=>at('ad2', x=>x.docs=[]), 'AD2-B': ()=>at('ad2', x=>x.docs=[]), 'AD2b': ()=>at('ad2'),
+    'AD2a': ()=>at('ad2', x=>{ x.docs=[]; x.img='assets/token-sample-56.svg'; }),
+    'AD2r': ()=>{ at('ad2'); S.fromReview = true; }, 'AD2x': ()=>{ at('ad2', x=>{ x.docs=[]; x.name=''; }); S.errs.name='Add a public name. Investors see it on the token page.'; },
+    'AD2x2': ()=>at('ad2', x=>{ x.docs=[]; x.imgUrl='https://ault.example/images/agp-logo.png'; x.imgErr=true; }),
+    'AD3': ()=>at('ad3', x=>x.por=null), 'AD3b': ()=>at('ad3'), 'AD3c': ()=>at('ad3'), 'AD3d': ()=>at('ad3', x=>x.showCombo=true),
+    'AD3x': ()=>at('ad3', x=>{ x.por=null; x.porErr='reserve-statement.pdf is 62 MB. The limit is 50 MB.'; }),
+    'AD4': ()=>at('ad4'), 'AD4c': ()=>at('ad4'), 'AD4d': ()=>at('ad4', x=>x.issueFee='0.5'), 'AD4x': ()=>at('ad4', x=>x.redeemFee='0.0000005'),
+    'AD5': ()=>at('ad5'), 'AD5-B': ()=>at('ad5'), 'AD5a': ()=>at('ad5', x=>x.roles.am=['gov','jason']), 'AD5f': ()=>{ at('ad5'); S.menu='am'; },
+    'AD5x': ()=>{ at('ad5', x=>x.issueFee='0.5'); S.errs.feeWallet='Choose the wallet fees are paid to, or set both fees to 0.'; },
+    'AD5b': ()=>at('ad5b'), 'AD5b-B': ()=>at('ad5b'), 'AD5d': ()=>at('ad5b', x=>x.burnOther=true),
+    'AD6c': ()=>{ S.modal={type:'submit'}; }, 'AD6d': ()=>{ S.modal={type:'submit'}; }, 'AD6e': ()=>{ S.modal={type:'submit'}; render(); A.signSubmit(); },
+    'AD7': ()=>{ r.fresh=false; go('ad7'); }, 'AD7-B': ()=>{ r.fresh=false; go('ad7'); }, 'AD7 진입': ()=>{ r.fresh=false; go('tokens'); },
+    'AD7c': ()=>{ r.fresh=false; S.modal={type:'withdrawReq', rid:r.id}; },
+    'PR2': ()=>{ S.cur=r.id; go('ad7'); }, 'PR2s': ()=>{ S.modal={type:'approve', rid:r.id}; }, 'PR2r': ()=>{ S.modal={type:'reject', rid:r.id}; },
+    'PR4': ()=>{ S.modal={type:'withdrawProp', rid:r.id}; }, 'PR3e': ()=>restartFrom(r), 'AD8x2': ()=>restartFrom(r),
+    'E2': ()=>{ go('home'); S.notifOpen=true; }, 'E3': ()=>{ go('home'); S.notifOpen=true; },
+    'YTw': ()=>go('tokens'),
+    'ADS1': ()=>{ S.d = fullDraft('commodity'); S.d.reached = 1; S.draftSaved = true; go('tokens', {justSaved:true}); },
+    'ADD1': ()=>{ at('ad2'); S.modal={type:'discard'}; },
+    'ADD2': ()=>{ S.d = fullDraft('commodity'); S.draftSaved = true; go('tokens'); S.modal={type:'deleteDraft'}; },
+    'ADD3': ()=>{ S.d = fullDraft('commodity'); S.draftSaved = true; go('tokens'); S.modal={type:'newOverDraft'}; },
+  };
+  if (POST[code]) POST[code]();
+  if (code!=='AD6e') render();
+  return true;
+}
+function openFromHash(){ const h = decodeURIComponent(location.hash.slice(1)); if (h) openCode(h); }
+addEventListener('hashchange', openFromHash);
+
 render();
+openFromHash();
 </script>
 </body>
 </html>
