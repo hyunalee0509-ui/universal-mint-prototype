@@ -1464,9 +1464,9 @@ function protoHTML(){
     ${sec('2. 조건', `<div><div class="pl">토큰 종류</div>${seg('kind',[['commodity','Commodity (AGP)'],['custom','Custom (BMAX)']])}</div>
     <div><div class="pl">보는 사람${forced?.persona?' (이 화면은 자동으로 정해짐)':''}</div>${forced?.persona ? `<div class="seg"><button class="on" disabled>${PEOPLE[forced.persona].name}</button></div>` : seg('persona',[['juya','Juya Kim (제안)'],['joe','Joe Miller (승인)']])}</div>
     <div><div class="pl">상장 규칙${forced?.rule?' (이 화면은 자동으로 정해짐)':''}</div>${forced?.rule ? `<div class="seg"><button class="on" disabled>${{org:'조직 승인 2 of 4', org3:'조직 승인 3 of 4', direct:'바로 제출'}[forced.rule]}</button></div>` : seg('rule',[['direct','바로 제출'],['org','승인 2 of 4'],['org3','승인 3 of 4']])}</div>
-    <div style="display:flex;gap:6px"><button class="btn" data-a="reset">처음부터</button><span class="grow"></span><button class="btn primary" data-a="applyProto" style="min-width:72px">확인</button></div>`)}
+    <div style="display:flex;gap:6px"><button class="btn" data-a="reset">처음부터</button></div>`)}
     ${sec('3. 지금 화면에서', live)}
-    <div class="pnote">실패 상황은 한 번만 일어나고, 다시 시도하면 넘어갑니다.</div>
+    <div class="pnote">화면이나 조건을 누르면 그 상태로 새로 시작해서 바로 열립니다. 실패 상황은 한 번만 일어나고, 다시 시도하면 넘어갑니다.</div>
   </div>`;
 }
 
@@ -1658,7 +1658,7 @@ const A = {
   /* prototype panel */
   persona(v){ if (S.persona===v) return; S.persona=v; S.notifOpen=false; closeModal(); S.backTo=null; S.taskTab='todo'; S.task=null; go(myTasks().some(t=>t.rid) ? 'tasks' :(S.screen==='ad7'||S.screen==='ad8') ? S.screen : 'tokens'); toast(`${me().name}(으)로 보는 중`); },
   rule(v){ S.rule=v; render(); },
-  pend(v){ const i=v.indexOf(':'), k=v.slice(0,i), val=v.slice(i+1); S.pend[k]=val; if (k==='target') S.stgOpen = null; $('#proto').innerHTML = protoHTML(); if (window.lucide) lucide.createIcons(); },
+  pend(v){ const i=v.indexOf(':'), k=v.slice(0,i), val=v.slice(i+1); S.pend[k]=val; if (k==='target') S.stgOpen = null; A.applyProto(); },
   stg(v){ S.stgOpen = (S.stgOpen || stageOf(S.pend.target))===v ? 'none' : v; $('#proto').innerHTML = protoHTML(); if (window.lucide) lucide.createIcons(); },
   applyProto(){ applyProto(); toast('열림: '+(TARGET_LABEL[S.pend.target]||'')); },
   platform(v){
